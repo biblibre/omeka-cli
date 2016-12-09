@@ -8,5 +8,5 @@ interface CommandInterface
     public function getDescription();
     public function getUsage();
 
-    public function run($options, $arguments, $context);
+    public function run($options, $arguments, $application);
 }
