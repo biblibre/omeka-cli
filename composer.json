@@ -1,0 +1,23 @@
+{
+    "name": "biblibre/omeka-cli",
+    "description": "Omeka CLI",
+    "type": "project",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Julian Maurice",
+            "email": "julian.maurice@biblibre.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "OmekaCli\\": "src/"
+        }
+    },
+    "require": {
+        "knplabs/github-api": "^1.7",
+        "php-http/guzzle6-adapter": "^1.1",
+        "psr/log": "^1.0"
+    },
+    "bin": ["bin/omeka-cli"]
+}
