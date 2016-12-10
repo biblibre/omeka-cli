@@ -2,7 +2,7 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Commands;
+use OmekaCli\Application;
 
 class HelpCommand extends AbstractCommand
 {
@@ -21,7 +21,7 @@ class HelpCommand extends AbstractCommand
         return $usage;
     }
 
-    public function run($options, $args, $application)
+    public function run($options, $args, Application $application)
     {
         if (empty($args)) {
             print $this->getUsage();

@@ -3,6 +3,7 @@
 namespace OmekaCli\Command\Plugin;
 
 use Github;
+use OmekaCli\Application;
 use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Exception\BadUsageException;
 
@@ -21,13 +22,13 @@ class DownloadCommand extends AbstractCommand
         return $usage;
     }
 
-    public function run($options, $args, $context)
+    public function run($options, $args, Application $application)
     {
         if (empty($args)) {
             throw new BadUsageException("Missing argument");
         }
 
-        $logger = $context->getLogger();
+        $logger = $application->getLogger();
 
         $search = $args[0];
         if (false !== strpos($search, '/')) {
@@ -62,7 +63,7 @@ class DownloadCommand extends AbstractCommand
         }
 
         $plugin = parse_ini_string(base64_decode($fileInfo['content']));
-        if ($context->isOmekaInitialized() && version_compare($plugin['omeka_minimum_version'], OMEKA_VERSION) > 0) {
+        if ($application->isOmekaInitialized() && version_compare($plugin['omeka_minimum_version'], OMEKA_VERSION) > 0) {
             $logger->warning('omeka_minimum_version = {omeka_minimum_version}, Omeka version = {omeka_version}', array(
                 'omeka_minimum_version' => $plugin['omeka_minimum_version'],
                 'omeka_version' => OMEKA_VERSION,
@@ -83,7 +84,7 @@ class DownloadCommand extends AbstractCommand
             $logger->warning("Unable to find plugin's name");
         }
 
-        if ($context->isOmekaInitialized()) {
+        if ($application->isOmekaInitialized()) {
             $destDir = PLUGIN_DIR . '/' . $pluginName;
         } else {
             $destDir = $pluginName;

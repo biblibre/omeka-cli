@@ -2,7 +2,7 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Commands;
+use OmekaCli\Application;
 
 class VersionCommand extends AbstractCommand
 {
@@ -21,7 +21,7 @@ class VersionCommand extends AbstractCommand
         return $usage;
     }
 
-    public function run($options, $args, $application)
+    public function run($options, $args, Application $application)
     {
         print OMEKACLI_VERSION . "\n";
     }

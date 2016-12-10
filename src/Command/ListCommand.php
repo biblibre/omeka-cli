@@ -2,7 +2,7 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Commands;
+use OmekaCli\Application;
 
 class ListCommand extends AbstractCommand
 {
@@ -19,7 +19,7 @@ class ListCommand extends AbstractCommand
         return $usage;
     }
 
-    public function run($options, $args, $application)
+    public function run($options, $args, Application $application)
     {
         $commands = $application->getCommandManager();
         foreach ($commands->getAll() as $name => $command) {

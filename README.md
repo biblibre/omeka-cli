@@ -34,7 +34,7 @@ $events = Zend_EventManager_StaticEventManager::getInstance();
 $events->attach('OmekaCli', 'commands', function() {
     return array(
         'myplugin:mycommand' => array(
-            'command' => new MyPlugin_MyCommand(),
+            'class' => 'MyPlugin_MyCommand',
             'aliases' => array('mycommand'),
         ),
     );

@@ -4,6 +4,7 @@ namespace OmekaCli;
 
 use OmekaCli\Command\Manager as CommandManager;
 use OmekaCli\Exception\BadUsageException;
+use OmekaCli\Util\Sandbox;
 
 class Application
 {
@@ -19,7 +20,6 @@ class Application
     );
 
     protected $logger;
-    protected $context;
     protected $commands;
     protected $omekaApplication;
 
@@ -179,18 +179,16 @@ class Application
 
     protected function isOmekaDir($dir)
     {
-        $script = <<<EOT
-@include "$dir/bootstrap.php";
-if (defined("OMEKA_VERSION")) {
-    print OMEKA_VERSION;
-}
-EOT;
+        $sandbox = new Sandbox;
+        $result = $sandbox->run(function() use($dir) {
+            include "$dir/bootstrap.php";
+            if (defined("OMEKA_VERSION")) {
+                return 0;
+            }
+            return 1;
+        });
 
-        $handle = popen("php -r '$script' 2>&1", 'r');
-        $version = fread($handle, 16);
-        pclose($handle);
-
-        return !empty($version) ? true : null;
+        return $result['exit_code'] === 0 ? true : null;
     }
 
     protected function searchOmekaDir()

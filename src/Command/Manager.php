@@ -4,12 +4,14 @@ namespace OmekaCli\Command;
 
 use OmekaCli\Application;
 use OmekaCli\Logger;
+use OmekaCli\Util\Sandbox;
 use Zend_EventManager_StaticEventManager;
 
 class Manager
 {
     const EVENT_ID = 'OmekaCli';
     const COMMANDS_EVENT_NAME = 'commands';
+    const COMMAND_INTERFACE = 'OmekaCli\Command\CommandInterface';
 
     protected $application;
     protected $logger;
@@ -71,11 +73,11 @@ class Manager
     {
         $this->commands = array();
 
-        $this->registerCommand('version', new VersionCommand);
-        $this->registerCommand('help', new HelpCommand);
-        $this->registerCommand('list', new ListCommand);
+        $this->registerCommand('version', 'OmekaCli\Command\VersionCommand');
+        $this->registerCommand('help', 'OmekaCli\Command\HelpCommand');
+        $this->registerCommand('list', 'OmekaCli\Command\ListCommand');
 
-        $this->registerCommand('plugin-download', new Plugin\DownloadCommand());
+        $this->registerCommand('plugin-download', 'OmekaCli\Command\Plugin\DownloadCommand');
         $this->registerAlias('dl', 'plugin-download');
 
         $this->registerPluginCommands();
@@ -84,13 +86,15 @@ class Manager
     protected function registerPluginCommands()
     {
         $commands = $this->processEvent(self::COMMANDS_EVENT_NAME);
-        foreach ($commands as $name => $command) {
-            if (is_array($command)) {
-                $aliases = isset($command['aliases']) ? $command['aliases'] : array();
-                $command = isset($command['command']) ? $command['command'] : null;
+        foreach ($commands as $name => $commandSpec) {
+            if (is_array($commandSpec)) {
+                $aliases = isset($commandSpec['aliases']) ? $commandSpec['aliases'] : array();
+                $class = isset($commandSpec['class']) ? $commandSpec['class'] : null;
+            } else {
+                $class = $commandSpec;
             }
 
-            $this->registerCommand($name, $command, $aliases);
+            $this->registerCommand($name, $class, $aliases);
         }
     }
 
@@ -103,7 +107,7 @@ class Manager
             $listeners = $events->getListeners(self::EVENT_ID, $eventName);
 
             if (false !== $listeners) {
-                foreach ($listeners->getIterator() as $listener) {
+                foreach ($listeners as $listener) {
                     $items = array_merge($items, $listener->call());
                 }
             }
@@ -116,19 +120,11 @@ class Manager
      * Register a new command
      *
      * @param string $name     Command name
-     * @param mixed  $command  The command object or an array containing the
-     *                         keys 'command' and 'aliases'.
+     * @param string $class    The class name of the command.
+     * @param string[] $aliases  Aliases to this command.
      */
-    protected function registerCommand($name, $command, $aliases = array())
+    protected function registerCommand($name, $class, $aliases = array())
     {
-        if (!$command instanceof CommandInterface) {
-            $this->logger->warning('Command {name} does not implement CommandInterface', array(
-                'name' => $name,
-            ));
-
-            return;
-        }
-
         if (isset($this->commands[$name])) {
             $this->logger->warning('Command {name} is already registered', array(
                 'name' => $name,
@@ -137,8 +133,42 @@ class Manager
             return;
         }
 
-        $this->commands[$name] = $command;
-        $this->registerAliases($aliases, $name);
+        if ($this->isCommandClass($class)) {
+            $command = new $class();
+            $this->commands[$name] = $command;
+            $this->registerAliases($aliases, $name);
+        }
+    }
+
+    protected function isCommandClass($class)
+    {
+        if (!is_string($class)) {
+            return false;
+        }
+
+        $sandbox = new Sandbox;
+        $result = $sandbox->run(function($socket) use($class) {
+            if (!in_array(self::COMMAND_INTERFACE, class_implements($class))) {
+                return 1;
+            }
+
+            return 0;
+        });
+
+        $exitCode = $result['exit_code'];
+        if ($exitCode === 255) {
+            $this->logger->error("Trying to load $class resulted in an error: {message}", array(
+                'message' => $result['message'],
+            ));
+        } elseif ($exitCode === 1) {
+            $this->logger->error("Class $class does not implement {interface}", array(
+                'interface' => self::COMMAND_INTERFACE,
+            ));
+        } elseif ($exitCode === 0) {
+            return true;
+        }
+
+        return false;
     }
 
     protected function registerAliases($names, $commandName)
