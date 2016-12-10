@@ -26,6 +26,11 @@ class Application
     protected $options;
     protected $args;
 
+    /**
+     * Create a new Application from global $argv.
+     *
+     * @return self
+     */
     public static function fromArgv()
     {
         global $argv;
