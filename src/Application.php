@@ -5,6 +5,7 @@ namespace OmekaCli;
 use OmekaCli\Command\Manager as CommandManager;
 use OmekaCli\Exception\BadUsageException;
 use OmekaCli\Util\Sandbox;
+use phpFastCache\CacheManager;
 
 class Application
 {
@@ -79,6 +80,8 @@ class Application
             require_once "$omekaPath/bootstrap.php";
             $this->initializeOmeka();
         }
+
+        $this->setupCache();
     }
 
     public function run()
@@ -221,5 +224,18 @@ class Application
         ));
         $application->initialize();
         $this->omekaApplication = $application;
+    }
+
+    protected function setupCache()
+    {
+        $cacheHome = getenv('XDG_CACHE_HOME');
+        if (empty($cacheHome)) {
+            $cacheHome = getenv('HOME') . '/.cache';
+        }
+        $cacheDir = "$cacheHome/omeka-cli";
+
+        CacheManager::setDefaultConfig(array(
+            'path' => $cacheDir,
+        ));
     }
 }

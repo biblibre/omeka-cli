@@ -14,10 +14,13 @@
             "OmekaCli\\": "src/"
         }
     },
+    "minimum-stability": "RC",
     "require": {
-        "knplabs/github-api": "^1.7",
+        "knplabs/github-api": "^2.0",
         "php-http/guzzle6-adapter": "^1.1",
-        "psr/log": "^1.0"
+        "psr/log": "^1.0",
+        "fabpot/goutte": "^3.2",
+        "phpFastCache/phpFastCache": "^5.0"
     },
     "bin": ["bin/omeka-cli"]
 }
