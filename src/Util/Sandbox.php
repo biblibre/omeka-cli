@@ -47,7 +47,7 @@ class Sandbox
             fclose(STDERR);
             socket_close($fd[1]);
 
-            register_shutdown_function(function() use($fd) {
+            register_shutdown_function(function () use ($fd) {
                 $error = error_get_last();
                 if ($error['type'] != E_USER_NOTICE) {
                     socket_write($fd[0], $error['message']);

@@ -117,11 +117,11 @@ class Manager
     }
 
     /**
-     * Register a new command
+     * Register a new command.
      *
-     * @param string $name     Command name
-     * @param string $class    The class name of the command.
-     * @param string[] $aliases  Aliases to this command.
+     * @param string   $name    Command name
+     * @param string   $class   the class name of the command
+     * @param string[] $aliases aliases to this command
      */
     protected function registerCommand($name, $class, $aliases = array())
     {
@@ -146,8 +146,8 @@ class Manager
             return false;
         }
 
-        $sandbox = new Sandbox;
-        $result = $sandbox->run(function($socket) use($class) {
+        $sandbox = new Sandbox();
+        $result = $sandbox->run(function ($socket) use ($class) {
             if (!in_array(self::COMMAND_INTERFACE, class_implements($class))) {
                 return 1;
             }

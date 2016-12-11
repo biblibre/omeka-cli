@@ -24,7 +24,8 @@ class HelpCommand extends AbstractCommand
     public function run($options, $args, Application $application)
     {
         if (empty($args)) {
-            print $this->getUsage();
+            echo $this->getUsage();
+
             return 0;
         }
 
@@ -36,15 +37,16 @@ class HelpCommand extends AbstractCommand
             $logger->error('Command {name} does not exist', array(
                 'name' => $commandName,
             ));
+
             return 1;
         }
 
         $usage = $command->getUsage();
         if (!$usage) {
-            print "There is no available help for this command\n";
+            echo "There is no available help for this command\n";
         }
 
-        print $usage;
-        print "\n";
+        echo $usage;
+        echo "\n";
     }
 }

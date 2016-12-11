@@ -26,14 +26,14 @@ class ListCommand extends AbstractCommand
             $aliases = $commands->getCommandAliases($name);
             $description = $command->getDescription();
 
-            print "$name";
+            echo "$name";
             if (isset($description)) {
-                print " -- $description";
+                echo " -- $description";
             }
             if (!empty($aliases)) {
-                print " (aliases: " . implode(', ', $aliases) . ")";
+                echo ' (aliases: ' . implode(', ', $aliases) . ')';
             }
-            print "\n";
+            echo "\n";
         }
     }
 }

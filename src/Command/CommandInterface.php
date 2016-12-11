@@ -39,8 +39,8 @@ interface CommandInterface
     /**
      * Run the command.
      *
-     * @param string[] $options An associative array of command line options
-     * @param string[] $arguments Command line arguments
+     * @param string[]    $options     An associative array of command line options
+     * @param string[]    $arguments   Command line arguments
      * @param Application $application The OmekaCli Application
      *
      * @return int exit code

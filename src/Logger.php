@@ -15,7 +15,7 @@ class Logger extends AbstractLogger
         }
 
         $message = $this->interpolate($message, $context);
-        error_log(sprintf("%s: %s", ucfirst($level), $message));
+        error_log(sprintf('%s: %s', ucfirst($level), $message));
     }
 
     protected function isLogLevelKnown($level)

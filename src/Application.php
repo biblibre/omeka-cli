@@ -58,7 +58,6 @@ class Application
         return $usage;
     }
 
-
     public function __construct($options, $args)
     {
         $this->options = $options;
@@ -92,12 +91,12 @@ class Application
         $commandName = $this->getCommandName();
 
         if ($this->getOption('help') || !$commandName) {
-            print $this->longUsage();
+            echo $this->longUsage();
+
             return 0;
         }
 
         return $this->runCommand();
-
     }
 
     public function isOmekaInitialized()
@@ -108,7 +107,7 @@ class Application
     public function getLogger()
     {
         if (!isset($this->logger)) {
-            $this->logger = new Logger;
+            $this->logger = new Logger();
         }
 
         return $this->logger;
@@ -168,6 +167,7 @@ class Application
             $logger->error('Command {command} does not exist', array(
                 'command' => $commandName,
             ));
+
             return 1;
         }
 
@@ -178,7 +178,8 @@ class Application
             $exitCode = $command->run($result['options'], $result['args'], $this);
         } catch (BadUsageException $e) {
             $logger->error($e->getMessage());
-            print $command->getUsage();
+            echo $command->getUsage();
+
             return 1;
         }
 
@@ -187,12 +188,13 @@ class Application
 
     protected function isOmekaDir($dir)
     {
-        $sandbox = new Sandbox;
-        $result = $sandbox->run(function() use($dir) {
+        $sandbox = new Sandbox();
+        $result = $sandbox->run(function () use ($dir) {
             include "$dir/bootstrap.php";
-            if (defined("OMEKA_VERSION")) {
+            if (defined('OMEKA_VERSION')) {
                 return 0;
             }
+
             return 1;
         });
 
@@ -218,9 +220,9 @@ class Application
             'resources' => array(
                 'theme' => array(
                     'basePath' => THEME_DIR,
-                    'webBasePath' => WEB_THEME
-                )
-            )
+                    'webBasePath' => WEB_THEME,
+                ),
+            ),
         ));
         $application->initialize();
         $this->omekaApplication = $application;

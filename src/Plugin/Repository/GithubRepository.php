@@ -8,11 +8,12 @@ use OmekaCli\Plugin\Info;
 abstract class GithubRepository implements RepositoryInterface
 {
     abstract protected function getOwner();
+
     abstract protected function getPossibleRepoNames($pluginName);
 
     public function __construct()
     {
-        $this->client = new Client;
+        $this->client = new Client();
         $this->owner = $this->getOwner();
     }
 
@@ -28,7 +29,7 @@ abstract class GithubRepository implements RepositoryInterface
         if ($repo) {
             $ini = $this->getPluginIni($repo['name']);
 
-            $info = new Info;
+            $info = new Info();
             $info->name = $pluginName;
             $info->displayName = $ini['name'];
             $info->version = $ini['version'];
@@ -43,7 +44,7 @@ abstract class GithubRepository implements RepositoryInterface
         $repo = $this->findRepo($pluginName);
 
         if (!$repo) {
-            throw new \Exception("Git repository not found");
+            throw new \Exception('Git repository not found');
         }
 
         $dest = "$destDir/$pluginName";
@@ -56,7 +57,7 @@ abstract class GithubRepository implements RepositoryInterface
         system("git clone -q $url $dest", $exitCode);
 
         if ($exitCode !== 0) {
-            throw new \Exception("git clone failed");
+            throw new \Exception('git clone failed');
         }
 
         return $dest;

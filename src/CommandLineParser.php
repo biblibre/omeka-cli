@@ -82,7 +82,6 @@ class CommandLineParser
         return false;
     }
 
-
     protected function parseLongOption($name, $option, $arg, &$args, &$result)
     {
         if (!isset($option['long'])) {
@@ -125,7 +124,6 @@ class CommandLineParser
         $argValue = substr($arg, 2);
 
         if ($argName === $option['short']) {
-
             if (isset($option['parameter']) && $option['parameter']) {
                 if (!$argValue) {
                     $argValue = next($args);

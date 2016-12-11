@@ -23,6 +23,6 @@ class VersionCommand extends AbstractCommand
 
     public function run($options, $args, Application $application)
     {
-        print OMEKACLI_VERSION . "\n";
+        echo OMEKACLI_VERSION . "\n";
     }
 }

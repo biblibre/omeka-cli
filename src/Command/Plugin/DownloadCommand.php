@@ -30,7 +30,7 @@ class DownloadCommand extends AbstractCommand
     public function run($options, $args, Application $application)
     {
         if (empty($args)) {
-            throw new BadUsageException("Missing argument");
+            throw new BadUsageException('Missing argument');
         }
 
         $logger = $application->getLogger();
@@ -39,7 +39,8 @@ class DownloadCommand extends AbstractCommand
 
         $plugins = $this->findAvailablePlugins($pluginName);
         if (empty($plugins)) {
-            print "No plugins named $pluginName were found\n";
+            echo "No plugins named $pluginName were found\n";
+
             return 1;
         }
 
@@ -51,16 +52,16 @@ class DownloadCommand extends AbstractCommand
         if ($application->isOmekaInitialized()) {
             $destDir = PLUGIN_DIR;
         } else {
-            $destDir = ".";
+            $destDir = '.';
         }
 
         $repository = $plugin['repository'];
         $repositoryName = $repository->getDisplayName();
 
-        print "Downloading $pluginName from $repositoryName...\n";
+        echo "Downloading $pluginName from $repositoryName...\n";
         try {
             $dest = $repository->download($pluginName, $destDir);
-            print "Downloaded into $dest\n";
+            echo "Downloaded into $dest\n";
         } catch (\Exception $e) {
             $logger->error($e->getMessage());
         }
@@ -74,7 +75,7 @@ class DownloadCommand extends AbstractCommand
             $repository = new $repositoryClass();
 
             $repositoryName = $repository->getDisplayName();
-            print "Searching $pluginName in $repositoryName\n";
+            echo "Searching $pluginName in $repositoryName\n";
             $pluginInfo = $repository->find($pluginName);
             if ($pluginInfo) {
                 $plugins[] = array(
@@ -94,13 +95,13 @@ class DownloadCommand extends AbstractCommand
         if (count($plugins) == 1) {
             $info = $plugins[0]['info'];
             $repository = $plugins[0]['repository'];
-            print sprintf('Found plugin %s (%s) on %s', $info->displayName,
+            echo sprintf('Found plugin %s (%s) on %s', $info->displayName,
                 $info->version, $repository->getDisplayName()) . "\n";
-            if ($this->confirmPrompt("Do you want to download it ?")) {
+            if ($this->confirmPrompt('Do you want to download it ?')) {
                 $pluginIdx = 0;
             }
         } else {
-            print sprintf('Found %s plugins', count($plugins)) . "\n";
+            echo sprintf('Found %s plugins', count($plugins)) . "\n";
 
             $pluginOptions = array();
             foreach ($plugins as $plugin) {
@@ -111,7 +112,7 @@ class DownloadCommand extends AbstractCommand
                     $info->displayName, $info->version, $repositoryName);
             }
 
-            $result = $this->menuPrompt("Choose one", $pluginOptions);
+            $result = $this->menuPrompt('Choose one', $pluginOptions);
             if (is_numeric($result) && isset($pluginOptions[$result])) {
                 $pluginIdx = $result;
             }
@@ -125,7 +126,7 @@ class DownloadCommand extends AbstractCommand
     protected function confirmPrompt($text)
     {
         do {
-            print "$text [y,n] ";
+            echo "$text [y,n] ";
             $response = trim(fgets(STDIN));
         } while ($response != 'y' && $response != 'n');
 
@@ -137,11 +138,11 @@ class DownloadCommand extends AbstractCommand
         do {
             $i = 0;
             foreach ($options as $option) {
-                print "[$i] $option\n";
+                echo "[$i] $option\n";
                 ++$i;
             }
             $max = $i - 1;
-            print "$text [0-$max,q] ";
+            echo "$text [0-$max,q] ";
             $response = trim(fgets(STDIN));
         } while ((!is_numeric($response) || $response < 0 || $response > $max) && $response != 'q');
 

@@ -21,7 +21,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
     public function getDisplayName()
     {
-        return "Omeka.org";
+        return 'Omeka.org';
     }
 
     public function find($pluginName)
@@ -29,7 +29,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
         $plugin = $this->findPlugin($pluginName);
 
         if ($plugin) {
-            $info = new Info;
+            $info = new Info();
             $info->name = $pluginName;
             $info->displayName = $plugin['display_name'];
             $info->version = $plugin['version'];
@@ -44,7 +44,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
         $plugin = $this->findPlugin($pluginName);
 
         if (!$plugin) {
-            throw new \Exception("Plugin not found");
+            throw new \Exception('Plugin not found');
         }
 
         $url = $plugin['download_url'];
@@ -63,7 +63,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
             throw new \Exception("$dest already exists");
         }
 
-        $zip = new ZipArchive;
+        $zip = new ZipArchive();
         if (true === $zip->open($tmpZip)) {
             $zip->extractTo($destDir);
             $zip->close();
@@ -80,7 +80,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
         $words = preg_split($camelCaseSplitRegex, $pluginName);
         $wordsRegex = implode('.*', $words);
 
-        $plugins = array_filter($plugins, function($plugin) use($wordsRegex) {
+        $plugins = array_filter($plugins, function ($plugin) use ($wordsRegex) {
             return 1 == preg_match("/$wordsRegex/i", $plugin['download_url']);
         });
 
