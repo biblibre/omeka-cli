@@ -208,7 +208,7 @@ class Application
             $dir = realpath($dir . '/..');
         }
 
-        if (!$dir !== false && $dir !== '/') {
+        if ($dir !== false && $dir !== '/') {
             return $dir;
         }
     }
