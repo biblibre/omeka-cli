@@ -45,7 +45,7 @@ class InfoCommand extends AbstractCommand
         echo "Omeka version         " . OMEKA_VERSION               . "\n";
         echo "Database version:     " . get_option('omeka_version') . "\n";
 
-        if (OMEKA_VERSION == get_option('omeka_version'))
+        if (OMEKA_VERSION != get_option('omeka_version'))
             echo "Warning: Omeka version and database version are not the same!\n";
 
         echo "Admin theme:          " . get_option('admin_theme')   . "\n";
