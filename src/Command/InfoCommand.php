@@ -42,7 +42,7 @@ class InfoCommand extends AbstractCommand
         $inactivePlugins = $pluginsTable->findBy(array('active' => 0));
 
         echo "Omeka base directory: " . BASE_DIR                    . "\n";
-        echo "Omeka version         " . OMEKA_VERSION               . "\n";
+        echo "Omeka version:        " . OMEKA_VERSION               . "\n";
         echo "Database version:     " . get_option('omeka_version') . "\n";
 
         if (OMEKA_VERSION != get_option('omeka_version'))
@@ -58,5 +58,3 @@ class InfoCommand extends AbstractCommand
             echo $plugin->name . " - " . $plugin->version . "\n";
     }
 }
-
-?>
