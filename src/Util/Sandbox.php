@@ -55,7 +55,13 @@ class Sandbox
                 socket_close($fd[0]);
             });
 
+            // Prevent PHPUnit from stopping execution at trigger_error
+            $oldReportingLevel = error_reporting();
+            error_reporting($oldReportingLevel ^ E_USER_NOTICE);
+
             trigger_error('');
+
+            error_reporting($oldReportingLevel);
 
             exit(call_user_func($callback, $fd[0]));
         }
