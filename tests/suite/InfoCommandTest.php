@@ -14,7 +14,7 @@ final class InfoCommandTest extends TestCase
     {
         $omeka_path = getenv('OMEKA_PATH');
         if (!getenv('OMEKA_PATH'))
-            exit('Error: OMEKA_PATH environment variable not defined.\n');
+            $this->markTestSkipped('Error: OMEKA_PATH environment variable not defined.\n');
 
         $options = array(
             'omeka-path' => $omeka_path,
