@@ -10,25 +10,22 @@ use PHPUnit\Framework\TestCase;
  */
 final class InfoCommandTest extends TestCase
 {
-    protected $application;
-
-    public function setUp()
+    public function testIsOutputFormatOk()
     {
+        $omeka_path = getenv('OMEKA_PATH');
+        if (!getenv('OMEKA_PATH'))
+            exit('Error: OMEKA_PATH environment variable not defined.\n');
+
         $options = array(
-            'omeka-path' => '/srv/http/Omeka',
+            'omeka-path' => $omeka_path,
         );
         $application = new Application($options, array());
         $application->initialize();
 
-        $this->application = $application;
-    }
-
-    public function testIsOutputFormatOk()
-    {
         $command = new InfoCommand();
 
         ob_start();
-        $command->run(array(), array(), $this->application);
+        $command->run(array(), array(), $application);
         $output = ob_get_clean();
 
         // TODO: make it beautiful...
