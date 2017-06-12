@@ -10,7 +10,9 @@ use PHPUnit\Framework\TestCase;
  */
 final class InfoCommandTest extends TestCase
 {
-    public function testIsOutputFormatOk()
+    protected $application;
+
+    protected function setUp()
     {
         $omeka_path = getenv('OMEKA_PATH');
         if (!getenv('OMEKA_PATH'))
@@ -19,16 +21,18 @@ final class InfoCommandTest extends TestCase
         $options = array(
             'omeka-path' => $omeka_path,
         );
-        $application = new Application($options, array());
-        $application->initialize();
+        $this->application = new Application($options, array());
+        $this->application->initialize();
+    }
 
+    public function testIsOutputFormatOk()
+    {
         $command = new InfoCommand();
 
         ob_start();
-        $command->run(array(), array(), $application);
+        $command->run(array(), array(), $this->application);
         $output = ob_get_clean();
 
-        // TODO: make it beautiful...
         $this->assertRegExp('
 /\AOmeka base directory: *(\/\w*)+
 Omeka version: *.+
