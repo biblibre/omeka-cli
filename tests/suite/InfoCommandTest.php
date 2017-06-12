@@ -31,12 +31,12 @@ final class InfoCommandTest extends TestCase
         // TODO: make it beautiful...
         $this->assertRegExp('
 /\AOmeka base directory: *(\/\w*)+
-Omeka version: *[0-9]([\.-][0-9])*[\.-][0-9]
-Database version: *[0-9]([\.-][0-9][\.-])*[0-9]
-Admin theme: *(\w*[\.-]*)+
-Public theme: *(\w*[\.-]*)+
+Omeka version: *.+
+Database version: *.+
+Admin theme: *.+
+Public theme: *.+
 Plugins \(actives\):
-(((\w*[\.-]*)+ - [0-9]([\.-][0-9])*[\.-][0-9])*\n)*Plugins \(inactives\):
-(((\w*[\.-]*)+ - [0-9]([\.-][0-9])*[\.-][0-9])*\n)*\z/', $output);
+((.+ - .+)*\n)*Plugins \(inactives\):
+((.+ - .+)*\n)*\z/', $output);
     }
 }
