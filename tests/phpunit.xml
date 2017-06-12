@@ -1,0 +1,10 @@
+<phpunit bootstrap="bootstrap.php"
+         convertErrorsToExceptions="true"
+         convertWarningsToExceptions="true"
+         stderr="true">
+    <testsuites>
+        <testsuite name="OmekaCli">
+            <directory>suite</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

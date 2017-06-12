@@ -20,7 +20,8 @@
         "php-http/guzzle6-adapter": "^1.1",
         "psr/log": "^1.0",
         "fabpot/goutte": "^3.2",
-        "phpFastCache/phpFastCache": "^5.0"
+        "phpFastCache/phpFastCache": "^5.0",
+        "phpunit/phpunit": "^5.7"
     },
     "bin": ["bin/omeka-cli"]
 }

@@ -16,6 +16,7 @@ It also provides everything needed for Omeka plugins to create custom commands.
     help             print help for a specific command
     list             list available commands
     plugin-download  download a plugin from github
+    info             print informations about current Omeka installation
 
 ## Installation
 
@@ -51,6 +52,14 @@ Then you will be able to run
 or, using the alias,
 
     $ omeka-cli mycommand [OPTION...] [ARG...]
+
+## Running tests
+
+If you want to test `omeka-cli`, run:
+
+    $ OMEKA_PATH=<path_to_omeka> vendor/bin/phpunit --stderr -c tests/phpunit.xml 
+
+The environment variable `OMEKA_PATH` must be defined to run the tests.
 
 ## License
 
