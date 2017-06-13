@@ -56,5 +56,7 @@ class InfoCommand extends AbstractCommand
         echo "Plugins (inactives):\n";
         foreach ($inactivePlugins as $plugin)
             echo $plugin->name . " - " . $plugin->version . "\n";
+
+        return 0;
     }
 }
