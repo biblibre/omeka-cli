@@ -5,16 +5,16 @@ use OmekaCli\Command\OptionsCommand;
 
 use PHPUnit\Framework\TestCase;
 
-require_once 'TestsTemplate.php';
+require_once 'AbstractTest.php';
 
 /**
  * @covers OptionsCommand
  */
-final class OptionsCommandTest extends TestsTemplate
+final class OptionsCommandTest extends AbstractTest
 {
     protected $application;
 
-    public function testIsOutputFormatOk()
+    public function testTest()
     {
         $command = new OptionsCommand();
 

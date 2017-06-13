@@ -5,7 +5,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @covers Nothing
  */
-class TestsTemplate extends TestCase
+abstract class AbstractTest extends TestCase
 {
     final protected function setUp()
     {

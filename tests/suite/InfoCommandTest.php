@@ -5,12 +5,12 @@ use OmekaCli\Command\InfoCommand;
 
 use PHPUnit\Framework\TestCase;
 
-require_once 'TestsTemplate.php';
+require_once 'AbstractTest.php';
 
 /**
  * @covers InfoCommand
  */
-final class InfoCommandTest extends TestsTemplate
+final class InfoCommandTest extends AbstractTest
 {
     protected $application;
 
