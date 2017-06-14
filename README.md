@@ -17,6 +17,7 @@ It also provides everything needed for Omeka plugins to create custom commands.
     list             list available commands
     plugin-download  download a plugin from github
     info             print informations about current Omeka installation
+    options          edit and see the "omeka_options" table
 
 ## Installation
 
