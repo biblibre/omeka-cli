@@ -31,6 +31,7 @@ class CommandLineParser
             $arg = current($args);
 
             if (empty($arg)) {
+                next($args);
                 continue;
             }
 
@@ -54,6 +55,7 @@ class CommandLineParser
             $arg = current($args);
 
             if (empty($arg)) {
+                next($args);
                 continue;
             }
 

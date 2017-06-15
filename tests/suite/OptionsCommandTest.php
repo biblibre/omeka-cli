@@ -37,25 +37,25 @@ final class OptionsCommandTest extends AbstractTest
         $command = new OptionsCommand();
 
         ob_start();
-        $command->run(array('get' => 1,),
-                      array('0' => 'omeka_version',),
+        $command->run(array(),
+                      array('omeka_version',),
                       $this->application);
         $output = ob_get_clean();
 
         $this->assertNotEmpty($output);
     }
 
-    public function testReturnEmptyLineOnNonExistingTableEntries()
+    public function testShowErrorOnNonExistingTableEntries()
     {
         $command = new OptionsCommand();
 
         ob_start();
-        $command->run(array('get' => 1,),
-                      array('0' => 'NonExistingTableEntries',),
+        $command->run(array(),
+                      array('NonExistingTableEntries',),
                       $this->application);
         $output = ob_get_clean();
 
-        $this->assertEquals($output, "\n");
+        $this->assertRegExp('/Error: option .* not found./', $output);
     }
 
     public function testCanEditExistingTableEntries()
@@ -63,22 +63,20 @@ final class OptionsCommandTest extends AbstractTest
         $command = new OptionsCommand();
 
         ob_start();
-        $command->run(array('get' => 1,),
-                      array('0' => 'omeka_version',),
+        $command->run(array(),
+                      array('omeka_version',),
                       $this->application);
         $oldVal = substr(ob_get_clean(), 0, -1);
 
         ob_start();
-        $command->run(array('set' => 1,),
-                      array('0' => 'omeka_version',
-                            '1' => '0.0.0',),
+        $command->run(array(),
+                      array('omeka_version', '0.0.0',),
                       $this->application);
         $output = ob_get_clean();
 
         ob_start();
-        $command->run(array('set' => 1,),
-                      array('0' => 'omeka_version',
-                            '1' => $oldVal,),
+        $command->run(array(),
+                      array('omeka_version', $oldVal,),
                       $this->application);
         ob_end_clean();
 

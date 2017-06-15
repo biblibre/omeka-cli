@@ -6,18 +6,6 @@ use OmekaCli\Application;
 
 class OptionsCommand extends AbstractCommand
 {
-    public function getOptionsSpec()
-    {
-        return array(
-            'get' => array(
-                'short' => 'g',
-            ),
-            'set' => array(
-                'short' => 's',
-            ),
-        );
-    }
-
     public function getDescription()
     {
         return 'edit and see the "omeka_options" table';
@@ -26,17 +14,14 @@ class OptionsCommand extends AbstractCommand
     public function getUsage()
     {
         $usage = "Usage:\n"
-               . "\toptions [SUBCOMMAND OPTION [VALUE]]\n"
+               . "\toptions OPTION [VALUE]\n"
                . "\n"
-               . "Edit and see the \"omeka_options\" table.\n"
+               . "Edit and retrieve elements from the \"omeka_options\" table.\n"
                . "\n"
-               . "SUBCOMMAND\n"
-               . "\t-g  get the OPTION,\n"
-               . "\t-s  set the OPTION.\n"
                . "OPTION\n"
-               . "\tthe name of the option to act on.\n"
+               . "\tthe name of the option to retrieve.\n"
                . "VALUE\n"
-               . "\tif -g is set, the new value of the option.\n"
+               . "\tif set, the new value of the option.\n"
                . "NB\n"
                . "\tThis command return an empty line in those cases:\n"
                . "\t- the option does not exists ;\n"
@@ -48,23 +33,22 @@ class OptionsCommand extends AbstractCommand
 
     public function run($options, $args, Application $application)
     {
-        if (empty($options) || empty($args)) {
+        if (count($args) == 0 || count($args) > 2) {
             echo $this->getUsage();
             return 1;
         }
 
-        switch (array_search(1, $options)) { // TODO handle serialized data
-            case "set":
-                if (!empty(get_option($args[0])))
-                    set_option($args[0], $args[1]);
-                // FALLTHROUGH
-            case "get":
-                echo get_option($args[0]) . "\n";
-                break;
-            default:
-                echo $this->getUsage();
-                return 1;
+        $db = get_db();
+        $optionsTable = $db->getTable('Option');
+        $query = $optionsTable->findBy(array('name' => $args[0]));
+        if (!$query) {
+            echo "Error: option " . $args[0] . " not found.\n";
+            return 1;
         }
+
+        if (count($args) == 2)
+            set_option($args[0], $args[1]);
+        echo get_option($args[0]) . "\n";
 
         return 0;
     }
