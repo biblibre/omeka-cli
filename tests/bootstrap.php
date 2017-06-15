@@ -4,6 +4,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use OmekaCli\Application;
 
+define('APPLICATION_ENV', 'testing');
+
 $omeka_path = getenv('OMEKA_PATH');
 if (!$omeka_path)
     exit("Error: OMEKA_PATH environment variable not defined.\n");

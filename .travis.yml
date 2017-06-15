@@ -1,0 +1,24 @@
+language: php
+
+php:
+  - 5.6
+  - 7.0
+  - 7.1
+
+sudo: false
+
+install:
+  - composer install --no-dev
+
+before_script:
+  - git clone --depth 1 https://github.com/omeka/Omeka
+  - mysql -e "create database IF NOT EXISTS omeka_test;" -uroot
+  - mv Omeka/application/config/config.ini.changeme Omeka/application/config/config.ini
+  - mv Omeka/application/tests/config.ini.changeme Omeka/application/tests/config.ini
+  - sed -i 's/db.host = ""/db.host = "localhost"/' Omeka/application/tests/config.ini
+  - sed -i 's/db.username = ""/db.username = "root"/' Omeka/application/tests/config.ini
+  - sed -i 's/db.dbname = ""/db.dbname = "omeka_test"/' Omeka/application/tests/config.ini
+  - sed -i 's/paths.imagemagick = ""/paths.imagemagick = "\/usr\/bin\/"/' Omeka/application/tests/config.ini
+
+script:
+  - OMEKA_PATH=./Omeka ./vendor/bin/phpunit -c tests/phpunit.xml

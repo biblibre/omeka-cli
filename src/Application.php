@@ -224,6 +224,11 @@ class Application
                 ),
             ),
         ));
+
+        if (APPLICATION_ENV === 'testing') {
+            \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
+        }
+
         $application->initialize();
         $this->omekaApplication = $application;
     }
