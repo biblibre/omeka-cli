@@ -58,7 +58,7 @@ or, using the alias,
 
 If you want to test `omeka-cli`, run:
 
-    $ OMEKA_PATH=<path_to_omeka> vendor/bin/phpunit --stderr -c tests/phpunit.xml 
+    $ OMEKA_PATH=<path_to_omeka> vendor/bin/phpunit -c tests/phpunit.xml 
 
 The environment variable `OMEKA_PATH` must be defined to run the tests.
 
