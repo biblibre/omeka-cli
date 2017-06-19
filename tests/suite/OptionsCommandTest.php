@@ -12,8 +12,6 @@ require_once 'AbstractTest.php';
  */
 final class OptionsCommandTest extends AbstractTest
 {
-    protected $application;
-
     public function testShowUsageWhenRunWithoutArgument()
     {
         $command = new OptionsCommand();

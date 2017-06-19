@@ -7,6 +7,8 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class AbstractTest extends TestCase
 {
+    protected $application;
+
     final protected function setUp()
     {
         if (class_exists('Zend_Registry'))

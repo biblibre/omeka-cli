@@ -12,8 +12,6 @@ require_once 'AbstractTest.php';
  */
 final class InfoCommandTest extends AbstractTest
 {
-    protected $application;
-
     public function testIsOutputFormatOk()
     {
         $command = new InfoCommand();
