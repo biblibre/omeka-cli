@@ -7,19 +7,12 @@ use OmekaCli\Exception\BadUsageException;
 use OmekaCli\Util\Sandbox;
 use phpFastCache\CacheManager;
 
+use GetOptionKit\OptionCollection;
+use GetOptionKit\ContinuousOptionParser;
+use GetOptionKit\Exception\InvalidOptionException;
+
 class Application
 {
-    protected static $optionsSpec = array(
-        'omeka-path' => array(
-            'short' => 'C',
-            'parameter' => true,
-        ),
-        'help' => array(
-            'short' => 'h',
-            'long' => 'help',
-        ),
-    );
-
     protected $logger;
     protected $commands;
     protected $omekaApplication;
@@ -36,14 +29,24 @@ class Application
     {
         global $argv;
 
+        $appSpec = new OptionCollection;
+        $appSpec->add('help',          'show help.');
+        $appSpec->add('C|omeka-path:', 'path to Omeka')
+                ->isa('String');
+
+        $args    = array();
+        $options = array();
+        $parser = new ContinuousOptionParser($appSpec);
         try {
-            $parser = new CommandLineParser(self::$optionsSpec);
-            $result = $parser->parse($argv);
-            $options = $result['options'];
-            $args = $result['args'];
-        } catch (\Exception $e) {
+            $appOptions = $parser->parse($argv);
+        } catch (InvalidOptionException $e) {
             throw new BadUsageException($e->getMessage(), 0, $e);
         }
+
+        while (!$parser->isEnd())
+            $args[] = $parser->advance();
+        foreach ($appOptions->keys as $key => $appSpec)
+            $options[$key] = $appOptions->keys[$key]->value;
 
         return new self($options, $args);
     }
@@ -171,19 +174,27 @@ class Application
             return 1;
         }
 
-        $exitCode = 0;
+        $exitCode = 0; // TODO: necessary?
+        $cmdSpec = $command->getOptionsSpec();
+
+        $cmdArgs    = array();
+        $cmdOptions = array();
+        $parser = new ContinuousOptionParser($cmdSpec);
         try {
-            $parser = new CommandLineParser($command->getOptionsSpec());
-            $result = $parser->parse($this->args);
-            $exitCode = $command->run($result['options'], $result['args'], $this);
-        } catch (BadUsageException $e) {
+            $cmdArgv = $parser->parse($this->args);
+        } catch (InvalidOptionException $e) {
             $logger->error($e->getMessage());
             echo $command->getUsage();
 
             return 1;
         }
 
-        return $exitCode;
+        while (!$parser->isEnd())
+            $cmdArgs[] = $parser->advance();
+        foreach ($cmdArgv->keys as $key => $cmdSpec)
+            $cmdOptions[$key] = $cmdArgv->keys[$key]->value;
+
+        return $command->run($cmdOptions, $cmdArgs, $this);
     }
 
     protected function isOmekaDir($dir)

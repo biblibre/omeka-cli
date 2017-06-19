@@ -21,7 +21,8 @@
         "psr/log": "^1.0",
         "fabpot/goutte": "^3.2",
         "phpFastCache/phpFastCache": "^5.0",
-        "phpunit/phpunit": "^5.7"
+        "phpunit/phpunit": "^5.7",
+        "corneltek/getoptionkit": "^2.5"
     },
     "bin": ["bin/omeka-cli"]
 }
