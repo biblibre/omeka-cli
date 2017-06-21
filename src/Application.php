@@ -2,7 +2,7 @@
 
 namespace OmekaCli;
 
-use OmekaCli\Command\Manager as CommandManager;
+use OmekaCli\Command\Manager;
 use OmekaCli\Exception\BadUsageException;
 use OmekaCli\Util\Sandbox;
 use phpFastCache\CacheManager;
@@ -119,7 +119,7 @@ class Application
     public function getCommandManager()
     {
         if (!isset($this->commands)) {
-            $this->commands = new CommandManager($this, $this->logger);
+            $this->commands = new Manager($this, $this->logger);
         }
 
         return $this->commands;
