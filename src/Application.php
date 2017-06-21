@@ -30,7 +30,7 @@ class Application
         global $argv;
 
         $appSpec = new OptionCollection;
-        $appSpec->add('help',          'show help.');
+        $appSpec->add('h|help',        'show help.');
         $appSpec->add('C|omeka-path:', 'path to Omeka')
                 ->isa('String');
 
