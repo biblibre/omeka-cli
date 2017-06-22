@@ -12,12 +12,12 @@ It also provides everything needed for Omeka plugins to create custom commands.
 
 ## Available commands
 
-    version          print version of omeka-cli
-    help             print help for a specific command
-    list             list available commands
-    plugin-download  download a plugin from github
-    info             print informations about current Omeka installation
-    options          edit and see the "omeka_options" table
+    help     print help for a specific command
+    info     print informations about current Omeka installation
+    list     list available commands
+    options  edit and see the "omeka_options" table
+    plugin   manage plugins
+    version  print version of omeka-cli
 
 ## Installation
 

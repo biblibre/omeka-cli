@@ -73,13 +73,12 @@ class Manager
     {
         $this->commands = array();
 
-        $this->registerCommand('version', 'OmekaCli\Command\VersionCommand');
-        $this->registerCommand('help', 'OmekaCli\Command\HelpCommand');
-        $this->registerCommand('list', 'OmekaCli\Command\ListCommand');
-        $this->registerCommand('info', 'OmekaCli\Command\InfoCommand');
+        $this->registerCommand('help',    'OmekaCli\Command\HelpCommand');
+        $this->registerCommand('info',    'OmekaCli\Command\InfoCommand');
+        $this->registerCommand('list',    'OmekaCli\Command\ListCommand');
         $this->registerCommand('options', 'OmekaCli\Command\OptionsCommand');
-        $this->registerCommand('plugin-download', 'OmekaCli\Command\Plugin\DownloadCommand');
-        $this->registerAlias('dl', 'plugin-download');
+        $this->registerCommand('plugin',  'OmekaCli\Command\PluginCommand');
+        $this->registerCommand('version', 'OmekaCli\Command\VersionCommand');
 
         $this->registerPluginCommands();
     }

@@ -1,28 +1,32 @@
 <?php
 
-namespace OmekaCli\Command\Plugin;
+namespace OmekaCli\Command;
 
 use OmekaCli\Application;
 use OmekaCli\Command\AbstractCommand;
-use OmekaCli\Exception\BadUsageException;
 
-class DownloadCommand extends AbstractCommand
+class PluginCommand extends AbstractCommand
 {
     protected static $repositories = array(
-        'omeka.org' => 'OmekaCli\Plugin\Repository\OmekaDotOrgRepository',
+        'omeka.org'    => 'OmekaCli\Plugin\Repository\OmekaDotOrgRepository',
         'github:omeka' => 'OmekaCli\Plugin\Repository\GithubOmekaRepository',
-        'github:ucsc' => 'OmekaCli\Plugin\Repository\GithubUcscRepository',
+        'github:ucsc'  => 'OmekaCli\Plugin\Repository\GithubUcscRepository',
     );
 
     public function getDescription()
     {
-        return 'download a plugin from github';
+        return 'manage plugin';
     }
 
     public function getUsage()
     {
         $usage = "Usage:\n"
-            . "\tplugin-download PLUGIN_NAME\n";
+               . "\tplugin COMMAND [ARGS...]\n"
+               . "\n"
+               . "Manage plugins.\n"
+               . "\n"
+               . "COMMAND\n"
+               . "\tdl|download  {NAME|URL}\n";
 
         return $usage;
     }
@@ -30,13 +34,33 @@ class DownloadCommand extends AbstractCommand
     public function run($options, $args, Application $application)
     {
         if (empty($args)) {
-            throw new BadUsageException('Missing argument');
+            echo $this->getUsage();
+            return 1;
         }
 
         $logger = $application->getLogger();
 
-        $pluginName = $args[0];
+        switch ($args[0]) {
+        case 'dl': /* FALLTHROUGH */
+        case 'download':
+            if (!isset($args[1]) || $args[1] == '') {
+                echo "Error: missing or empty argument to download.\n";
+                echo $this->getUsage();
+                return 1;
+            }
+            $exitCode = $this->download($args[1]);
+            break;
+        default:
+            echo "Error: unknown argument $args[0].\n";
+            echo $this->getUsage();
+            return 1;
+        }
 
+        return $exitCode;
+    }
+
+    protected function download($pluginName)
+    {
         $plugins = $this->findAvailablePlugins($pluginName);
         if (empty($plugins)) {
             echo "No plugins named $pluginName were found\n";
@@ -63,7 +87,7 @@ class DownloadCommand extends AbstractCommand
             $dest = $repository->download($pluginName, $destDir);
             echo "Downloaded into $dest\n";
         } catch (\Exception $e) {
-            $logger->error($e->getMessage());
+            echo "Download failed.\n";
         }
     }
 
