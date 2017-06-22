@@ -79,22 +79,4 @@ Usage:
 
 (.+\n)*\z/', $output);
     }
-
-    public function testCanDownloadPlugin()
-    {
-        $command = new PluginCommand();
-
-        ob_start();
-        $command->run(array(), array(), $this->application);
-        $output = ob_get_clean();
-
-        $this->assertNotEmpty($output);
-        $this->assertRegExp('
-/\AUsage:
-\tplugin.+
-
-.+
-
-(.+\n)*\z/', $output);
-    }
 }
