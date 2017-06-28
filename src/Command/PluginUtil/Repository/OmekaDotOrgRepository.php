@@ -1,8 +1,7 @@
 <?php
 
-namespace OmekaCli\Plugin\Repository;
+namespace OmekaCli\Command\PluginUtil\Repository;
 
-use OmekaCli\Plugin\Info;
 use Goutte\Client;
 use ZipArchive;
 use phpFastCache\CacheManager;
@@ -29,11 +28,12 @@ class OmekaDotOrgRepository implements RepositoryInterface
         $plugin = $this->findPlugin($pluginName);
 
         if ($plugin) {
-            $info = new Info();
-            $info->name = $pluginName;
-            $info->displayName = $plugin['display_name'];
-            $info->version = $plugin['version'];
-            $info->omekaMinimumVersion = $plugin['omeka_minimum_version'];
+            $info = array(
+                'name'                => $pluginName,
+                'displayName'         => $plugin['display_name'],
+                'version'             => $plugin['version'],
+                'omekaMinimumVersion' => $plugin['omeka_minimum_version'],
+            );
 
             return $info;
         }

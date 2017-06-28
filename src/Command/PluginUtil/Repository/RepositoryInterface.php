@@ -1,6 +1,6 @@
 <?php
 
-namespace OmekaCli\Plugin\Repository;
+namespace OmekaCli\Command\PluginUtil\Repository;
 
 interface RepositoryInterface
 {

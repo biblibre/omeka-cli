@@ -7,11 +7,7 @@ use OmekaCli\Command\AbstractCommand;
 
 class PluginCommand extends AbstractCommand
 {
-    protected static $repositories = array(
-        'omeka.org'    => 'OmekaCli\Plugin\Repository\OmekaDotOrgRepository',
-        'github:omeka' => 'OmekaCli\Plugin\Repository\GithubOmekaRepository',
-        'github:ucsc'  => 'OmekaCli\Plugin\Repository\GithubUcscRepository',
-    );
+    protected $application;
 
     public function getDescription()
     {
@@ -35,25 +31,26 @@ class PluginCommand extends AbstractCommand
     {
         if (empty($args)) {
             echo $this->getUsage();
-            return 1;
-        }
+            $exitCode = 1;
+        } else {
+            $this->application = $application;
 
-        $logger = $application->getLogger();
-
-        switch ($args[0]) {
-        case 'dl': /* FALLTHROUGH */
-        case 'download':
-            if (!isset($args[1]) || $args[1] == '') {
-                echo "Error: missing or empty argument to download.\n";
+            switch ($args[0]) {
+            case 'dl': /* FALLTHROUGH */
+            case 'download':
+                if (!isset($args[1]) || $args[1] == '') {
+                    echo "Error: nothing download.\n";
+                    echo $this->getUsage();
+                    $exitCode = 1;
+                } else {
+                    $exitCode = $this->download($args[1]);
+                }
+                break;
+            default:
+                echo "Error: unknown argument $args[0].\n";
                 echo $this->getUsage();
-                return 1;
+                $exitCode = 1;
             }
-            $exitCode = $this->download($args[1]);
-            break;
-        default:
-            echo "Error: unknown argument $args[0].\n";
-            echo $this->getUsage();
-            return 1;
         }
 
         return $exitCode;
@@ -64,100 +61,110 @@ class PluginCommand extends AbstractCommand
         $plugins = $this->findAvailablePlugins($pluginName);
         if (empty($plugins)) {
             echo "No plugins named $pluginName were found\n";
+            $exitCode = 1;
+        } else if (null !== ($plugin = $this->pluginPrompt($plugins))) {
+            $destDir = ($this->application->isOmekaInitialized())
+                     ? PLUGIN_DIR : '.';
 
-            return 1;
-        }
+            $repo = $plugin['repository'];
+            $repoName = $repo->getDisplayName();
 
-        $plugin = $this->pluginPrompt($plugins);
-        if (!isset($plugin)) {
-            return 0;
-        }
-
-        if ($application->isOmekaInitialized()) {
-            $destDir = PLUGIN_DIR;
+            echo "Downloading from $repoName...\n";
+            try {
+                $dest = $repo->download($pluginName, $destDir);
+                echo "Downloaded into $dest\n";
+            } catch (\Exception $e) {
+                echo 'Error: download failed: ' . $e->getMessage() . ".\n";
+            }
+            $exitCode = 0;
         } else {
-            $destDir = '.';
+            echo "Aborted.\n";
+            $exitCode = 1;
         }
 
-        $repository = $plugin['repository'];
-        $repositoryName = $repository->getDisplayName();
-
-        echo "Downloading $pluginName from $repositoryName...\n";
-        try {
-            $dest = $repository->download($pluginName, $destDir);
-            echo "Downloaded into $dest\n";
-        } catch (\Exception $e) {
-            echo "Download failed.\n";
-        }
+        return $exitCode;
     }
 
     protected function findAvailablePlugins($pluginName)
     {
         $plugins = array();
 
-        foreach (self::$repositories as $name => $repositoryClass) {
-            $repository = new $repositoryClass();
-
-            $repositoryName = $repository->getDisplayName();
-            echo "Searching $pluginName in $repositoryName\n";
-            $pluginInfo = $repository->find($pluginName);
-            if ($pluginInfo) {
-                $plugins[] = array(
-                    'info' => $pluginInfo,
-                    'repository' => $repository,
-                );
-            }
+        echo "Searching on Omeka.org\n";
+        $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
+        $repo = new $repoClass;
+        $pluginInfo = $repo->find($pluginName);
+        if ($pluginInfo) {
+            $pluginsOmeka[] = array(
+                'info'       => $pluginInfo,
+                'repository' => $repo,
+            );
+        } else {
+            $pluginsOmeka = array();
         }
 
-        return $plugins;
+        echo "Searching on GitHub\n";
+        $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
+        $repo = new $repoClass;
+        $pluginInfo = $repo->find($pluginName);
+        if ($pluginInfo) {
+            $pluginsGitHub[] = array(
+                'info'       => $pluginInfo,
+                'repository' => $repo,
+            );
+        } else {
+            $pluginsGitHub = array();
+        }
+
+        return array(
+            'atOmeka'  => $pluginsOmeka,
+            'atGithub' => $pluginsGitHub,
+        );
     }
 
     protected function pluginPrompt($plugins)
     {
-        $pluginIdx = null;
+        $omekaPluginCount  = count($plugins['atOmeka']);
+        $githubPluginCount = count($plugins['atGithub']);
 
-        if (count($plugins) == 1) {
-            $info = $plugins[0]['info'];
-            $repository = $plugins[0]['repository'];
-            echo sprintf('Found plugin %s (%s) on %s', $info->displayName,
-                $info->version, $repository->getDisplayName()) . "\n";
-            if ($this->confirmPrompt('Do you want to download it ?')) {
-                $pluginIdx = 0;
+        echo $omekaPluginCount . ' plugin(s) found at omeka.org' . "\n";
+        foreach ($plugins['atOmeka'] as $plugin)
+            echo $plugin['info']['name'] . "\n";
+
+        echo $githubPluginCount . ' plugin(s) found at github.com' . "\n";
+        foreach ($plugins['atGithub'] as $plugin)
+            echo $plugin['info']['name'] . "\n";
+
+        echo 'Download from omeka.org or github.com?' . "\n";
+        $ans = $this->menuPrompt('Choose one', array('omeka', 'github'));
+        if (isset($ans)) {
+            switch ($ans) {
+            case 0:
+                $chosenPlugin = $plugins['atOmeka'][0];
+                break;
+            case 1:
+                $chosenPlugin = $plugins['atGithub'][0];
+                break;
+            default:
+                echo 'Error: something is going wrong during pluginPrompt.' . "\n";
             }
         } else {
-            echo sprintf('Found %s plugins', count($plugins)) . "\n";
-
-            $pluginOptions = array();
-            foreach ($plugins as $plugin) {
-                $info = $plugin['info'];
-                $repositoryName = $plugin['repository']->getDisplayName();
-
-                $pluginOptions[] = sprintf('%s (%s) from %s',
-                    $info->displayName, $info->version, $repositoryName);
-            }
-
-            $result = $this->menuPrompt('Choose one', $pluginOptions);
-            if (is_numeric($result) && isset($pluginOptions[$result])) {
-                $pluginIdx = $result;
-            }
+            echo 'Nothing chosen.' . "\n";
         }
 
-        if (isset($pluginIdx)) {
-            return $plugins[$pluginIdx];
-        }
+        return isset($chosenPlugin) ? $chosenPlugin : null;
     }
 
-    protected function confirmPrompt($text)
+    protected function confirmPrompt($text) // TODO move it, it's not a plugin specific task.
     {
         do {
             echo "$text [y,n] ";
-            $response = trim(fgets(STDIN));
-        } while ($response != 'y' && $response != 'n');
+            $ans = trim(fgets(STDIN));
+        } while ($ans != 'y' && $ans != 'n');
 
-        return $response == 'y' ? true : false;
+        return $ans == 'y' ? true : false;
     }
 
-    protected function menuPrompt($text, $options)
+    protected function menuPrompt($text, $options) // TODO move it, it's not a plugin specific task.
     {
         do {
             $i = 0;
@@ -167,9 +174,10 @@ class PluginCommand extends AbstractCommand
             }
             $max = $i - 1;
             echo "$text [0-$max,q] ";
-            $response = trim(fgets(STDIN));
-        } while ((!is_numeric($response) || $response < 0 || $response > $max) && $response != 'q');
+            $ans = trim(fgets(STDIN));
+        } while ((!is_numeric($ans) || $ans < 0 || $ans > $max) &&
+                 $ans != 'q');
 
-        return $response != 'q' ? $response : null;
+        return $ans != 'q' ? $ans : null;
     }
 }
