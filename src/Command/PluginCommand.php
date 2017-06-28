@@ -4,6 +4,9 @@ namespace OmekaCli\Command;
 
 use OmekaCli\Application;
 use OmekaCli\Command\AbstractCommand;
+use OmekaCli\UIUtils;
+
+require_once(__DIR__ . '/../UIUtils.php');
 
 class PluginCommand extends AbstractCommand
 {
@@ -36,7 +39,7 @@ class PluginCommand extends AbstractCommand
             $this->application = $application;
 
             switch ($args[0]) {
-            case 'dl': /* FALLTHROUGH */
+            case 'dl': // FALLTHROUGH
             case 'download':
                 if (!isset($args[1]) || $args[1] == '') {
                     echo "Error: nothing download.\n";
@@ -45,6 +48,9 @@ class PluginCommand extends AbstractCommand
                 } else {
                     $exitCode = $this->download($args[1]);
                 }
+                break;
+            case 'ud': // FALLTHROUGH
+            case 'update':
                 break;
             default:
                 echo "Error: unknown argument $args[0].\n";
@@ -135,7 +141,7 @@ class PluginCommand extends AbstractCommand
             echo $plugin['info']['name'] . "\n";
 
         echo 'Download from omeka.org or github.com?' . "\n";
-        $ans = $this->menuPrompt('Choose one', array('omeka', 'github'));
+        $ans = UIUtils::menuPrompt('Choose one', array('omeka', 'github'));
         if (isset($ans)) {
             switch ($ans) {
             case 0:
@@ -152,32 +158,5 @@ class PluginCommand extends AbstractCommand
         }
 
         return isset($chosenPlugin) ? $chosenPlugin : null;
-    }
-
-    protected function confirmPrompt($text) // TODO move it, it's not a plugin specific task.
-    {
-        do {
-            echo "$text [y,n] ";
-            $ans = trim(fgets(STDIN));
-        } while ($ans != 'y' && $ans != 'n');
-
-        return $ans == 'y' ? true : false;
-    }
-
-    protected function menuPrompt($text, $options) // TODO move it, it's not a plugin specific task.
-    {
-        do {
-            $i = 0;
-            foreach ($options as $option) {
-                echo "[$i] $option\n";
-                ++$i;
-            }
-            $max = $i - 1;
-            echo "$text [0-$max,q] ";
-            $ans = trim(fgets(STDIN));
-        } while ((!is_numeric($ans) || $ans < 0 || $ans > $max) &&
-                 $ans != 'q');
-
-        return $ans != 'q' ? $ans : null;
     }
 }
