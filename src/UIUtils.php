@@ -28,6 +28,6 @@ class UIUtils
         } while ((!is_numeric($ans) || $ans < 0 || $ans > $max) &&
                  $ans != 'q');
 
-        return $ans != 'q' ? $ans : null;
+        return $ans != 'q' ? $ans : -1;
     }
 }

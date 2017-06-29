@@ -7,48 +7,55 @@ use Github\Exception\RuntimeException;
 
 class GithubRepository implements RepositoryInterface
 {
-    protected $selectedRepo;
+    protected static $url; // TODO change it, this is madness.
 
     public function __construct()
     {
         $this->client = new Client();
     }
 
+    public static function setUrl($newurl)
+    {
+        self::$url = $newurl;
+    }
+
     public function getDisplayName()
     {
-        return "github.com";
+        return 'github.com';
     }
 
     public function find($pluginName)
     {
-        $this->selectedRepo = $this->findRepo($pluginName);
+        $possibleRepos = $this->findRepo($pluginName);
+        $infos = array();
 
-        if ($this->selectedRepo) {
+        foreach ($possibleRepos as $repo) {
             $ini = $this->getPluginIni(
-                $this->selectedRepo['owner']['login'],
-                $this->selectedRepo['name']
+                $repo['owner']['login'],
+                $repo['name']
             );
-            if (!empty($ini)) {
-                $info = array(
+            if (isset($ini)) {
+                $infos[] = array(
                     'name'                => $pluginName,
                     'displayName'         => $ini['name'],
                     'version'             => $ini['version'],
                     'omekaMinimumVersion' => $ini['omeka_minimum_version'],
+                    'url'                 => $repo['clone_url'],
                 );
             }
         }
 
-        return (isset($info)) ? $info : null;
+        return (!empty($infos)) ? $infos : null;
     }
 
     public function download($pluginName, $destDir)
     {
-        $dest = $destDir . '/' . $this->selectedRepo['name'];
+        $dest = $destDir . '/' . $pluginName;
         if (file_exists($dest))
             throw new \Exception("destination $dest already exists");
 
         $exitCode = null;
-        $url = $this->selectedRepo['clone_url'];
+        $url = self::$url;
         system("git clone -q $url $dest", $exitCode);
 
         if ($exitCode !== 0)
@@ -61,30 +68,14 @@ class GithubRepository implements RepositoryInterface
     {
         try {
             $repos = $this->client->api('search')->repositories(
-                $pluginName . ' language:php language:html'
+                $pluginName . ' omeka in:name,description,readme'
             );
         } catch (\Exception $e) {
             echo "Warning: something bad occured during GitHub searching.\n";
             return;
         }
 
-        $chosen = 0;
-        if ($repos['total_count'] == 0) {
-            return;
-        } else if ($repos['total_count'] > 1) {
-            do {
-                echo "Many repositories found, choose one.\n";
-                $i = 0;
-                foreach ($repos['items'] as $repo)
-                    printf("%d) %s/%s\n",
-                           $i++,
-                           $repo['owner']['login'],
-                           $repo['name']);
-                $chosen = trim(fgets(STDIN));
-            } while (!is_numeric($chosen) || $chosen < 0 || $chosen > $i - 1);
-        }
-
-        return $repos['items'][$chosen];
+        return $repos['items'];
     }
 
     protected function getPluginIni($repoOwner, $repoName)
@@ -95,10 +86,7 @@ class GithubRepository implements RepositoryInterface
                 "$repoName",
                 'plugin.ini'
             );
-        } catch (\RuntimeException $e) {
-            echo 'Error: this is probably not an Omeka plugin. Continuing.'
-               . "\n";
-        }
+        } catch (\RuntimeException $e) { }
 
         return (isset($fileInfo))
              ? parse_ini_string(base64_decode($fileInfo['content']))
