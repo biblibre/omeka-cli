@@ -112,16 +112,18 @@ class PluginCommand extends AbstractCommand
         $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
         $repo = new $repoClass;
         $pluginInfo = $repo->find($pluginName);
-        foreach ($pluginInfo as $info) {
-            $pluginsGitHub[] = array(
-                'info'       => $info,
-                'repository' => $repo,
-            );
+        if (!empty($pluginInfo)) {
+            foreach ($pluginInfo as $info) {
+                $pluginsGitHub[] = array(
+                    'info'       => $info,
+                    'repository' => $repo,
+                );
+            }
         }
 
         return array(
-            'atOmeka'  => $pluginsOmeka,
-            'atGithub' => $pluginsGitHub,
+            'atOmeka'  => (!empty($pluginsOmeka))  ? $pluginsOmeka  : array(),
+            'atGithub' => (!empty($pluginsGitHub)) ? $pluginsGithub : array(),
         );
     }
 
@@ -133,25 +135,33 @@ class PluginCommand extends AbstractCommand
         echo $omekaPluginCount  . ' plugin(s) found at omeka.org'  . "\n";
         echo $githubPluginCount . ' plugin(s) found at github.com' . "\n";
 
-        $allPlugins = array_merge($plugins['atOmeka'], $plugins['atGithub']);
-        foreach ($allPlugins as $plugin) {
-            $toMenu[] = sprintf("%s (%s) - %s",
-                $plugin['info']['displayName'],
-                $plugin['info']['version'],
-                $plugin['repository']->getDisplayName()
-            );
-        }
+        if (!empty($plugins['atOmeka']) && !empty($plugin['atGithub']))
+            $allPlugins = array_merge($plugins['atOmeka'], $plugins['atGithub']);
+        else if (empty($plugin['atGithub']))
+            $allPlugins = $plugins['atOmeka'];
+        else if (empty($plugin['atOmeka']))
+            $allPlugins = $plugins['atGithub'];
 
-        if (isset($toMenu)) {
-            $chosenIdx = UIUtils::menuPrompt('Choose one', $toMenu);
-            $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
-            $repoClass::setUrl($allPlugins[$chosenIdx]['info']['url']); // TODO change it, this is madness.
-        }
+        if (count($allPlugins) != 0) {
+            foreach ($allPlugins as $plugin) {
+                $toMenu[] = sprintf("%s (%s) - %s",
+                    $plugin['info']['displayName'],
+                    $plugin['info']['version'],
+                    $plugin['repository']->getDisplayName()
+                );
+            }
 
-        if ($chosenIdx >= 0)
-            $chosenPlugin = $allPlugins[$chosenIdx];
-        else
-            echo 'Nothing chosen.' . "\n";
+            if (isset($toMenu)) {
+                $chosenIdx = UIUtils::menuPrompt('Choose one', $toMenu);
+                $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
+                $repoClass::setUrl($allPlugins[$chosenIdx]['info']['url']); // TODO change it, this is madness.
+            }
+
+            if ($chosenIdx >= 0)
+                $chosenPlugin = $allPlugins[$chosenIdx];
+            else
+                echo 'Nothing chosen.' . "\n";
+        }
 
         return isset($chosenPlugin) ? $chosenPlugin : null;
     }
