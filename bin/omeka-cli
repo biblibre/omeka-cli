@@ -3,7 +3,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-define('OMEKACLI_VERSION', '0.5.0');
+define('OMEKACLI_VERSION', '0.5.1');
 
 use OmekaCli\Application;
 use OmekaCli\Exception\BadUsageException;
