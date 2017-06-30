@@ -67,15 +67,20 @@ class GithubRepository implements RepositoryInterface
     protected function findRepo($pluginName)
     {
         try {
-            $repos = $this->client->api('search')->repositories(
-                $pluginName . ' omeka in:name,description,readme'
-            );
+            $reposToFilter = $this->client->api('search')->repositories(
+                $pluginName . ' omeka in:name,description fork:true'
+            )['items'];
         } catch (\Exception $e) {
             echo "Warning: something bad occured during GitHub searching.\n";
             return;
         }
 
-        return $repos['items'];
+        $repos = array();
+        for ($i = 0; $i < count($reposToFilter); $i++)
+            if (preg_match("/$pluginName/i", $reposToFilter[$i]['name']))
+                $repos[] = $reposToFilter[$i];
+
+        return $repos;
     }
 
     protected function getPluginIni($repoOwner, $repoName)
