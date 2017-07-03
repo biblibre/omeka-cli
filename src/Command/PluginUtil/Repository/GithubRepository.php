@@ -80,7 +80,7 @@ class GithubRepository implements RepositoryInterface
             if (preg_match("/$pluginName/i", $reposToFilter[$i]['name']))
                 $repos[] = $reposToFilter[$i];
 
-        return $repos;
+        return $this->filterPlugins($repos);
     }
 
     protected function getPluginIni($repoOwner, $repoName)
@@ -96,5 +96,35 @@ class GithubRepository implements RepositoryInterface
         return (isset($fileInfo))
              ? parse_ini_string(base64_decode($fileInfo['content']))
              : null;
+    }
+
+    protected function filterPlugins($repos)
+    {
+        $ans = array();
+
+        foreach ($repos as $repo) {
+            $files = $this->client->api('repo')->contents()->show(
+                $repo['owner']['login'],
+                $repo['name']
+            );
+
+            // Search <name>Plugin.php file.
+            $phpFileFound = false;
+            foreach ($files as $file)
+                if (preg_match('/.+Plugin\.php/i', $file['name']))
+                    $phpFileFound = true;
+
+            // Search plugin.ini file.
+            $iniFileFound = false;
+            foreach ($files as $file)
+                if (preg_match('/plugin\.ini/i', $file['name']))
+                    $iniFileFound = true;
+
+            // Check if both have been found.
+            if ($iniFileFound && $phpFileFound)
+                $ans[] = $repo;
+        }
+
+        return $ans;
     }
 }
