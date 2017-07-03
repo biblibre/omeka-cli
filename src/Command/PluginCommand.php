@@ -165,6 +165,13 @@ class PluginCommand extends AbstractCommand
                 echo 'Nothing chosen.' . "\n";
         }
 
-        return isset($chosenPlugin) ? $chosenPlugin : null;
+        if (version_compare(OMEKA_VERSION, $chosenPlugin['info']['omekaMinimumVersion']) < 0) {
+            echo 'Warning: the current Omeka version is to low to install'
+               . 'this plugin.' . PHP_EOL;
+            if (!confirmPrompt('Download it anyway?'))
+                $chosenPlugin = null;
+        }
+
+        return $chosenPlugin;
     }
 }
