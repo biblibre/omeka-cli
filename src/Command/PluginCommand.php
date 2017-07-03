@@ -122,8 +122,8 @@ class PluginCommand extends AbstractCommand
         }
 
         return array(
-            'atOmeka'  => (!empty($pluginsOmeka))  ? $pluginsOmeka  : array(),
-            'atGithub' => (!empty($pluginsGitHub)) ? $pluginsGithub : array(),
+            'atOmeka'  => empty($pluginsOmeka)  ? array() : $pluginsOmeka,
+            'atGithub' => empty($pluginsGitHub) ? array() : $pluginsGitHub,
         );
     }
 
@@ -135,7 +135,7 @@ class PluginCommand extends AbstractCommand
         echo $omekaPluginCount  . ' plugin(s) found at omeka.org'  . "\n";
         echo $githubPluginCount . ' plugin(s) found at github.com' . "\n";
 
-        if (!empty($plugins['atOmeka']) && !empty($plugin['atGithub']))
+        if (!empty($plugins['atOmeka']) && !empty($plugins['atGithub']))
             $allPlugins = array_merge($plugins['atOmeka'], $plugins['atGithub']);
         else if (empty($plugin['atGithub']))
             $allPlugins = $plugins['atOmeka'];
