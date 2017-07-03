@@ -153,8 +153,10 @@ class PluginCommand extends AbstractCommand
 
             if (isset($toMenu)) {
                 $chosenIdx = UIUtils::menuPrompt('Choose one', $toMenu);
-                $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
-                $repoClass::setUrl($allPlugins[$chosenIdx]['info']['url']); // TODO change it, this is madness.
+                if ($chosenIdx > 0) {
+                    $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
+                    $repoClass::setUrl($allPlugins[$chosenIdx]['info']['url']); // TODO change it, this is madness.
+                }
             }
 
             if ($chosenIdx >= 0)
