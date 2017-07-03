@@ -6,6 +6,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.2] - 2017-07-03
+### Added
+- CHANGELOG.md file.
+
+### Changed
+- The way `dl` subcommand search repositories.
+
+### Fixed
+- User prompt in `dl` subcommand.
+- Typo error.
+
 ## [0.5.1] - 2017-06-30
 ### Fixed
 - Error when searching a repo that does not exist.
