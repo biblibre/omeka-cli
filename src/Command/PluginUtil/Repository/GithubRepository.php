@@ -41,6 +41,7 @@ class GithubRepository implements RepositoryInterface
                     'version'             => $ini['version'],
                     'omekaMinimumVersion' => $ini['omeka_minimum_version'],
                     'url'                 => $repo['clone_url'],
+                    'owner'               => $repo['owner']['login']
                 );
             }
         }

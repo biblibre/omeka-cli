@@ -147,7 +147,10 @@ class PluginCommand extends AbstractCommand
                 $toMenu[] = sprintf("%s (%s) - %s",
                     $plugin['info']['displayName'],
                     $plugin['info']['version'],
-                    $plugin['repository']->getDisplayName()
+                    (array_key_exists('owner', $plugin['info']))
+                        ? $plugin['repository']->getDisplayName()
+                            . '/' . $plugin['info']['owner']
+                        : $plugin['repository']->getDisplayName()
                 );
             }
 
