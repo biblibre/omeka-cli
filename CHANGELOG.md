@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Prompt when Omeka version does not fit with plugin version.
 - Repository name during plugin selection.
 
+### Changed
+- Installation informations in README.md file.
+
 ## [0.5.2] - 2017-07-03
 ### Added
 - CHANGELOG.md file.

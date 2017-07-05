@@ -21,6 +21,8 @@ It also provides everything needed for Omeka plugins to create custom commands.
 
 ## Installation
 
+**NOTE** You will need `git` to use omeka-cli.
+
     $ git clone https://github.com/biblibre/omeka-cli.git
     $ cd omeka-cli
     $ composer install --no-dev
