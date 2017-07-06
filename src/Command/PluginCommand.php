@@ -6,6 +6,8 @@ use OmekaCli\Application;
 use OmekaCli\Command\AbstractCommand;
 use OmekaCli\UIUtils;
 
+use Github\Client;
+
 require_once(__DIR__ . '/../UIUtils.php');
 
 class PluginCommand extends AbstractCommand
@@ -25,7 +27,8 @@ class PluginCommand extends AbstractCommand
                . "Manage plugins.\n"
                . "\n"
                . "COMMAND\n"
-               . "\tdl|download  {NAME|URL}\n";
+               . "\tdl|download  {NAME|URL}\n"
+               . "\tud|update\n";
 
         return $usage;
     }
@@ -51,6 +54,7 @@ class PluginCommand extends AbstractCommand
                 break;
             case 'ud': // FALLTHROUGH
             case 'update':
+                $exitCode = $this->update();
                 break;
             default:
                 echo "Error: unknown argument $args[0].\n";
@@ -178,5 +182,42 @@ class PluginCommand extends AbstractCommand
         }
 
         return (isset($chosenPlugin)) ? $chosenPlugin : null;
+    }
+
+    protected function update()
+    {
+        $c = new Client();
+        if (!is_dir('plugins')) {
+            echo 'Error: plugins directory not found.' . PHP_EOL;
+            return 1;
+        }
+
+        $plugins = array();
+        $db = get_db();
+        foreach ($db->getTable('Plugin')->findAll() as $plugin)
+            $plugins[] = array($plugin->name, $plugin->version);
+
+        $wd = getcwd();
+        foreach ($plugins as $plugin) {
+            if (file_exists('plugins/' . $plugin[0] . '/.git/config')) {
+                chdir($wd . '/plugins/' . $plugin[0]);
+                $loHash = rtrim(shell_exec('git rev-parse HEAD'), PHP_EOL);
+                $aut = explode('/', shell_exec('git config --get remote.origin.url'))[3];
+                chdir($wd);
+                $reHash = $c->api('repo')->commits()->all($aut, $plugin[0], array())[0]['sha'];
+                if ($loHash == $reHash)
+                    continue;
+            } else {
+                $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
+                $repo = new $repoClass;
+                $ver = $repo->findPlugin($plugin[0])['url'];
+                $ver = @end(preg_replace('/\.zip$/', '', preg_split('/-/', $ver)));
+                if ($plugin[1] == $ver)
+                    continue;
+            }
+            echo $plugin[0] . PHP_EOL;
+        }
+
+        return 1;
     }
 }

@@ -79,4 +79,15 @@ Usage:
 
 (.+\n)*\z/', $output);
     }
+
+    public function testShowPluginsToUpdate()
+    {
+        $command = new PluginCommand();
+
+        ob_start();
+        $command->run(array(), array('ud'), $this->application);
+        $output = ob_get_clean();
+
+        $this->assertRegExp('/(.+\n)*/', $output);
+    }
 }

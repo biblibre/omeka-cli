@@ -72,7 +72,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
         return $dest;
     }
 
-    protected function findPlugin($pluginName)
+    public function findPlugin($pluginName)
     {
         $plugins = $this->getPlugins();
 
