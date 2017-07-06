@@ -5,10 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.6.0] - 2017-07-06
 ### Fixed
 - Error when choosing 'q' during plugin prompt.
 
 ### Added
+- `plugin update` command to list plugins that need to be updated.
 - Prompt when Omeka version does not fit with plugin version.
 - Repository name during plugin selection.
 
