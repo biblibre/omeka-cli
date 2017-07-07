@@ -219,6 +219,6 @@ class PluginCommand extends AbstractCommand
             echo $plugin[0] . PHP_EOL;
         }
 
-        return 1;
+        return 0;
     }
 }
