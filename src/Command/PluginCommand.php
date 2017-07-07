@@ -187,8 +187,8 @@ class PluginCommand extends AbstractCommand
     protected function update()
     {
         $c = new Client();
-        if (!is_dir('plugins')) {
-            echo 'Error: plugins directory not found.' . PHP_EOL;
+        if (!$this->application->isOmekaInitialized()) {
+            echo 'Error: Omeka not initialized here.' . PHP_EOL;
             return 1;
         }
 
