@@ -197,13 +197,10 @@ class PluginCommand extends AbstractCommand
         foreach ($db->getTable('Plugin')->findAll() as $plugin)
             $plugins[] = array($plugin->name, $plugin->version);
 
-        $workingDirectory = getcwd();
         foreach ($plugins as $plugin) {
             if (file_exists('plugins/' . $plugin[0] . '/.git/config')) {
-                chdir($workingDirectory . '/plugins/' . $plugin[0]);
-                $localCommitHash = rtrim(shell_exec('git rev-parse HEAD'), PHP_EOL);
-                $author = explode('/', shell_exec('git config --get remote.origin.url'))[3];
-                chdir($workingDirectory);
+                $localCommitHash = rtrim(shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin[0] . ' rev-parse HEAD'), PHP_EOL);
+                $author = explode('/', shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin[0] . ' config --get remote.origin.url'))[3];
                 $remoteCommitHash = $c->api('repo')->commits()->all($author, $plugin[0], array())[0]['sha'];
                 if ($localCommitHash == $remoteCommitHash)
                     continue;
