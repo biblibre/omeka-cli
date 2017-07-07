@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Changed
 - Update alias is now 'up' and not 'ud'.
+- Many minor code improvements.
 
 ## [0.6.0] - 2017-07-06
 ### Fixed
