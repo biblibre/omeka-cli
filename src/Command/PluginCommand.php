@@ -28,7 +28,7 @@ class PluginCommand extends AbstractCommand
                . "\n"
                . "COMMAND\n"
                . "\tdl|download  {NAME|URL}\n"
-               . "\tud|update\n";
+               . "\tup|update\n";
 
         return $usage;
     }
@@ -52,7 +52,7 @@ class PluginCommand extends AbstractCommand
                     $exitCode = $this->download($args[1]);
                 }
                 break;
-            case 'ud': // FALLTHROUGH
+            case 'up': // FALLTHROUGH
             case 'update':
                 $exitCode = $this->update();
                 break;
