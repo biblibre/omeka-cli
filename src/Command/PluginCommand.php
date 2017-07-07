@@ -211,7 +211,8 @@ class PluginCommand extends AbstractCommand
                 $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
                 $repo = new $repoClass;
                 $ver = $repo->findPlugin($plugin[0])['url'];
-                $ver = @end(preg_replace('/\.zip$/', '', preg_split('/-/', $ver)));
+                $tmp = preg_replace('/\.zip$/', '', preg_split('/-/', $ver));
+                $ver = end($tmp);
                 if ($plugin[1] == $ver)
                     continue;
             }
