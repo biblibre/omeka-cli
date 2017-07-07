@@ -197,23 +197,23 @@ class PluginCommand extends AbstractCommand
         foreach ($db->getTable('Plugin')->findAll() as $plugin)
             $plugins[] = array($plugin->name, $plugin->version);
 
-        $wd = getcwd();
+        $workingDirectory = getcwd();
         foreach ($plugins as $plugin) {
             if (file_exists('plugins/' . $plugin[0] . '/.git/config')) {
-                chdir($wd . '/plugins/' . $plugin[0]);
-                $loHash = rtrim(shell_exec('git rev-parse HEAD'), PHP_EOL);
-                $aut = explode('/', shell_exec('git config --get remote.origin.url'))[3];
-                chdir($wd);
-                $reHash = $c->api('repo')->commits()->all($aut, $plugin[0], array())[0]['sha'];
-                if ($loHash == $reHash)
+                chdir($workingDirectory . '/plugins/' . $plugin[0]);
+                $localCommitHash = rtrim(shell_exec('git rev-parse HEAD'), PHP_EOL);
+                $author = explode('/', shell_exec('git config --get remote.origin.url'))[3];
+                chdir($workingDirectory);
+                $remoteCommitHash = $c->api('repo')->commits()->all($author, $plugin[0], array())[0]['sha'];
+                if ($localCommitHash == $remoteCommitHash)
                     continue;
             } else {
                 $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
                 $repo = new $repoClass;
-                $ver = $repo->findPlugin($plugin[0])['url'];
-                $tmp = preg_replace('/\.zip$/', '', preg_split('/-/', $ver));
-                $ver = end($tmp);
-                if ($plugin[1] == $ver)
+                $version = $repo->findPlugin($plugin[0])['url'];
+                $tmp = preg_replace('/\.zip$/', '', preg_split('/-/', $version));
+                $version = end($tmp);
+                if ($plugin[1] == $version)
                     continue;
             }
             echo $plugin[0] . PHP_EOL;
