@@ -5,6 +5,7 @@ namespace OmekaCli\Command;
 use OmekaCli\Application;
 use OmekaCli\Command\AbstractCommand;
 use OmekaCli\UIUtils;
+use Github\Exception\RuntimeException;
 
 use Github\Client;
 
@@ -201,7 +202,12 @@ class PluginCommand extends AbstractCommand
             if (file_exists('plugins/' . $plugin[0] . '/.git/config')) {
                 $localCommitHash = rtrim(shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin[0] . ' rev-parse HEAD'), PHP_EOL);
                 $author = explode('/', shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin[0] . ' config --get remote.origin.url'))[3];
-                $remoteCommitHash = $c->api('repo')->commits()->all($author, $plugin[0], array())[0]['sha'];
+                try {
+                    $remoteCommitHash = $c->api('repo')->commits()->all($author, $plugin[0], array())[0]['sha'];
+                } catch (\RuntimeException $e) {
+                    echo $e->getMessage() . PHP_EOL;
+                    continue;
+                }
                 if ($localCommitHash == $remoteCommitHash)
                     continue;
             } else {
