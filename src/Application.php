@@ -174,7 +174,6 @@ class Application
             return 1;
         }
 
-        $exitCode = 0; // TODO: necessary?
         $cmdSpec = $command->getOptionsSpec();
 
         $cmdArgs    = array();
