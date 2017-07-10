@@ -28,7 +28,7 @@ class PluginCommand extends AbstractCommand
                . "Manage plugins.\n"
                . "\n"
                . "COMMAND\n"
-               . "\tdl|download  {NAME|URL}\n"
+               . "\tdl|download  {NAME}\n"
                . "\tup|update\n";
 
         return $usage;
