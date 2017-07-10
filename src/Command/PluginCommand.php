@@ -54,6 +54,7 @@ class PluginCommand extends AbstractCommand
             $exitCode = 1;
         } else {
             $this->application = $application;
+            $this->quick = false;
 
             switch ($args[0]) {
             case 'dl': // FALLTHROUGH
@@ -69,7 +70,7 @@ class PluginCommand extends AbstractCommand
                 break;
             case 'up': // FALLTHROUGH
             case 'update':
-                if ($options['quick']) {
+                if ($this->quick) {
                     echo $this->getUsage();
                     $exitCode = 1;
                     break;
