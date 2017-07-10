@@ -5,15 +5,28 @@ namespace OmekaCli\Command;
 use OmekaCli\Application;
 use OmekaCli\Command\AbstractCommand;
 use OmekaCli\UIUtils;
-use Github\Exception\RuntimeException;
 
 use Github\Client;
+use Github\Exception\RuntimeException;
+
+use GetOptionKit\ContinuousOptionParser;
+use GetOptionKit\Exception\InvalidOptionException;
+use GetOptionKit\OptionCollection;
 
 require_once(__DIR__ . '/../UIUtils.php');
 
 class PluginCommand extends AbstractCommand
 {
     protected $application;
+    protected $quick;
+
+    public function getOptionsSpec()
+    {
+        $appSpec = new OptionCollection;
+        $appSpec->add('q|quick', 'downloads.');
+
+        return $appSpec;
+    }
 
     public function getDescription()
     {
@@ -28,7 +41,7 @@ class PluginCommand extends AbstractCommand
                . "Manage plugins.\n"
                . "\n"
                . "COMMAND\n"
-               . "\tdl|download  {NAME}\n"
+               . "\tdl|download  [-q|--quick]  {NAME}\n"
                . "\tup|update\n";
 
         return $usage;
@@ -50,11 +63,17 @@ class PluginCommand extends AbstractCommand
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
+                    $this->quick = $options['quick'] ? true : false;
                     $exitCode = $this->download($args[1]);
                 }
                 break;
             case 'up': // FALLTHROUGH
             case 'update':
+                if ($options['quick']) {
+                    echo $this->getUsage();
+                    $exitCode = 1;
+                    break;
+                }
                 $exitCode = $this->update();
                 break;
             default:
@@ -73,10 +92,16 @@ class PluginCommand extends AbstractCommand
         if (empty($plugins)) {
             echo "No plugins named $pluginName were found\n";
             $exitCode = 1;
-        } else if (null !== ($plugin = $this->pluginPrompt($plugins))) {
+        } else if ($this->quick || null !== ($plugin = $this->pluginPrompt($plugins))) {
             $destDir = ($this->application->isOmekaInitialized())
                      ? PLUGIN_DIR : '.';
 
+            if (!empty($plugins['atOmeka'])) {
+                $plugin = $plugins['atOmeka']['0'];
+            } else {
+                echo 'Error: no such plugin at Omeka.org' . PHP_EOL;
+                return 1;
+            }
             $repo = $plugin['repository'];
             $repoName = $repo->getDisplayName();
 
@@ -113,16 +138,20 @@ class PluginCommand extends AbstractCommand
             $pluginsOmeka = array();
         }
 
-        echo "Searching on GitHub\n";
-        $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
-        $repo = new $repoClass;
-        $pluginInfo = $repo->find($pluginName);
-        if (!empty($pluginInfo)) {
-            foreach ($pluginInfo as $info) {
-                $pluginsGitHub[] = array(
-                    'info'       => $info,
-                    'repository' => $repo,
-                );
+        if ($this->quick) {
+            $pluginsGitHub = array();
+        } else {
+            echo "Searching on GitHub\n";
+            $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
+            $repo = new $repoClass;
+            $pluginInfo = $repo->find($pluginName);
+            if (!empty($pluginInfo)) {
+                foreach ($pluginInfo as $info) {
+                    $pluginsGitHub[] = array(
+                        'info'       => $info,
+                        'repository' => $repo,
+                    );
+                }
             }
         }
 
@@ -214,7 +243,14 @@ class PluginCommand extends AbstractCommand
                 if ($plugin->version == $version)
                     continue;
             }
-            echo $plugin->name . PHP_EOL;
+            $pluginsToUpdate[] = $plugin->name;
+        }
+
+        if (!empty($pluginsToUpdate)) {
+            echo 'Plugins to update:' . PHP_EOL;
+            foreach($pluginsToUpdate as $plugin)
+                echo $plugin . PHP_EOL;
+            UIUtils::confirmPrompt('Update plugins?');
         }
 
         return 0;
