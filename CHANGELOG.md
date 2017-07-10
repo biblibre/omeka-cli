@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - -q option for the `plugin dl` command.
+- Test for `plugin dl` command.
+- Big warning in README.md.
 
 ### Changed
 - Update alias is now 'up' and not 'ud'.

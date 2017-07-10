@@ -58,6 +58,8 @@ or, using the alias,
 
 ## Running tests
 
+**Do not run tests on your own Omeka installation!**
+
 If you want to test `omeka-cli`, run:
 
     $ OMEKA_PATH=<path_to_omeka> vendor/bin/phpunit -c tests/phpunit.xml 
