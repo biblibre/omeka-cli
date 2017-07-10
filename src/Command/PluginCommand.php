@@ -187,23 +187,18 @@ class PluginCommand extends AbstractCommand
 
     protected function update()
     {
-        $c = new Client();
         if (!$this->application->isOmekaInitialized()) {
             echo 'Error: Omeka not initialized here.' . PHP_EOL;
             return 1;
         }
 
-        $plugins = array();
-        $db = get_db();
-        foreach ($db->getTable('Plugin')->findAll() as $plugin)
-            $plugins[] = array($plugin->name, $plugin->version);
-
-        foreach ($plugins as $plugin) {
-            if (file_exists('plugins/' . $plugin[0] . '/.git/config')) {
-                $localCommitHash = rtrim(shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin[0] . ' rev-parse HEAD'), PHP_EOL);
-                $author = explode('/', shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin[0] . ' config --get remote.origin.url'))[3];
+        $c = new Client();
+        foreach (get_db()->getTable('Plugin')->findAll() as $plugin) {
+            if (file_exists('plugins/' . $plugin->name . '/.git/config')) {
+                $localCommitHash = rtrim(shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' rev-parse HEAD'), PHP_EOL);
+                $author = explode('/', shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' config --get remote.origin.url'))[3];
                 try {
-                    $remoteCommitHash = $c->api('repo')->commits()->all($author, $plugin[0], array())[0]['sha'];
+                    $remoteCommitHash = $c->api('repo')->commits()->all($author, $plugin->name, array())[0]['sha'];
                 } catch (\RuntimeException $e) {
                     echo $e->getMessage() . PHP_EOL;
                     continue;
@@ -213,13 +208,13 @@ class PluginCommand extends AbstractCommand
             } else {
                 $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
                 $repo = new $repoClass;
-                $version = $repo->findPlugin($plugin[0])['url'];
+                $version = $repo->findPlugin($plugin->name)['url'];
                 $tmp = preg_replace('/\.zip$/', '', preg_split('/-/', $version));
                 $version = end($tmp);
-                if ($plugin[1] == $version)
+                if ($plugin->version == $version)
                     continue;
             }
-            echo $plugin[0] . PHP_EOL;
+            echo $plugin->name . PHP_EOL;
         }
 
         return 0;
