@@ -23,7 +23,7 @@ class PluginCommand extends AbstractCommand
     public function getOptionsSpec()
     {
         $appSpec = new OptionCollection;
-        $appSpec->add('q|quick', 'downloads.');
+        $appSpec->add('q|quick', 'do not prompt anything, just go ahead.');
 
         return $appSpec;
     }
@@ -42,7 +42,7 @@ class PluginCommand extends AbstractCommand
                . "\n"
                . "COMMAND\n"
                . "\tdl|download  [-q|--quick]  {NAME}\n"
-               . "\tup|update\n";
+               . "\tup|update  [-q|--quick]\n";
 
         return $usage;
     }
@@ -54,7 +54,7 @@ class PluginCommand extends AbstractCommand
             $exitCode = 1;
         } else {
             $this->application = $application;
-            $this->quick = false;
+            $this->quick = isset($options['quick']) ? true : false;
 
             switch ($args[0]) {
             case 'dl': // FALLTHROUGH
@@ -64,17 +64,11 @@ class PluginCommand extends AbstractCommand
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
-                    $this->quick = $options['quick'] ? true : false;
                     $exitCode = $this->download($args[1]);
                 }
                 break;
             case 'up': // FALLTHROUGH
             case 'update':
-                if ($this->quick) {
-                    echo $this->getUsage();
-                    $exitCode = 1;
-                    break;
-                }
                 $exitCode = $this->update();
                 break;
             default:
@@ -251,7 +245,10 @@ class PluginCommand extends AbstractCommand
             echo 'Plugins to update:' . PHP_EOL;
             foreach($pluginsToUpdate as $plugin)
                 echo $plugin . PHP_EOL;
-            UIUtils::confirmPrompt('Update plugins?');
+            if ($this->quick) {
+            } else {
+                UIUtils::confirmPrompt('Update plugins?');
+            }
         }
 
         return 0;
