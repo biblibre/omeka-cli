@@ -1,6 +1,5 @@
 <?php
 
-use OmekaCli\Application;
 use OmekaCli\Command\InfoCommand;
 
 use PHPUnit\Framework\TestCase;

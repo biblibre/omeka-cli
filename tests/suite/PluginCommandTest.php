@@ -1,6 +1,5 @@
 <?php
 
-use OmekaCli\Application;
 use OmekaCli\Command\PluginCommand;
 
 use PHPUnit\Framework\TestCase;
@@ -103,7 +102,6 @@ Usage:
         ob_start();
         $command->run(array(), array('up'), $this->application);
         $output = ob_get_clean();
-
 
         $this->assertRegExp('/(.+\n)*/', $output);
     }
