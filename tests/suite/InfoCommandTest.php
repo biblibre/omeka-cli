@@ -19,6 +19,13 @@ final class InfoCommandTest extends AbstractTest
         $command->run(array(), array(), $this->application);
         $output = ob_get_clean();
 
-        $this->assertNotEmpty($output);
+        $this->assertRegExp(
+'/\AOmeka base directory: +.+
+Omeka version: +.+
+Database version: +.+(\nWarning: Omeka version and database version are not the same!)?
+Admin theme: +.+
+Public theme: +.+
+Plugins \(actives\):(\n.+)*
+Plugins \(inactives\):(\n.+)*\Z/', $output);
     }
 }
