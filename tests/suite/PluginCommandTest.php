@@ -100,9 +100,9 @@ Usage:
         $command = new PluginCommand();
 
         ob_start();
-        $command->run(array(), array('up'), $this->application);
+        $command->run(array('quick' => true), array('up'), $this->application);
         $output = ob_get_clean();
 
-        $this->assertRegExp('/(.+\n)*/', $output);
+        $this->assertRegExp('/\APlugins to update:(\n.+)*\Z/', $output);
     }
 }
