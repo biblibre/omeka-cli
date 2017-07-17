@@ -84,23 +84,19 @@ Usage:
         $command = new PluginCommand();
 
         ob_start();
-        shell_exec('rm -rf ' . getenv('OMEKA_PATH') . '/plugins/BagIt');
         $command->run(array('quick' => true), array('dl', 'BagIt'), $this->application);
         $output = ob_get_clean();
 
         $this->assertNull(null);
-        $this->assertFileExists(getenv('OMEKA_PATH') . '/plugins/BagIt');
-        $this->assertFileIsReadable(getenv('OMEKA_PATH') . '/plugins/BagIt/plugin.ini');
-        $this->assertFileIsReadable(getenv('OMEKA_PATH') . '/plugins/BagIt/BagItPlugin.php');
-        shell_exec('rm -rf ' . getenv('OMEKA_PATH') . '/plugins/BagIt');
+        $this->assertFileExists(PLUGIN_DIR . '/Coins');
+        $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/plugin.ini');
+        $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/BagItPlugin.php');
+        shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
     }
 
-// Commented untill `plugin {,un}install` command has not been tested.
 //    public function testCanUpdatePlugins()
 //    {
 //        $command = new PluginCommand();
-//
-//        shell_exec("");
 //
 //        ob_start();
 //        $command->run(array('quick' => true), array('up'), $this->application);
