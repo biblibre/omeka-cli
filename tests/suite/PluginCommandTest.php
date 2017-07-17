@@ -95,14 +95,19 @@ Usage:
         shell_exec('rm -rf ' . getenv('OMEKA_PATH') . '/plugins/BagIt');
     }
 
-    public function testShowPluginsToUpdate()
-    {
-        $command = new PluginCommand();
-
-        ob_start();
-        $command->run(array('quick' => true), array('up'), $this->application);
-        $output = ob_get_clean();
-
-        $this->assertRegExp('/\APlugins to update:(\n.+)*\Z/', $output);
-    }
+// Commented untill `plugin {,un}install` command has not been tested.
+//    public function testCanUpdatePlugins()
+//    {
+//        $command = new PluginCommand();
+//
+//        shell_exec("");
+//
+//        ob_start();
+//        $command->run(array('quick' => true), array('up'), $this->application);
+//        $output = ob_get_clean();
+//
+//        $this->assertRegExp('
+///\AUpdating\.\.\.
+//(.+)*\Z/', $output);
+//    }
 }

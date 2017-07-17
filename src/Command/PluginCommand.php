@@ -13,6 +13,9 @@ use GetOptionKit\ContinuousOptionParser;
 use GetOptionKit\Exception\InvalidOptionException;
 use GetOptionKit\OptionCollection;
 
+use Omeka\Plugin;
+use Omeka\Plugin\Installer;
+
 require_once(__DIR__ . '/../UIUtils.php');
 
 class PluginCommand extends AbstractCommand
@@ -229,25 +232,52 @@ class PluginCommand extends AbstractCommand
                 }
                 if ($localCommitHash == $remoteCommitHash)
                     continue;
+                else
+                    shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull');
             } else {
                 $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
                 $repo = new $repoClass;
                 $version = $repo->findPlugin($plugin->name)['url'];
                 $tmp = preg_replace('/\.zip$/', '', preg_split('/-/', $version));
                 $version = end($tmp);
-                if ($plugin->version == $version)
+                if ($plugin->version == $version) {
                     continue;
+                } else {
+                    $this->quick = true;
+                    shell_exec('rm -r ' . PLUGIN_DIR . '/'. $plugin->name);
+                    ob_start();
+                    $this->download($plugin->name);
+                    ob_end_clean();
+                 }
             }
-            $pluginsToUpdate[] = $plugin->name;
+            $pluginsToUpdate[] = $plugin;
         }
 
         if (!empty($pluginsToUpdate)) {
-            echo 'Plugins to update:' . PHP_EOL;
-            foreach($pluginsToUpdate as $plugin)
-                echo $plugin . PHP_EOL;
-            if ($this->quick) {
-            } else {
-                UIUtils::confirmPrompt('Update plugins?');
+            echo 'Updating...' . PHP_EOL;
+            foreach($pluginsToUpdate as $plugin) {
+                echo $plugin->name;
+                if (!$this->quick && !UIUtils::confirmPrompt(', update?'))
+                    continue;
+                else
+                    echo PHP_EOL;
+                $broker = $plugin->getPluginBroker();
+                $loader = new \Omeka_Plugin_Loader($broker,
+                                                  new \Omeka_Plugin_Ini(PLUGIN_DIR),
+                                                  new \Omeka_Plugin_Mvc(PLUGIN_DIR),
+                                                  PLUGIN_DIR);
+                $installer = new \Omeka_Plugin_Installer($broker, $loader);
+                if (null === $plugin->getIniVersion()) {
+                    $version = array_filter(
+                        file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini'),
+                        function($var) { return preg_match('/\Aversion=/', $var); }
+                    );
+                    $version = array_pop($version);
+                    $version = preg_replace('/\Aversion=/', '', $version);
+                    $version = preg_replace('/"/', '', $version);
+                    $plugin->setIniVersion($version);
+                }
+                $installer->upgrade($plugin);
             }
         }
 
