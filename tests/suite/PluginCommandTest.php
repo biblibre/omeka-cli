@@ -89,7 +89,7 @@ Usage:
 
         $this->assertFileExists(PLUGIN_DIR . '/Coins');
         $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/plugin.ini');
-        $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/BagItPlugin.php');
+        $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/CoinsPlugin.php');
         shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
     }
 
