@@ -87,7 +87,6 @@ Usage:
         $command->run(array('quick' => true), array('dl', 'BagIt'), $this->application);
         $output = ob_get_clean();
 
-        $this->assertNull(null);
         $this->assertFileExists(PLUGIN_DIR . '/Coins');
         $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/plugin.ini');
         $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/BagItPlugin.php');
