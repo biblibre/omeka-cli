@@ -79,30 +79,30 @@ Usage:
 (.+\n)*\z/', $output);
     }
 
-    public function testCanDownloadPlugins()
-    {
-        $command = new PluginCommand();
-
-        ob_start();
-        $command->run(array('quick' => true), array('dl', 'Coins'), $this->application);
-        $output = ob_get_clean();
-
-        $this->assertFileExists(PLUGIN_DIR . '/Coins');
-        $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/plugin.ini');
-        $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/CoinsPlugin.php');
-        shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
-    }
-
-//    public function testCanUpdatePlugins()
+//    public function testCanDownloadPlugins()
 //    {
 //        $command = new PluginCommand();
 //
 //        ob_start();
-//        $command->run(array('quick' => true), array('up'), $this->application);
+//        $command->run(array('quick' => true), array('dl', 'Coins'), $this->application);
 //        $output = ob_get_clean();
 //
-//        $this->assertRegExp('
-///\AUpdating\.\.\.
-//(.+)*\Z/', $output);
+//        $this->assertFileExists(PLUGIN_DIR . '/Coins');
+//        $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/plugin.ini');
+//        $this->assertFileIsReadable(PLUGIN_DIR . '/Coins/CoinsPlugin.php');
+//        shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
 //    }
+
+    public function testCanUpdatePlugins()
+    {
+        $command = new PluginCommand();
+
+        ob_start();
+        $command->run(array('quick' => true), array('up'), $this->application);
+        $output = ob_get_clean();
+
+        $this->assertRegExp('
+/\AUpdating\.\.\.
+(.+)*\Z/', $output);
+    }
 }
