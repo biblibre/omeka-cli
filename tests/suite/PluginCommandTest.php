@@ -98,6 +98,7 @@ Usage:
         $command = new PluginCommand();
 
         ob_start();
+        shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
         shell_exec('curl -O http://omeka.org/wordpress/wp-content/uploads/COinS-2.0.1.zip 2>/dev/null 1>/dev/null');
         shell_exec('unzip COinS-2.0.1.zip -d ' . PLUGIN_DIR . ' 2>/dev/null 1>/dev/null');
         shell_exec('rm -f COinS-2.0.1.zip');
@@ -130,6 +131,7 @@ Usage:
         ob_start();
         $command->run(array(), array('un', 'Coins'), $this->application);
         $output = ob_get_clean();
+        shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
 
         $this->assertEquals('Plugin uninstalled.' . PHP_EOL, $output);
     }
