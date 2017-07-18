@@ -14,7 +14,10 @@ use GetOptionKit\Exception\InvalidOptionException;
 use GetOptionKit\OptionCollection;
 
 use Omeka\Plugin;
+use Omeka\Plugin\Broker;
 use Omeka\Plugin\Installer;
+
+use Omeka\Record;
 
 require_once(__DIR__ . '/../UIUtils.php');
 
@@ -45,6 +48,7 @@ class PluginCommand extends AbstractCommand
                . "\n"
                . "COMMAND\n"
                . "\tdl|download  [-q|--quick]  {NAME}\n"
+               . "\tin|install  {NAME}\n"
                . "\tup|update  [-q|--quick]\n";
 
         return $usage;
@@ -63,11 +67,21 @@ class PluginCommand extends AbstractCommand
             case 'dl': // FALLTHROUGH
             case 'download':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo "Error: nothing download.\n";
+                    echo "Error: nothing to download.\n";
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
                     $exitCode = $this->download($args[1]);
+                }
+                break;
+            case 'in':
+            case 'install':
+                if (!isset($args[1]) || $args[1] == '') {
+                    echo "Error: nothing to install.\n";
+                    echo $this->getUsage();
+                    $exitCode = 1;
+                } else {
+                    $exitCode = $this->install($args[1]);
                 }
                 break;
             case 'up': // FALLTHROUGH
@@ -210,6 +224,46 @@ class PluginCommand extends AbstractCommand
         }
 
         return (isset($chosenPlugin)) ? $chosenPlugin : null;
+    }
+
+    protected function install($pluginName)
+    {
+        if (!$this->application->isOmekaInitialized()) {
+            echo 'Error: Omeka not initialized here.' . PHP_EOL;
+            return 1;
+        }
+
+        $plugin = new \Plugin;
+        $plugin->name = $pluginName;
+
+        $version = array_filter(
+            file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini'),
+            function($var) { return preg_match('/\Aversion=/', $var); }
+        );
+        $version = array_pop($version);
+        $version = preg_replace('/\Aversion=/', '', $version);
+        $version = preg_replace('/"/', '', $version);
+        $plugin->setIniVersion($version);
+        $plugin->setLoaded(true);
+        $broker = $plugin->getPluginBroker();
+        $loader = new \Omeka_Plugin_Loader($broker,
+                                           new \Omeka_Plugin_Ini(PLUGIN_DIR),
+                                           new \Omeka_Plugin_Mvc(PLUGIN_DIR),
+                                           PLUGIN_DIR);
+        $installer = new \Omeka_Plugin_Installer($broker, $loader);
+        $installer->install($plugin);
+
+        $result = get_db()->getTable('Plugin')->findBy(array(
+            'active' => 1,
+            'name'   => $plugin->name,
+        ))[0];
+
+        if ($result->isActive())
+            echo 'Installation succeeded.' . PHP_EOL;
+        else
+            echo 'Installation failed.' . PHP_EOL;
+
+        return 0;
     }
 
     protected function update()
