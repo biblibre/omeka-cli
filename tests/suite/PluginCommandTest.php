@@ -93,6 +93,23 @@ Usage:
 //        shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
 //    }
 
+    public function testCanInstallDownloadedPlugin()
+    {
+        $command = new PluginCommand();
+
+        ob_start();
+        shell_exec('curl -O http://omeka.org/wordpress/wp-content/uploads/COinS-2.0.1.zip 2>/dev/null 1>/dev/null');
+        shell_exec('unzip COinS-2.0.1.zip -d ' . PLUGIN_DIR . ' 2>/dev/null 1>/dev/null');
+        shell_exec('rm -f COinS-2.0.1.zip');
+        ob_end_clean();
+
+        ob_start();
+        $command->run(array(), array('in', 'Coins'), $this->application);
+        $output = ob_get_clean();
+
+        $this->assertEquals('Installation succeeded.' . PHP_EOL, $output);
+    }
+
     public function testCanUpdatePlugins()
     {
         $command = new PluginCommand();
