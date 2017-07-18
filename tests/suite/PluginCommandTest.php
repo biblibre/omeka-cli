@@ -122,4 +122,15 @@ Usage:
 /\AUpdating\.\.\.
 (.+)*\Z/', $output);
     }
+
+    public function testCanUninstallInstalledPlugin()
+    {
+        $command = new PluginCommand();
+
+        ob_start();
+        $command->run(array(), array('un', 'Coins'), $this->application);
+        $output = ob_get_clean();
+
+        $this->assertEquals('Plugin uninstalled.' . PHP_EOL, $output);
+    }
 }
