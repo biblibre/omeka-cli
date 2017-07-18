@@ -48,6 +48,7 @@ class PluginCommand extends AbstractCommand
                . "\n"
                . "COMMAND\n"
                . "\tdl|download  [-q|--quick]  {NAME}\n"
+               . "\tde|deactivate {NAME}\n"
                . "\tin|install  {NAME}\n"
                . "\tun|uninstall  {NAME}\n"
                . "\tup|update  [-q|--quick]\n";
@@ -65,30 +66,40 @@ class PluginCommand extends AbstractCommand
             $this->quick = isset($options['quick']) ? true : false;
 
             switch ($args[0]) {
+            case 'de': // FALLTHROUGH
+            case 'deactivate':
+                if (!isset($args[1]) || $args[1] == '') {
+                    echo 'Error: nothing to deactivate.' . PHP_EOL;
+                    echo $this->getUsage();
+                    $exitCode = 1;
+                } else {
+                    $exitCode = $this->deactivate($args[1]);
+                }
+                break;
             case 'dl': // FALLTHROUGH
             case 'download':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo "Error: nothing to download.\n";
+                    echo 'Error: nothing to download.' . PHP_EOL;
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
                     $exitCode = $this->download($args[1]);
                 }
                 break;
-            case 'in':
+            case 'in': // FALLTHROUGH
             case 'install':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo "Error: nothing to install.\n";
+                    echo 'Error: nothing to install.' . PHP_EOL;
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
                     $exitCode = $this->install($args[1]);
                 }
                 break;
-            case 'un':
+            case 'un': // FALLTHROUGH
             case 'uninstall':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo "Error: nothing to uninstall.\n";
+                    echo 'Error: nothing to uninstall.' . PHP_EOL;
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
@@ -100,13 +111,36 @@ class PluginCommand extends AbstractCommand
                 $exitCode = $this->update();
                 break;
             default:
-                echo "Error: unknown argument $args[0].\n";
+                echo 'Error: unknown argument $args[0].' . PHP_EOL;
                 echo $this->getUsage();
                 $exitCode = 1;
             }
         }
 
         return $exitCode;
+    }
+
+    protected function deactivate($pluginName)
+    {
+        $plugin = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
+
+        if (empty($plugin)) {
+            echo 'Error: plugin not installed.' . PHP_EOL;
+            return 1;
+        }
+        $plugin = $plugin[0];
+
+        $broker = $plugin->getPluginBroker();
+        $loader = new \Omeka_Plugin_Loader($broker,
+                                           new \Omeka_Plugin_Ini(PLUGIN_DIR),
+                                           new \Omeka_Plugin_Mvc(PLUGIN_DIR),
+                                           PLUGIN_DIR);
+        $installer = new \Omeka_Plugin_Installer($broker, $loader);
+        $installer->deactivate($plugin);
+
+        echo 'Plugin deactivated.' . PHP_EOL;
+
+        return 0;
     }
 
     protected function download($pluginName)
