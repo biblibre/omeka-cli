@@ -132,7 +132,18 @@ Usage:
         $command->run(array(), array('de', 'Coins'), $this->application);
         $output = ob_get_clean();
 
-        $this->assertEquals('Plugin deactivated' . PHP_EOL, $output);
+        $this->assertEquals('Plugin deactivated.' . PHP_EOL, $output);
+    }
+
+    public function testCanActivateInstalledPlugin()
+    {
+        $command = new PluginCommand();
+
+        ob_start();
+        $command->run(array(), array('ac', 'Coins'), $this->application);
+        $output = ob_get_clean();
+
+        $this->assertEquals('Plugin activated.' . PHP_EOL, $output);
     }
 
     public function testCanUninstallInstalledPlugin()
