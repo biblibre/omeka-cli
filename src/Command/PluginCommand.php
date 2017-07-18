@@ -49,6 +49,7 @@ class PluginCommand extends AbstractCommand
                . "COMMAND\n"
                . "\tdl|download  [-q|--quick]  {NAME}\n"
                . "\tin|install  {NAME}\n"
+               . "\tun|uninstall  {NAME}\n"
                . "\tup|update  [-q|--quick]\n";
 
         return $usage;
@@ -82,6 +83,16 @@ class PluginCommand extends AbstractCommand
                     $exitCode = 1;
                 } else {
                     $exitCode = $this->install($args[1]);
+                }
+                break;
+            case 'un':
+            case 'uninstall':
+                if (!isset($args[1]) || $args[1] == '') {
+                    echo "Error: nothing to uninstall.\n";
+                    echo $this->getUsage();
+                    $exitCode = 1;
+                } else {
+                    $exitCode = $this->uninstall($args[1]);
                 }
                 break;
             case 'up': // FALLTHROUGH
@@ -262,6 +273,28 @@ class PluginCommand extends AbstractCommand
             echo 'Installation succeeded.' . PHP_EOL;
         else
             echo 'Installation failed.' . PHP_EOL;
+
+        return 0;
+    }
+
+    protected function uninstall($pluginName)
+    {
+        $plugin = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
+
+        if (empty($plugin)) {
+            echo 'Error: plugin not installed.' . PHP_EOL;
+            return 1;
+        }
+        $plugin = $plugin[0];
+        $broker = $plugin->getPluginBroker();
+        $loader = new \Omeka_Plugin_Loader($broker,
+                                           new \Omeka_Plugin_Ini(PLUGIN_DIR),
+                                           new \Omeka_Plugin_Mvc(PLUGIN_DIR),
+                                           PLUGIN_DIR);
+        $installer = new \Omeka_Plugin_Installer($broker, $loader);
+        $installer->uninstall($plugin);
+
+        echo 'Plugin uninstalled.' . PHP_EOL;
 
         return 0;
     }
