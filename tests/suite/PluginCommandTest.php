@@ -124,6 +124,17 @@ Usage:
 (.+)*\Z/', $output);
     }
 
+    public function testCanDeactivateInstalledPlugin()
+    {
+        $command = new PluginCommand();
+
+        ob_start();
+        $command->run(array(), array('de', 'Coins'), $this->application);
+        $output = ob_get_clean();
+
+        $this->assertEquals('Plugin deactivated' . PHP_EOL, $output);
+    }
+
     public function testCanUninstallInstalledPlugin()
     {
         $command = new PluginCommand();
