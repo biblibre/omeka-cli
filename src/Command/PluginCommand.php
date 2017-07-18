@@ -48,6 +48,7 @@ class PluginCommand extends AbstractCommand
                . "\n"
                . "COMMAND\n"
                . "\tdl|download  [-q|--quick]  {NAME}\n"
+               . "\tac|activate {NAME}\n"
                . "\tde|deactivate {NAME}\n"
                . "\tin|install  {NAME}\n"
                . "\tun|uninstall  {NAME}\n"
@@ -66,6 +67,16 @@ class PluginCommand extends AbstractCommand
             $this->quick = isset($options['quick']) ? true : false;
 
             switch ($args[0]) {
+            case 'ac': // FALLTHROUGH
+            case 'activate':
+                if (!isset($args[1]) || $args[1] == '') {
+                    echo 'Error: nothing to activate.' . PHP_EOL;
+                    echo $this->getUsage();
+                    $exitCode = 1;
+                } else {
+                    $exitCode = $this->activate($args[1]);
+                }
+                break;
             case 'de': // FALLTHROUGH
             case 'deactivate':
                 if (!isset($args[1]) || $args[1] == '') {
@@ -118,6 +129,29 @@ class PluginCommand extends AbstractCommand
         }
 
         return $exitCode;
+    }
+
+    protected function activate($pluginName)
+    {
+        $plugin = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
+
+        if (empty($plugin)) {
+            echo 'Error: plugin not installed.' . PHP_EOL;
+            return 1;
+        }
+        $plugin = $plugin[0];
+
+        $broker = $plugin->getPluginBroker();
+        $loader = new \Omeka_Plugin_Loader($broker,
+                                           new \Omeka_Plugin_Ini(PLUGIN_DIR),
+                                           new \Omeka_Plugin_Mvc(PLUGIN_DIR),
+                                           PLUGIN_DIR);
+        $installer = new \Omeka_Plugin_Installer($broker, $loader);
+        $installer->activate($plugin);
+
+        echo 'Plugin activated.' . PHP_EOL;
+
+        return 0;
     }
 
     protected function deactivate($pluginName)
