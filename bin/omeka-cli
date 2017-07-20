@@ -1,9 +1,10 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
 define('OMEKACLI_VERSION', '0.8.0');
+define('OMEKACLI_PATH',    __DIR__ . '/..');
+
+require_once OMEKACLI_PATH . '/vendor/autoload.php';
 
 use OmekaCli\Application;
 use OmekaCli\Exception\BadUsageException;

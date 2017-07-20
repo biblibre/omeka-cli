@@ -54,4 +54,16 @@ Usage:
 .+
 \z/', $output);
     }
+
+    public function testCanTellIfOmekaCliIsUpToDate()
+    {
+        $command = new UpgradeCommand();
+
+        ob_start();
+        $command->run(array(), array(), $this->application);
+        $output = ob_get_clean();
+
+        $this->assertNotEmpty($output);
+        $this->assertRegExp('/\Aomeka-cli is up-to-date\.|New version of omeka-cli available\.\n\z/', $output);
+    }
 }

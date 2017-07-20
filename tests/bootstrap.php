@@ -2,6 +2,8 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+define('OMEKACLI_PATH', __DIR__ . '/..');
+
 use OmekaCli\Application;
 
 define('APPLICATION_ENV', 'testing');
