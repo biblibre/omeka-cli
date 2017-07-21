@@ -64,6 +64,8 @@ Usage:
         $output = ob_get_clean();
 
         $this->assertNotEmpty($output);
-        $this->assertRegExp('/\A(omeka-cli is up-to-date|New version of omeka-cli available)\.\n\z/', $output);
+        $this->assertRegExp('
+/\Aomeka-cli: (up-to-date|new version available)\.
+(Omeka: (up-to-date|new version available)\.\n)?\z/', $output);
     }
 }

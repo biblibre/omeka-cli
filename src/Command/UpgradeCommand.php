@@ -37,19 +37,29 @@ class UpgradeCommand extends AbstractCommand
             $localCommitHash = rtrim(shell_exec('git -C ' . OMEKACLI_PATH . ' rev-parse master'), PHP_EOL);
             try {
                 $remoteCommitHash = $c->api('repo')->commits()->all('biblibre', 'omeka-cli', array())[0]['sha'];
+                echo 'omeka-cli: ';
                 if ($localCommitHash == $remoteCommitHash)
-                    echo 'omeka-cli is up-to-date.' . PHP_EOL;
+                    echo 'up-to-date.' . PHP_EOL;
                 else
-                    echo 'New version of omeka-cli available.' . PHP_EOL;
+                    echo 'new version available.' . PHP_EOL;
             } catch (\RuntimeException $e) {
                 echo $e->getMessage() . PHP_EOL;
             }
         } else {
             $remoteVersion = shell_exec('git -C ' . OMEKACLI_PATH . ' ls-remote --tags https://github.com/biblibre/omeka-cli 2>/dev/null | grep -o \'[0-9]\+\.[0-9]\+\.[0-9]\+\' | sort -rV | sed 1q');
+            echo 'omeka-cli: ';
             if (OMEKACLI_VERSION == $remoteVersion)
-                echo 'omeka-cli is up-to-date.' . PHP_EOL;
+                echo 'up-to-date.' . PHP_EOL;
             else
-                echo 'New version of omeka-cli available.' . PHP_EOL;
+                echo 'new version available.' . PHP_EOL;
+        }
+
+        if ($application->isOmekaInitialized()) {
+            echo 'Omeka: ';
+            if (version_compare(OMEKA_VERSION, latest_omeka_version() ) >= 0)
+                echo 'up-to-date.' . PHP_EOL;
+            else
+                echo 'new version available.' . PHP_EOL;
         }
 
         return 0;
