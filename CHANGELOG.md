@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.9.0] - 2017-07-21
+### Added
+- `upgrade` command.
+
 ## [0.8.0] - 2017-07-18
 ### Added
 - `plugin {,de}activate` commands.
