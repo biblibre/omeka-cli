@@ -11,7 +11,7 @@ class UpgradeCommand extends AbstractCommand
 {
     public function getDescription()
     {
-        return 'upgrade omeka-cli or Omeka';
+        return 'check omeka-cli and Omeka version';
     }
 
     public function getUsage()
@@ -19,7 +19,7 @@ class UpgradeCommand extends AbstractCommand
         $usage = 'Usage:' . PHP_EOL
                . '    upgrade' . PHP_EOL
                . PHP_EOL
-               . 'Upgrade omeka-cli or Omeka.' . PHP_EOL;
+               . 'Check omeka-cli and Omeka version.' . PHP_EOL;
 
         return $usage;
     }
