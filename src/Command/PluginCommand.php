@@ -380,7 +380,7 @@ class PluginCommand extends AbstractCommand
                 if ($localCommitHash == $remoteCommitHash)
                     continue;
                 else
-                    shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull');
+                    shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull --rebase');
             } else {
                 $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
                 $repo = new $repoClass;
