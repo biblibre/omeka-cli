@@ -390,11 +390,18 @@ class PluginCommand extends AbstractCommand
                 if ($plugin->version == $version) {
                     continue;
                 } else {
-                    $this->no_prompt = true;
-                    shell_exec('rm -r ' . PLUGIN_DIR . '/'. $plugin->name);
                     ob_start();
-                    $this->download($plugin->name);
-                    ob_end_clean();
+                    shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . ' '
+                                     . PLUGIN_DIR . '/' . $plugin->name . '.bak');
+                    if ($this->download($plugin->name)) {
+                        echo 'Error: cannot update plugin' . PHP_EOL;
+                        shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . '.bak '
+                                         . PLUGIN_DIR . '/' . $plugin->name);
+                        continue;
+                    } else {
+                        shell_exec('rm -r ' . PLUGIN_DIR . '/'. $plugin->name . '.bak');
+                    }
+                    fprintf(STDERR, ob_get_clean());
                  }
             }
             $pluginsToUpdate[] = $plugin;
