@@ -368,7 +368,7 @@ class PluginCommand extends AbstractCommand
 
         $c = new Client();
         foreach (get_db()->getTable('Plugin')->findAll() as $plugin) {
-            if (file_exists('plugins/' . $plugin->name . '/.git/config')) {
+            if (file_exists('plugins/' . $plugin->name . '/.git')) {
                 $localCommitHash = rtrim(shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' rev-parse HEAD'), PHP_EOL);
                 $author = explode('/', shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' config --get remote.origin.url'))[3];
                 try {
