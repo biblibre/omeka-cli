@@ -8,7 +8,7 @@ It also provides everything needed for Omeka plugins to create custom commands.
 ## Usage
 
     omeka-cli {-h|--help}
-    omeka-cli [-C <omeka-path>] COMMAND [ARGS...]
+    omeka-cli [-C <omeka-path>] [--no-prompt] COMMAND [ARGS...]
 
 ## Available commands
 
