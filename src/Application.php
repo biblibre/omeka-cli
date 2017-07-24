@@ -30,9 +30,10 @@ class Application
         global $argv;
 
         $appSpec = new OptionCollection;
-        $appSpec->add('h|help',        'show help.');
+        $appSpec->add('h|help',        'show help');
         $appSpec->add('C|omeka-path:', 'path to Omeka')
                 ->isa('String');
+        $appSpec->add('no-prompt',     'do not prompt anything');
 
         $args    = array();
         $options = array();
@@ -96,10 +97,13 @@ class Application
         if ($this->getOption('help') || !$commandName) {
             echo $this->longUsage();
 
-            return 0;
+            $exitCode = 0;
+        } else {
+            define('NO_PROMPT', $this->getOption('no-prompt') ? true : false);
+            $exitCode = $this->runCommand();
         }
 
-        return $this->runCommand();
+        return $exitCode;
     }
 
     public function isOmekaInitialized()
