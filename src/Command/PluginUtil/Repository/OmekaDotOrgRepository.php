@@ -9,6 +9,8 @@ use DateInterval;
 
 class OmekaDotOrgRepository implements RepositoryInterface
 {
+    static protected $cache;
+
     const PLUGINS_URL = 'http://omeka.org/add-ons/plugins/';
 
     protected $client;
@@ -16,6 +18,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
     public function __construct()
     {
         $this->client = new Client();
+        self::$cache = null;
     }
 
     public function getDisplayName()
@@ -99,9 +102,10 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
     protected function getPlugins()
     {
-        $cache = CacheManager::getInstance('Files');
+        if (self::$cache == null)
+            self::$cache = CacheManager::getInstance('Files');
         $cacheKey = __METHOD__;
-        $cacheItem = $cache->getItem($cacheKey);
+        $cacheItem = self::$cache->getItem($cacheKey);
 
         if (!$cacheItem->isHit()) {
             $root = $this->client->request('GET', self::PLUGINS_URL);
@@ -121,7 +125,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
             $ttl = DateInterval::createFromDateString('1 day');
             $cacheItem->set($plugins)->expiresAfter($ttl);
-            $cache->save($cacheItem);
+            self::$cache->save($cacheItem);
         }
 
         return $cacheItem->get();
