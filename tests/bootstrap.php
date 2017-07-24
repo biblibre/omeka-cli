@@ -18,6 +18,8 @@ $application = new Application(
 );
 $application->initialize();
 
+define('NO_PROMPT', true);
+
 Zend_Registry::set(
     'omeka-cli-application',
     $application

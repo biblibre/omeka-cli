@@ -24,15 +24,7 @@ require_once(__DIR__ . '/../UIUtils.php');
 class PluginCommand extends AbstractCommand
 {
     protected $application;
-    protected $quick;
-
-    public function getOptionsSpec()
-    {
-        $appSpec = new OptionCollection;
-        $appSpec->add('q|quick', 'do not prompt anything, just go ahead.');
-
-        return $appSpec;
-    }
+    protected $no_prompt;
 
     public function getDescription()
     {
@@ -47,12 +39,12 @@ class PluginCommand extends AbstractCommand
                . "Manage plugins.\n"
                . "\n"
                . "COMMAND\n"
-               . "\tdl|download  [-q|--quick]  {NAME}\n"
+               . "\tdl|download  {NAME}\n"
                . "\tac|activate {NAME}\n"
                . "\tde|deactivate {NAME}\n"
                . "\tin|install  {NAME}\n"
                . "\tun|uninstall  {NAME}\n"
-               . "\tup|update  [-q|--quick]\n";
+               . "\tup|update\n";
 
         return $usage;
     }
@@ -64,7 +56,7 @@ class PluginCommand extends AbstractCommand
             $exitCode = 1;
         } else {
             $this->application = $application;
-            $this->quick = isset($options['quick']) ? true : false;
+            $this->no_prompt = NO_PROMPT ? true : false;
 
             switch ($args[0]) {
             case 'ac': // FALLTHROUGH
@@ -183,7 +175,7 @@ class PluginCommand extends AbstractCommand
         if (empty($plugins)) {
             echo "No plugins named $pluginName were found\n";
             $exitCode = 1;
-        } else if ($this->quick || null !== ($plugin = $this->pluginPrompt($plugins))) {
+        } else if ($this->no_prompt || null !== ($plugin = $this->pluginPrompt($plugins))) {
             $destDir = ($this->application->isOmekaInitialized())
                      ? PLUGIN_DIR : '.';
 
@@ -229,7 +221,7 @@ class PluginCommand extends AbstractCommand
             $pluginsOmeka = array();
         }
 
-        if ($this->quick) {
+        if ($this->no_prompt) {
             $pluginsGitHub = array();
         } else {
             echo "Searching on GitHub\n";
@@ -398,7 +390,7 @@ class PluginCommand extends AbstractCommand
                 if ($plugin->version == $version) {
                     continue;
                 } else {
-                    $this->quick = true;
+                    $this->no_prompt = true;
                     shell_exec('rm -r ' . PLUGIN_DIR . '/'. $plugin->name);
                     ob_start();
                     $this->download($plugin->name);
@@ -412,7 +404,7 @@ class PluginCommand extends AbstractCommand
             echo 'Updating...' . PHP_EOL;
             foreach($pluginsToUpdate as $plugin) {
                 echo $plugin->name;
-                if (!$this->quick && !UIUtils::confirmPrompt(', update?'))
+                if (!$this->no_prompt && !UIUtils::confirmPrompt(', update?'))
                     continue;
                 else
                     echo PHP_EOL;

@@ -84,7 +84,7 @@ Usage:
 //        $command = new PluginCommand();
 //
 //        ob_start();
-//        $command->run(array('quick' => true), array('dl', 'Coins'), $this->application);
+//        $command->run(array(), array('dl', 'Coins'), $this->application);
 //        $output = ob_get_clean();
 //
 //        $this->assertFileExists(PLUGIN_DIR . '/Coins');
@@ -116,7 +116,7 @@ Usage:
         $command = new PluginCommand();
 
         ob_start();
-        $command->run(array('quick' => true), array('up'), $this->application);
+        $command->run(array(), array('up'), $this->application);
         $output = ob_get_clean();
 
         $this->assertRegExp('
