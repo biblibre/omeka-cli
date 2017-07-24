@@ -304,6 +304,11 @@ class PluginCommand extends AbstractCommand
             return 1;
         }
 
+        if (!file_exists(PLUGIN_DIR . '/' . $pluginName)) {
+            echo 'Error: plugin not found.' . PHP_EOL;
+            return 1;
+        }
+
         $plugin = new \Plugin;
         $plugin->name = $pluginName;
 
