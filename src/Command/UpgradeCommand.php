@@ -60,6 +60,10 @@ class UpgradeCommand extends AbstractCommand
                 echo 'up-to-date.' . PHP_EOL;
             else
                 echo 'new version available.' . PHP_EOL;
+
+            echo 'Plugins:' . PHP_EOL;
+            $pluginCommand = new PluginCommand();
+            $pluginCommand->run(array(), array('up', '--list'), $application);
         }
 
         return 0;

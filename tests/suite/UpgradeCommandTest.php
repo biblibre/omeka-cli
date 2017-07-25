@@ -66,6 +66,8 @@ Usage:
         $this->assertNotEmpty($output);
         $this->assertRegExp('
 /\Aomeka-cli: (up-to-date|new version available)\.
-(Omeka: (up-to-date|new version available)\.\n)?\z/', $output);
+Omeka: (up-to-date|new version available)\.
+Plugins:
+(.+\n)*\z/', $output);
     }
 }
