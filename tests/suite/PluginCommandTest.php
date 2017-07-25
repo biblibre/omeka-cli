@@ -22,11 +22,11 @@ final class PluginCommandTest extends AbstractTest
         $this->assertNotEmpty($output);
         $this->assertRegExp('
 /\AUsage:
-\tplugin.+
+    plugin.+
 
 .+
 
-(.+\n)*\z/', $output);
+(.*\n)*\z/', $output);
     }
 
     public function testShowUsageWhenRunWithWrongArgument()
@@ -42,11 +42,11 @@ final class PluginCommandTest extends AbstractTest
         $this->assertRegExp('
 /\AError: .+
 Usage:
-\tplugin.+
+    plugin.+
 
 .+
 
-(.+\n)*\z/', $output);
+(.*\n)*\z/', $output);
 
         // Right command, wrong argument
         ob_start();
@@ -57,11 +57,11 @@ Usage:
         $this->assertRegExp('
 /\AError: .+
 Usage:
-\tplugin.+
+    plugin.+
 
 .+
 
-(.+\n)*\z/', $output);
+(.*\n)*\z/', $output);
 
         // Right command, empty argument
         ob_start();
@@ -72,11 +72,11 @@ Usage:
         $this->assertRegExp('
 /\AError: .+
 Usage:
-\tplugin.+
+    plugin.+
 
 .+
 
-(.+\n)*\z/', $output);
+(.*\n)*\z/', $output);
     }
 
 //    public function testCanDownloadPlugins()
@@ -111,17 +111,20 @@ Usage:
         $this->assertEquals('Installation succeeded.' . PHP_EOL, $output);
     }
 
-    public function testCanUpdatePlugins()
+    public function testCanUpdatePluginsAndSaveOldVersion()
     {
         $command = new PluginCommand();
 
         ob_start();
-        $command->run(array(), array('up'), $this->application);
+        $command->run(array(), array('up', '--save'), $this->application);
         $output = ob_get_clean();
 
         $this->assertRegExp('
-/\AUpdating\.\.\.
+/Updating\.\.\.
 (.+)*\Z/', $output);
+        $this->assertFileExists(BASE_DIR . '/Coins.bak');
+        $this->assertFileIsReadable(BASE_DIR . '/Coins.bak');
+        shell_exec('rm -rf ' . BASE_DIR . '/Coins.bak');
     }
 
     public function testCanDeactivateInstalledPlugin()

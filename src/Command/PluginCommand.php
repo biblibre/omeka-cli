@@ -25,6 +25,7 @@ class PluginCommand extends AbstractCommand
 {
     protected $application;
     protected $no_prompt;
+    protected $save;
 
     public function getDescription()
     {
@@ -33,18 +34,23 @@ class PluginCommand extends AbstractCommand
 
     public function getUsage()
     {
-        $usage = "Usage:\n"
-               . "\tplugin COMMAND [ARGS...]\n"
-               . "\n"
-               . "Manage plugins.\n"
-               . "\n"
-               . "COMMAND\n"
-               . "\tdl|download  {NAME}\n"
-               . "\tac|activate {NAME}\n"
-               . "\tde|deactivate {NAME}\n"
-               . "\tin|install  {NAME}\n"
-               . "\tun|uninstall  {NAME}\n"
-               . "\tup|update\n";
+        $usage = 'Usage:' . PHP_EOL
+               . '    plugin COMMAND [ARGS...]' . PHP_EOL
+               . PHP_EOL
+               . 'Manage plugins.' . PHP_EOL
+               . PHP_EOL
+               . 'COMMAND' . PHP_EOL
+               . '    dl|download  {NAME}' . PHP_EOL
+               . '    ac|activate {NAME}' . PHP_EOL
+               . '    de|deactivate {NAME}' . PHP_EOL
+               . '    in|install  {NAME}' . PHP_EOL
+               . '    un|uninstall  {NAME}' . PHP_EOL
+               . '    up|update [--save]' . PHP_EOL
+               . PHP_EOL
+               . 'The --save option of the update command will save all '
+               . 'plugins before updating them into the Omeka root '
+               . 'directory using name like this: "pluginName.bak".'
+               . PHP_EOL;
 
         return $usage;
     }
@@ -111,6 +117,8 @@ class PluginCommand extends AbstractCommand
                 break;
             case 'up': // FALLTHROUGH
             case 'update':
+                if (count($args) == 2 && $args[1] == '--save')
+                    $this->save = true;
                 $exitCode = $this->update();
                 break;
             default:
@@ -385,6 +393,9 @@ class PluginCommand extends AbstractCommand
                 if ($localCommitHash == $remoteCommitHash)
                     continue;
                 else
+                    if ($this->save)
+                        shell_exec('cp -r ' . PLUGIN_DIR . '/' . $plugin->name
+                                            . PLUGIN_DIR . '/' . $plugin->name . '.bak');
                     shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull --rebase');
             } else {
                 $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
@@ -395,18 +406,17 @@ class PluginCommand extends AbstractCommand
                 if ($plugin->version == $version) {
                     continue;
                 } else {
-                    ob_start();
                     shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . ' '
-                                     . PLUGIN_DIR . '/' . $plugin->name . '.bak');
+                                     . BASE_DIR   . '/' . $plugin->name . '.bak');
                     if ($this->download($plugin->name)) {
                         echo 'Error: cannot update plugin' . PHP_EOL;
-                        shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . '.bak '
+                        shell_exec('mv ' . BASE_DIR   . '/' . $plugin->name . '.bak '
                                          . PLUGIN_DIR . '/' . $plugin->name);
                         continue;
                     } else {
-                        shell_exec('rm -r ' . PLUGIN_DIR . '/'. $plugin->name . '.bak');
+                        if (!$this->save)
+                            shell_exec('rm -r ' . BASE_DIR . '/'. $plugin->name . '.bak');
                     }
-                    fprintf(STDERR, ob_get_clean());
                  }
             }
             $pluginsToUpdate[] = $plugin;
@@ -416,10 +426,14 @@ class PluginCommand extends AbstractCommand
             echo 'Updating...' . PHP_EOL;
             foreach($pluginsToUpdate as $plugin) {
                 echo $plugin->name;
-                if (!$this->no_prompt && !UIUtils::confirmPrompt(', update?'))
+                if (!$this->no_prompt && !UIUtils::confirmPrompt(', update?')) {
+                    shell_exec('rm -rf ' . PLUGIN_DIR . '/' . $plugin->name);
+                    shell_exec('mv ' . BASE_DIR   . '/' . $plugin->name . '.bak '
+                                     . PLUGIN_DIR . '/' . $plugin->name);
                     continue;
-                else
+                } else {
                     echo PHP_EOL;
+                }
                 $broker = $plugin->getPluginBroker();
                 $loader = new \Omeka_Plugin_Loader($broker,
                                                   new \Omeka_Plugin_Ini(PLUGIN_DIR),
