@@ -305,7 +305,7 @@ class PluginCommand extends AbstractCommand
         return (isset($chosenPlugin)) ? $chosenPlugin : null;
     }
 
-    protected function install($pluginName)
+    protected function install($pluginName) // TODO: simplify it.
     {
         if (!$this->application->isOmekaInitialized()) {
             echo 'Error: Omeka not initialized here.' . PHP_EOL;
@@ -381,7 +381,7 @@ class PluginCommand extends AbstractCommand
 
         $c = new Client();
         foreach (get_db()->getTable('Plugin')->findAll() as $plugin) {
-            if (file_exists('plugins/' . $plugin->name . '/.git')) {
+            if (file_exists(PLUGIN_DIR . '/' . $plugin->name . '/.git')) {
                 $localCommitHash = rtrim(shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' rev-parse HEAD'), PHP_EOL);
                 $author = explode('/', shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' config --get remote.origin.url'))[3];
                 try {
@@ -415,7 +415,7 @@ class PluginCommand extends AbstractCommand
                         continue;
                     } else {
                         if (!$this->save)
-                            shell_exec('rm -r ' . BASE_DIR . '/'. $plugin->name . '.bak');
+                            shell_exec('rm -rf ' . BASE_DIR . '/'. $plugin->name . '.bak');
                     }
                  }
             }
