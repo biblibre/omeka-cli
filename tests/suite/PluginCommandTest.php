@@ -97,6 +97,17 @@ Usage:
         $this->assertEquals('Installation succeeded.' . PHP_EOL, $output);
     }
 
+    public function testCanListPluginsToUpdate()
+    {
+        $command = new PluginCommand();
+
+        ob_start();
+        $command->run(array(), array('up', '--list'), $this->application);
+        $output = ob_get_clean();
+
+        $this->assertRegExp('/.+\n\Z/', $output);
+    }
+
     public function testCanUpdatePluginsAndSaveOldVersion()
     {
         $command = new PluginCommand();

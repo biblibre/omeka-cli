@@ -26,6 +26,7 @@ class PluginCommand extends AbstractCommand
     protected $application;
     protected $no_prompt;
     protected $save;
+    protected $listOnly;
 
     public function getDescription()
     {
@@ -45,11 +46,14 @@ class PluginCommand extends AbstractCommand
                . '    de|deactivate {NAME}' . PHP_EOL
                . '    in|install  {NAME}' . PHP_EOL
                . '    un|uninstall  {NAME}' . PHP_EOL
-               . '    up|update [--save]' . PHP_EOL
+               . '    up|update [--save] [--info]' . PHP_EOL
                . PHP_EOL
                . 'The --save option of the update command will save all '
                . 'plugins before updating them into the Omeka root '
                . 'directory using name like this: "pluginName.bak".'
+               . PHP_EOL
+               . 'The --info option of the update command will only list '
+               . 'which can be updated.'
                . PHP_EOL;
 
         return $usage;
@@ -63,6 +67,8 @@ class PluginCommand extends AbstractCommand
         } else {
             $this->application = $application;
             $this->no_prompt = NO_PROMPT ? true : false;
+            $this->save = false;
+            $this->listOnly = false;
 
             switch ($args[0]) {
             case 'ac': // FALLTHROUGH
@@ -117,8 +123,12 @@ class PluginCommand extends AbstractCommand
                 break;
             case 'up': // FALLTHROUGH
             case 'update':
-                if (count($args) == 2 && $args[1] == '--save')
-                    $this->save = true;
+                if (isset($args[1])) {
+                    if ($args[1] == '--save')
+                        $this->save = true;
+                    else if ($args[1] == '--list')
+                        $this->listOnly = true;
+                }
                 $exitCode = $this->update();
                 break;
             default:
@@ -393,6 +403,10 @@ class PluginCommand extends AbstractCommand
                 if ($localCommitHash == $remoteCommitHash)
                     continue;
                 else
+                    if ($this->listOnly) {
+                        echo $plugin->name . PHP_EOL;
+                        continue;
+                    }
                     if ($this->save)
                         shell_exec('cp -r ' . PLUGIN_DIR . '/' . $plugin->name
                                             . PLUGIN_DIR . '/' . $plugin->name . '.bak');
@@ -406,6 +420,10 @@ class PluginCommand extends AbstractCommand
                 if ($plugin->version == $version) {
                     continue;
                 } else {
+                    if ($this->listOnly) {
+                        echo $plugin->name . PHP_EOL;
+                        continue;
+                    }
                     shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . ' '
                                      . BASE_DIR   . '/' . $plugin->name . '.bak');
                     if ($this->download($plugin->name)) {
