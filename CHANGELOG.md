@@ -6,7 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.11.0] - 2017-07-26
+## [0.12.1] - 2017-07-26
+### Fixed
+- Entry in this files
+- Too many calls to getInstance() method.
+
+## [0.12.0] - 2017-07-25
 ### Added
 - --list option to `plugin update` command.
 
