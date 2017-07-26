@@ -17,7 +17,6 @@ It also provides everything needed for Omeka plugins to create custom commands.
     list     list available commands
     options  edit and see the "omeka_options" table
     plugin   manage plugins
-    upgrade  check omeka-cli and Omeka version
     version  print version of omeka-cli
 
 ## Installation
