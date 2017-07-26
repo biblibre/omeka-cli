@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.13.0] - 2017-07-26
+### Changed
+- `info` command now does what `upgrade` command did.
+- Passing a non-existing command to omeka-cli make it print the usage.
+
+### Removed
+- `upgrade` command.
+
 ## [0.12.1] - 2017-07-26
 ### Fixed
 - Entry in this files
