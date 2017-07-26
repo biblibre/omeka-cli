@@ -18,7 +18,6 @@ class OmekaDotOrgRepository implements RepositoryInterface
     public function __construct()
     {
         $this->client = new Client();
-        self::$cache = null;
     }
 
     public function getDisplayName()
