@@ -171,9 +171,8 @@ class Application
 
         $command = $commands->get($commandName);
         if (!isset($command)) {
-            $logger->error('Command {command} does not exist', array(
-                'command' => $commandName,
-            ));
+            $logger->error('Command {command} does not exist', array('command' => $commandName,));
+            echo $this->usage();
 
             return 1;
         }
