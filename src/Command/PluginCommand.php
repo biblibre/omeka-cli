@@ -192,17 +192,24 @@ class PluginCommand extends AbstractCommand
         $plugins = $this->findAvailablePlugins($pluginName);
         if (empty($plugins)) {
             echo "No plugins named $pluginName were found\n";
-            $exitCode = 1;
-        } else if ($this->no_prompt || null !== ($plugin = $this->pluginPrompt($plugins))) {
-            $destDir = ($this->application->isOmekaInitialized())
-                     ? PLUGIN_DIR : '.';
+            return 1;
+        }
 
+        if ($this->no_prompt) {
             if (!empty($plugins['atOmeka'])) {
-                $plugin = $plugins['atOmeka']['0'];
+                $plugin = $plugins['atOmeka'][0];
             } else {
                 echo 'Error: no such plugin at Omeka.org' . PHP_EOL;
                 return 1;
             }
+        } else {
+            $plugin = $this->pluginPrompt($plugins);
+        }
+
+        if ($plugin) {
+            $destDir = ($this->application->isOmekaInitialized())
+                     ? PLUGIN_DIR : '.';
+
             $repo = $plugin['repository'];
             $repoName = $repo->getDisplayName();
 
