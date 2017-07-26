@@ -8,6 +8,7 @@ use OmekaCli\UIUtils;
 
 use Github\Client;
 use Github\Exception\RuntimeException;
+use Github\Exception\ApiLimitExceedException;
 
 use GetOptionKit\ContinuousOptionParser;
 use GetOptionKit\Exception\InvalidOptionException;
@@ -398,26 +399,26 @@ class PluginCommand extends AbstractCommand
 
         $c = new Client();
         foreach (get_db()->getTable('Plugin')->findAll() as $plugin) {
+            echo 'Updating: ' . $plugin->name . PHP_EOL;
             if (file_exists(PLUGIN_DIR . '/' . $plugin->name . '/.git')) {
-                $localCommitHash = rtrim(shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' rev-parse HEAD'), PHP_EOL);
-                $author = explode('/', shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' config --get remote.origin.url'))[3];
-                try {
-                    $remoteCommitHash = $c->api('repo')->commits()->all($author, $plugin->name, array())[0]['sha'];
-                } catch (\RuntimeException $e) {
-                    echo $e->getMessage() . PHP_EOL;
+                // TODO: Move github specific code to GitHub repo class.
+                system('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' rev-parse @{u} 1>/dev/null 2>/dev/null', $ans);
+                if ($ans != 0) {
+                    echo 'Error: no upstream.' . PHP_EOL;
                     continue;
                 }
-                if ($localCommitHash == $remoteCommitHash)
+                shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' fetch 2>/dev/null');
+                $output = shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' log --oneline HEAD..@{u}');
+var_dump($output);
+                if (empty($output)) {
+                    echo 'up-to-date' . PHP_EOL;
                     continue;
-                else
-                    if ($this->listOnly) {
-                        echo $plugin->name . PHP_EOL;
-                        continue;
-                    }
-                    if ($this->save)
-                        shell_exec('cp -r ' . PLUGIN_DIR . '/' . $plugin->name
-                                            . PLUGIN_DIR . '/' . $plugin->name . '.bak');
-                    shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull --rebase');
+                }
+                if ($this->listOnly) {
+                    echo 'new version available' . PHP_EOL;
+                    continue;
+                }
+                shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull --rebase');
             } else {
                 $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
                 $repo = new $repoClass;
@@ -433,50 +434,29 @@ class PluginCommand extends AbstractCommand
                     }
                     shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . ' '
                                      . BASE_DIR   . '/' . $plugin->name . '.bak');
-                    if ($this->download($plugin->name)) {
-                        echo 'Error: cannot update plugin' . PHP_EOL;
-                        shell_exec('mv ' . BASE_DIR   . '/' . $plugin->name . '.bak '
-                                         . PLUGIN_DIR . '/' . $plugin->name);
-                        continue;
-                    } else {
+                    try {
+                        $repo->download($plugin->name, PLUGIN_DIR);
                         if (!$this->save)
                             shell_exec('rm -rf ' . BASE_DIR . '/'. $plugin->name . '.bak');
+                    } catch (\Exception $e) {
+                        echo 'Error: cannot update plugin' . PHP_EOL;
+                        echo $e->getMessage() . PHP_EOL;
+                        shell_exec('mv ' . BASE_DIR   . '/' . $plugin->name . '.bak '
+                                         . PLUGIN_DIR . '/' . $plugin->name);
                     }
-                 }
-            }
-            $pluginsToUpdate[] = $plugin;
-        }
-
-        if (!empty($pluginsToUpdate)) {
-            echo 'Updating...' . PHP_EOL;
-            foreach($pluginsToUpdate as $plugin) {
-                echo $plugin->name;
-                if (!$this->no_prompt && !UIUtils::confirmPrompt(', update?')) {
-                    shell_exec('rm -rf ' . PLUGIN_DIR . '/' . $plugin->name);
-                    shell_exec('mv ' . BASE_DIR   . '/' . $plugin->name . '.bak '
-                                     . PLUGIN_DIR . '/' . $plugin->name);
-                    continue;
-                } else {
-                    echo PHP_EOL;
                 }
-                $broker = $plugin->getPluginBroker();
-                $loader = new \Omeka_Plugin_Loader($broker,
-                                                  new \Omeka_Plugin_Ini(PLUGIN_DIR),
-                                                  new \Omeka_Plugin_Mvc(PLUGIN_DIR),
-                                                  PLUGIN_DIR);
-                $installer = new \Omeka_Plugin_Installer($broker, $loader);
-                if (null === $plugin->getIniVersion()) {
-                    $version = array_filter(
-                        file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini'),
-                        function($var) { return preg_match('/\Aversion=/', $var); }
-                    );
-                    $version = array_pop($version);
-                    $version = preg_replace('/\Aversion=/', '', $version);
-                    $version = preg_replace('/"/', '', $version);
-                    $plugin->setIniVersion($version);
-                }
-                $installer->upgrade($plugin);
             }
+            $broker = $plugin->getPluginBroker();
+            $loader = new \Omeka_Plugin_Loader($broker,
+                                              new \Omeka_Plugin_Ini(PLUGIN_DIR),
+                                              new \Omeka_Plugin_Mvc(PLUGIN_DIR),
+                                              PLUGIN_DIR);
+            $installer = new \Omeka_Plugin_Installer($broker, $loader);
+            if (null === $plugin->getIniVersion()) {
+                $version = parse_ini_file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini')['version'];
+                $plugin->setIniVersion($version);
+            }
+            $installer->upgrade($plugin);
         }
 
         return 0;

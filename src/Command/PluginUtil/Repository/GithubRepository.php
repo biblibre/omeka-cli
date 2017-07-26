@@ -4,6 +4,7 @@ namespace OmekaCli\Command\PluginUtil\Repository;
 
 use Github\Client;
 use Github\Exception\RuntimeException;
+use Github\Exception\ApiLimitExceedException;
 
 class GithubRepository implements RepositoryInterface
 {
