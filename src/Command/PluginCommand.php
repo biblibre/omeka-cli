@@ -338,7 +338,19 @@ class PluginCommand extends AbstractCommand
         $plugin = new \Plugin;
         $plugin->name = $pluginName;
 
-        $version = parse_ini_file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini')['version'];
+        $ini = parse_ini_file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini');
+        if (isset($ini['required_plugins'])) {
+            $deps = $ini['required_plugins'];
+            $deps = explode(',', $deps);
+            $deps = array_map("trim", $deps);
+            foreach ($deps as $dep) {
+                if (!plugin_is_active($dep)) {
+                    echo 'Error: plugin ' . $dep . ' not active' . PHP_EOL;
+                    return 1;
+                }
+            }
+        }
+        $version = $ini['version'];
         $plugin->setIniVersion($version);
         $plugin->setLoaded(true);
         $broker = $plugin->getPluginBroker();
@@ -403,7 +415,6 @@ class PluginCommand extends AbstractCommand
                 }
                 shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' fetch 2>/dev/null');
                 $output = shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' log --oneline HEAD..@{u}');
-var_dump($output);
                 if (empty($output)) {
                     echo 'up-to-date' . PHP_EOL;
                     continue;
