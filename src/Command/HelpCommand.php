@@ -29,12 +29,10 @@ class HelpCommand extends AbstractCommand
             return 0;
         }
 
-        $logger = $application->getLogger();
-
         $commandName = reset($args);
         $command = $application->getCommandManager()->get($commandName);
         if (!isset($command)) {
-            $logger->error('Command {name} does not exist', array(
+            $this->logger->error('Command {name} does not exist', array(
                 'name' => $commandName,
             ));
 
@@ -43,7 +41,7 @@ class HelpCommand extends AbstractCommand
 
         $usage = $command->getUsage();
         if (!$usage) {
-            echo "There is no available help for this command\n";
+            $this->logger->error('There is no available help for this command');
         }
 
         echo $usage;

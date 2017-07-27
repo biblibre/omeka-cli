@@ -14,8 +14,14 @@ class Logger extends AbstractLogger
             throw new InvalidArgumentException("level $level is invalid");
         }
 
+        $message = $this->getMessage($level, $message, $context);
+        error_log($message);
+    }
+
+    protected function getMessage($level, $message, $context)
+    {
         $message = $this->interpolate($message, $context);
-        error_log(sprintf('%s: %s', ucfirst($level), $message));
+        return sprintf('%s: %s', ucfirst($level), $message);
     }
 
     protected function isLogLevelKnown($level)

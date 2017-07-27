@@ -75,7 +75,7 @@ class PluginCommand extends AbstractCommand
             case 'ac': // FALLTHROUGH
             case 'activate':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo 'Error: nothing to activate.' . PHP_EOL;
+                    $this->logger->error('nothing to activate.');
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
@@ -85,7 +85,7 @@ class PluginCommand extends AbstractCommand
             case 'de': // FALLTHROUGH
             case 'deactivate':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo 'Error: nothing to deactivate.' . PHP_EOL;
+                    $this->logger->error('nothing to deactivate.');
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
@@ -95,7 +95,7 @@ class PluginCommand extends AbstractCommand
             case 'dl': // FALLTHROUGH
             case 'download':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo 'Error: nothing to download.' . PHP_EOL;
+                    $this->logger->error('nothing to download.');
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
@@ -105,7 +105,7 @@ class PluginCommand extends AbstractCommand
             case 'in': // FALLTHROUGH
             case 'install':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo 'Error: nothing to install.' . PHP_EOL;
+                    $this->logger->error('nothing to install.');
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
@@ -115,7 +115,7 @@ class PluginCommand extends AbstractCommand
             case 'un': // FALLTHROUGH
             case 'uninstall':
                 if (!isset($args[1]) || $args[1] == '') {
-                    echo 'Error: nothing to uninstall.' . PHP_EOL;
+                    $this->logger->error('nothing to uninstall.');
                     echo $this->getUsage();
                     $exitCode = 1;
                 } else {
@@ -133,7 +133,7 @@ class PluginCommand extends AbstractCommand
                 $exitCode = $this->update();
                 break;
             default:
-                echo 'Error: unknown argument $args[0].' . PHP_EOL;
+                $this->logger->error('unknown argument' .$args[0] . '.');
                 echo $this->getUsage();
                 $exitCode = 1;
             }
@@ -147,14 +147,14 @@ class PluginCommand extends AbstractCommand
         $plugins = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
 
         if (empty($plugins)) {
-            echo 'Error: plugin not installed.' . PHP_EOL;
+            $this->logger->error('plugin not installed.');
             return 1;
         }
         $plugin = $plugins[0];
 
         $missingDeps = $this->getMissingDependencies($plugin);
         if (!empty($missingDeps)) {
-            echo 'Error: missing plugins ' . implode(',', $missingDeps) . PHP_EOL;
+            $this->logger->error('missing plugins ' . implode(',', $missingDeps) . '.');
             return 1;
         }
 
@@ -166,7 +166,7 @@ class PluginCommand extends AbstractCommand
         $installer = new \Omeka_Plugin_Installer($broker, $loader);
         $installer->activate($plugin);
 
-        echo 'Plugin activated.' . PHP_EOL;
+        $this->logger->info('plugin activated.');
 
         return 0;
     }
@@ -176,7 +176,7 @@ class PluginCommand extends AbstractCommand
         $plugin = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
 
         if (empty($plugin)) {
-            echo 'Error: plugin not installed.' . PHP_EOL;
+            $this->logger->error('plugin not installed.');
             return 1;
         }
         $plugin = $plugin[0];
@@ -189,7 +189,7 @@ class PluginCommand extends AbstractCommand
         $installer = new \Omeka_Plugin_Installer($broker, $loader);
         $installer->deactivate($plugin);
 
-        echo 'Plugin deactivated.' . PHP_EOL;
+        $this->logger->info('plugin deactivated.');
 
         return 0;
     }
@@ -198,7 +198,7 @@ class PluginCommand extends AbstractCommand
     {
         $plugins = $this->findAvailablePlugins($pluginName);
         if (empty($plugins)) {
-            echo "No plugins named $pluginName were found\n";
+            $this->logger->error('No plugins named ' . $pluginName . ' were found.');
             return 1;
         }
 
@@ -206,7 +206,7 @@ class PluginCommand extends AbstractCommand
             if (!empty($plugins['atOmeka'])) {
                 $plugin = $plugins['atOmeka'][0];
             } else {
-                echo 'Error: no such plugin at Omeka.org' . PHP_EOL;
+                $this->logger->error('no such plugin at Omeka.org.');
                 return 1;
             }
         } else {
@@ -220,27 +220,23 @@ class PluginCommand extends AbstractCommand
             $repo = $plugin['repository'];
             $repoName = $repo->getDisplayName();
 
-            echo "Downloading from $repoName...\n";
+            $this->logger->info('downloading from ' . $repoName . '...');
             try {
                 $dest = $repo->download($pluginName, $destDir);
-                echo "Downloaded into $dest\n";
+                $this->logger->info('downloaded into ' . $dest . '...');
             } catch (\Exception $e) {
-                echo 'Error: download failed: ' . $e->getMessage() . ".\n";
+                $this->logger->error('download failed: ' . $e->getMessage());
             }
-            $exitCode = 0;
-        } else {
-            echo "Aborted.\n";
-            $exitCode = 1;
         }
 
-        return $exitCode;
+        return 0;
     }
 
     protected function findAvailablePlugins($pluginName)
     {
         $plugins = array();
 
-        echo "Searching on Omeka.org\n";
+        $this->logger->info('searching on Omeka.org.');
         $repoClass = 'OmekaCli\Command\PluginUtil\Repository\OmekaDotOrgRepository';
         $repo = new $repoClass;
         $pluginInfo = $repo->find($pluginName);
@@ -256,7 +252,7 @@ class PluginCommand extends AbstractCommand
         if ($this->no_prompt) {
             $pluginsGitHub = array();
         } else {
-            echo "Searching on GitHub\n";
+            $this->logger->info('searching on GitHub.');
             $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
             $repo = new $repoClass;
             $pluginInfo = $repo->find($pluginName);
@@ -281,8 +277,8 @@ class PluginCommand extends AbstractCommand
         $omekaPluginCount  = count($plugins['atOmeka']);
         $githubPluginCount = count($plugins['atGithub']);
 
-        echo $omekaPluginCount  . ' plugin(s) found at omeka.org'  . "\n";
-        echo $githubPluginCount . ' plugin(s) found at github.com' . "\n";
+        $this->logger->info($omekaPluginCount  . ' plugin(s) found at omeka.org.');
+        $this->logger->info($githubPluginCount . ' plugin(s) found at github.com.');
 
         if (!empty($plugins['atOmeka']) && !empty($plugins['atGithub']))
             $allPlugins = array_merge($plugins['atOmeka'], $plugins['atGithub']);
@@ -314,13 +310,12 @@ class PluginCommand extends AbstractCommand
             if ($chosenIdx >= 0)
                 $chosenPlugin = $allPlugins[$chosenIdx];
             else
-                echo 'Nothing chosen.' . "\n";
+                $this->logger->info('nothing chosen.');
         }
 
         if (isset($chosenPlugin)) {
             if (version_compare(OMEKA_VERSION, $chosenPlugin['info']['omekaMinimumVersion']) < 0) {
-                echo 'Warning: the current Omeka version is to low to install'
-                   . 'this plugin.' . PHP_EOL;
+                $this->logger->warning('the current Omeka version is too low to install this plugin.');
                 if (!confirmPrompt('Download it anyway?'))
                     $chosenPlugin = null;
             }
@@ -332,12 +327,12 @@ class PluginCommand extends AbstractCommand
     protected function install($pluginName) // TODO: simplify it.
     {
         if (!$this->application->isOmekaInitialized()) {
-            echo 'Error: Omeka not initialized here.' . PHP_EOL;
+            $this->logger->error('Omeka not initialized here.');
             return 1;
         }
 
         if (!file_exists(PLUGIN_DIR . '/' . $pluginName)) {
-            echo 'Error: plugin not found.' . PHP_EOL;
+            $this->logger->error('plugin not found.');
             return 1;
         }
 
@@ -346,10 +341,11 @@ class PluginCommand extends AbstractCommand
 
         $missingDeps = $this->getMissingDependencies($plugin);
         if (!empty($missingDeps)) {
-            echo 'Error: missing plugins ' . implode(',', $missingDeps) . PHP_EOL;
+            $this->logger->error('Error: missing plugins ' . implode(',', $missingDeps));
             return 1;
         }
 
+        $ini = parse_ini_file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini');
         $version = $ini['version'];
         $plugin->setIniVersion($version);
         $plugin->setLoaded(true);
@@ -367,9 +363,9 @@ class PluginCommand extends AbstractCommand
         ))[0];
 
         if ($result->isActive())
-            echo 'Installation succeeded.' . PHP_EOL;
+            $this->logger->info('installation succeeded.');
         else
-            echo 'Installation failed.' . PHP_EOL;
+            $this->logger->error('installation failed.');
 
         return 0;
     }
@@ -379,7 +375,7 @@ class PluginCommand extends AbstractCommand
         $plugin = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
 
         if (empty($plugin)) {
-            echo 'Error: plugin not installed.' . PHP_EOL;
+            $this->logger->error('plugin not installed.');
             return 1;
         }
         $plugin = $plugin[0];
@@ -391,7 +387,7 @@ class PluginCommand extends AbstractCommand
         $installer = new \Omeka_Plugin_Installer($broker, $loader);
         $installer->uninstall($plugin);
 
-        echo 'Plugin uninstalled.' . PHP_EOL;
+        $this->logger->info('plugin uninstalled.');
 
         return 0;
     }
@@ -399,28 +395,28 @@ class PluginCommand extends AbstractCommand
     protected function update()
     {
         if (!$this->application->isOmekaInitialized()) {
-            echo 'Error: Omeka not initialized here.' . PHP_EOL;
+            $this->logger->error('Omeka not initialized here.');
             return 1;
         }
 
         $c = new Client();
         foreach (get_db()->getTable('Plugin')->findAll() as $plugin) {
-            echo 'Updating: ' . $plugin->name . PHP_EOL;
+            $this->logger->info('updating: ' . $plugin->name);
             if (file_exists(PLUGIN_DIR . '/' . $plugin->name . '/.git')) {
                 // TODO: Move github specific code to GitHub repo class.
                 system('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' rev-parse @{u} 1>/dev/null 2>/dev/null', $ans);
                 if ($ans != 0) {
-                    echo 'Error: no upstream.' . PHP_EOL;
+                    $this->logger->error('no upstream.');
                     continue;
                 }
                 shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' fetch 2>/dev/null');
                 $output = shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' log --oneline HEAD..@{u}');
                 if (empty($output)) {
-                    echo 'up-to-date' . PHP_EOL;
+                    $this->logger->info('up-to-date.');
                     continue;
                 }
                 if ($this->listOnly) {
-                    echo 'new version available' . PHP_EOL;
+                    $this->logger->info('new version available.');
                     continue;
                 }
                 shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull --rebase');
@@ -444,7 +440,7 @@ class PluginCommand extends AbstractCommand
                         if (!$this->save)
                             shell_exec('rm -rf ' . BASE_DIR . '/'. $plugin->name . '.bak');
                     } catch (\Exception $e) {
-                        echo 'Error: cannot update plugin' . PHP_EOL;
+                        $this->logger->error('cannot update plugin.');
                         echo $e->getMessage() . PHP_EOL;
                         shell_exec('mv ' . BASE_DIR   . '/' . $plugin->name . '.bak '
                                          . PLUGIN_DIR . '/' . $plugin->name);

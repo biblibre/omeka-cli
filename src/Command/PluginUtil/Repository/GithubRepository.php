@@ -73,7 +73,7 @@ class GithubRepository implements RepositoryInterface
                 $pluginName . ' omeka in:name,description fork:true'
             )['items'];
         } catch (\Exception $e) {
-            echo "Warning: something bad occured during GitHub searching.\n";
+            echo "Warning: something bad occured during GitHub searching.\n"; // TODO: log or not log?
             return;
         }
 

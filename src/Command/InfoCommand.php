@@ -57,7 +57,7 @@ class InfoCommand extends AbstractCommand
         }
 
         if (!$application->isOmekaInitialized()) {
-            echo 'Error: Omeka is not initialized here.' . PHP_EOL;
+            $this->logger->error('Omeka is not initialized here.');
             return 1;
         }
 
@@ -87,6 +87,7 @@ class InfoCommand extends AbstractCommand
             echo $plugin->name . ' - ' . $plugin->version . PHP_EOL;
         echo 'Plugins to update:' . PHP_EOL;
         $pluginCommand = new PluginCommand();
+        $pluginCommand->setLogger($this->logger);
         $pluginCommand->run(array(), array('up', '--list'), $application);
 
         return 0;

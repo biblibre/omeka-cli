@@ -42,13 +42,13 @@ class OptionsCommand extends AbstractCommand
         $optionsTable = $db->getTable('Option');
         $query = $optionsTable->findBy(array('name' => $args[0]));
         if (!$query) {
-            echo "Error: option " . $args[0] . " not found.\n";
+            $this->logger->error('option ' . $args[0] . ' not found.');
             return 1;
         }
 
         if (count($args) == 2)
             set_option($args[0], $args[1]);
-        echo get_option($args[0]) . "\n";
+        echo get_option($args[0]) . PHP_EOL;
 
         return 0;
     }

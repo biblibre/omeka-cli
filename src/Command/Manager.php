@@ -135,6 +135,7 @@ class Manager
 
         if ($this->isCommandClass($class)) {
             $command = new $class();
+            $command->setLogger($this->logger);
             $this->commands[$name] = $command;
             $this->registerAliases($aliases, $name);
         }

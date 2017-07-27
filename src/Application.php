@@ -123,7 +123,7 @@ class Application
     public function getCommandManager()
     {
         if (!isset($this->commands)) {
-            $this->commands = new Manager($this, $this->logger);
+            $this->commands = new Manager($this, $this->getLogger());
         }
 
         return $this->commands;

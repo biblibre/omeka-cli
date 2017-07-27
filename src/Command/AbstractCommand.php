@@ -3,9 +3,13 @@
 namespace OmekaCli\Command;
 
 use GetOptionKit\OptionCollection;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 
-abstract class AbstractCommand implements CommandInterface
+abstract class AbstractCommand implements CommandInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     public function getOptionsSpec()
     {
         return new OptionCollection;

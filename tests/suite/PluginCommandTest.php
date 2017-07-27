@@ -13,7 +13,7 @@ final class PluginCommandTest extends AbstractTest
 {
     public function testShowUsageWhenRunWithoutArgument()
     {
-        $command = new PluginCommand();
+        $command = $this->getCommand('plugin');
 
         ob_start();
         $command->run(array(), array(), $this->application);
@@ -31,7 +31,7 @@ final class PluginCommandTest extends AbstractTest
 
     public function testShowUsageWhenRunWithWrongArgument()
     {
-        $command = new PluginCommand();
+        $command = $this->getCommand('plugin');
 
         // Wrong subcommand
         ob_start();
@@ -40,8 +40,7 @@ final class PluginCommandTest extends AbstractTest
 
         $this->assertNotEmpty($output);
         $this->assertRegExp('
-/\AError: .+
-Usage:
+/\AUsage:
     plugin.+
 
 .+
@@ -55,8 +54,7 @@ Usage:
 
         $this->assertNotEmpty($output);
         $this->assertRegExp('
-/\AError: .+
-Usage:
+/\AUsage:
     plugin.+
 
 .+
@@ -70,8 +68,7 @@ Usage:
 
         $this->assertNotEmpty($output);
         $this->assertRegExp('
-/\AError: .+
-Usage:
+/\AUsage:
     plugin.+
 
 .+
@@ -81,7 +78,7 @@ Usage:
 
     public function testCanInstallDownloadedPlugin()
     {
-        $command = new PluginCommand();
+        $command = $this->getCommand('plugin');
 
         ob_start();
         shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
@@ -94,12 +91,12 @@ Usage:
         $command->run(array(), array('in', 'Coins'), $this->application);
         $output = ob_get_clean();
 
-        $this->assertEquals('Installation succeeded.' . PHP_EOL, $output);
+        $this->assertEquals('Info: installation succeeded.', $this->fakeLogger->getOutput());
     }
 
     public function testCanListPluginsToUpdate()
     {
-        $command = new PluginCommand();
+        $command = $this->getCommand('plugin');
 
         ob_start();
         $command->run(array(), array('up', '--list'), $this->application);
@@ -110,15 +107,13 @@ Usage:
 
     public function testCanUpdatePluginsAndSaveOldVersion()
     {
-        $command = new PluginCommand();
+        $command = $this->getCommand('plugin');
 
         ob_start();
         $command->run(array(), array('up', '--save'), $this->application);
         $output = ob_get_clean();
 
-        $this->assertRegExp('
-/Updating\.\.\.
-(.+)*\Z/', $output);
+        $this->assertRegExp('/Info: updating: .+\Z/', $this->fakeLogger->getOutput());
         $this->assertFileExists(BASE_DIR . '/Coins.bak');
         $this->assertFileIsReadable(BASE_DIR . '/Coins.bak');
         shell_exec('rm -rf ' . BASE_DIR . '/Coins.bak');
@@ -126,35 +121,35 @@ Usage:
 
     public function testCanDeactivateInstalledPlugin()
     {
-        $command = new PluginCommand();
+        $command = $this->getCommand('plugin');
 
         ob_start();
         $command->run(array(), array('de', 'Coins'), $this->application);
         $output = ob_get_clean();
 
-        $this->assertEquals('Plugin deactivated.' . PHP_EOL, $output);
+        $this->assertEquals('Info: plugin deactivated.', $this->fakeLogger->getOutput());
     }
 
     public function testCanActivateInstalledPlugin()
     {
-        $command = new PluginCommand();
+        $command = $this->getCommand('plugin');
 
         ob_start();
         $command->run(array(), array('ac', 'Coins'), $this->application);
         $output = ob_get_clean();
 
-        $this->assertEquals('Plugin activated.' . PHP_EOL, $output);
+        $this->assertEquals('Info: plugin activated.', $this->fakeLogger->getOutput());
     }
 
     public function testCanUninstallInstalledPlugin()
     {
-        $command = new PluginCommand();
+        $command = $this->getCommand('plugin');
 
         ob_start();
         $command->run(array(), array('un', 'Coins'), $this->application);
         $output = ob_get_clean();
         shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
 
-        $this->assertEquals('Plugin uninstalled.' . PHP_EOL, $output);
+        $this->assertEquals('Info: plugin uninstalled.', $this->fakeLogger->getOutput());
     }
 }

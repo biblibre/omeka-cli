@@ -13,7 +13,7 @@ final class InfoCommandTest extends AbstractTest
 {
     public function testIsOutputFormatOk()
     {
-        $command = new InfoCommand();
+        $command = $this->getCommand('info');
 
         ob_start();
         $command->run(array(), array(), $this->application);

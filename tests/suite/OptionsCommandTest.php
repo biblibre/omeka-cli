@@ -13,7 +13,7 @@ final class OptionsCommandTest extends AbstractTest
 {
     public function testShowUsageWhenRunWithoutArgument()
     {
-        $command = new OptionsCommand();
+        $command = $this->getCommand('options');
 
         ob_start();
         $command->run(array(), array(), $this->application);
@@ -31,7 +31,7 @@ final class OptionsCommandTest extends AbstractTest
 
     public function testCanRetrieveExistingTableEntries()
     {
-        $command = new OptionsCommand();
+        $command = $this->getCommand('options');
 
         ob_start();
         $command->run(array(),
@@ -44,39 +44,37 @@ final class OptionsCommandTest extends AbstractTest
 
     public function testShowErrorOnNonExistingTableEntries()
     {
-        $command = new OptionsCommand();
+        $command = $this->getCommand('options');
 
-        ob_start();
-        $command->run(array(),
+        $retCode = $command->run(array(),
                       array('NonExistingTableEntries',),
                       $this->application);
-        $output = ob_get_clean();
 
-        $this->assertRegExp('/Error: option .* not found./', $output);
+        $this->assertEquals(1, $retCode);
+        $this->assertRegExp('/Error: option .* not found./', $this->fakeLogger->getOutput());
     }
 
     public function testCanEditExistingTableEntries()
     {
-        $command = new OptionsCommand();
+        $command = $this->getCommand('options');
 
         ob_start();
         $command->run(array(),
-                      array('omeka_version',),
+                      array('omeka_version'),
                       $this->application);
-        $oldVal = substr(ob_get_clean(), 0, -1);
+        $oldVal = rtrim(ob_get_clean());
 
         ob_start();
         $command->run(array(),
-                      array('omeka_version', '0.0.0',),
+                      array('omeka_version', '0.0.0'),
                       $this->application);
         $output = ob_get_clean();
+        $this->assertNotEmpty($output, "\n");
 
         ob_start();
         $command->run(array(),
                       array('omeka_version', $oldVal,),
                       $this->application);
         ob_end_clean();
-
-        $this->assertNotEmpty($output, "\n");
     }
 }
