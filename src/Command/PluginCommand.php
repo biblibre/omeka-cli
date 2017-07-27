@@ -396,7 +396,8 @@ class PluginCommand extends AbstractCommand
 
         $c = new Client();
         foreach (get_db()->getTable('Plugin')->findAll() as $plugin) {
-            $this->logger->info('updating: ' . $plugin->name);
+            if (!$this->listOnly)
+                $this->logger->info('updating ' . $plugin->name);
             if (file_exists(PLUGIN_DIR . '/' . $plugin->name . '/.git')) {
                 // TODO: Move github specific code to GitHub repo class.
                 system('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' rev-parse @{u} 1>/dev/null 2>/dev/null', $ans);
@@ -411,8 +412,10 @@ class PluginCommand extends AbstractCommand
                     continue;
                 }
                 if ($this->listOnly) {
-                    $this->logger->info('new version available.');
+                    echo $plugin->name . PHP_EOL;
                     continue;
+                } else {
+                    $this->logger->info('new version available.');
                 }
                 shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull --rebase');
             } else {

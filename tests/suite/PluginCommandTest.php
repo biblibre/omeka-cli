@@ -113,7 +113,7 @@ final class PluginCommandTest extends AbstractTest
         $command->run(array(), array('up', '--save'), $this->application);
         $output = ob_get_clean();
 
-        $this->assertRegExp('/Info: updating: .+\Z/', $this->fakeLogger->getOutput());
+        $this->assertRegExp('/Info: updating .+\Z/', $this->fakeLogger->getOutput());
         $this->assertFileExists(BASE_DIR . '/Coins.bak');
         $this->assertFileIsReadable(BASE_DIR . '/Coins.bak');
         shell_exec('rm -rf ' . BASE_DIR . '/Coins.bak');

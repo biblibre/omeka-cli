@@ -6,9 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Fixed
+- `info` command bloated output.
 - Version initialization in `install` command.
 - `update` command.
 - Plugin prompting.
+
+### Changed
+- Abort plugin installation if a dependency is not resolved.
+- Many outputs, since omeka-cli know uses a logger.
 
 ## [0.13.0] - 2017-07-26
 ### Changed
