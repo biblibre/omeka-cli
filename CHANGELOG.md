@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Version initialization in `install` command.
+- `update` command.
+- Plugin prompting.
 
 ## [0.13.0] - 2017-07-26
 ### Changed

@@ -338,13 +338,7 @@ class PluginCommand extends AbstractCommand
         $plugin = new \Plugin;
         $plugin->name = $pluginName;
 
-        $version = array_filter(
-            file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini'),
-            function($var) { return preg_match('/\Aversion=/', $var); }
-        );
-        $version = array_pop($version);
-        $version = preg_replace('/\Aversion=/', '', $version);
-        $version = preg_replace('/"/', '', $version);
+        $version = parse_ini_file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini')['version'];
         $plugin->setIniVersion($version);
         $plugin->setLoaded(true);
         $broker = $plugin->getPluginBroker();
