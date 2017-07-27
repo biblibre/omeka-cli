@@ -47,7 +47,7 @@ class PluginCommand extends AbstractCommand
                . '    de|deactivate {NAME}' . PHP_EOL
                . '    in|install  {NAME}' . PHP_EOL
                . '    un|uninstall  {NAME}' . PHP_EOL
-               . '    up|update [--save] [--info]' . PHP_EOL
+               . '    up|update [--save] [--list] {NAME}' . PHP_EOL
                . PHP_EOL
                . 'The --save option of the update command will save all '
                . 'plugins before updating them into the Omeka root '
@@ -124,13 +124,17 @@ class PluginCommand extends AbstractCommand
                 break;
             case 'up': // FALLTHROUGH
             case 'update':
-                if (isset($args[1])) {
-                    if ($args[1] == '--save')
+                $pluginName = null;
+                array_shift($args);
+                while (($arg = array_shift($args)) != null && $pluginName == null) {
+                    if ($arg == '--save')
                         $this->save = true;
-                    else if ($args[1] == '--list')
+                    else if ($arg == '--list')
                         $this->listOnly = true;
+                    else
+                        $pluginName = $arg;
                 }
-                $exitCode = $this->update();
+                $exitCode = $this->update($pluginName);
                 break;
             default:
                 $this->logger->error('unknown argument' .$args[0] . '.');
@@ -387,7 +391,7 @@ class PluginCommand extends AbstractCommand
         return 0;
     }
 
-    protected function update()
+    protected function update($pluginName = null)
     {
         if (!$this->application->isOmekaInitialized()) {
             $this->logger->error('Omeka not initialized here.');
@@ -395,7 +399,8 @@ class PluginCommand extends AbstractCommand
         }
 
         $c = new Client();
-        foreach (get_db()->getTable('Plugin')->findAll() as $plugin) {
+        $plugins = get_db()->getTable('Plugin')->findBy($pluginName == null ? array() : array('name' => $pluginName));
+        foreach ($plugins as $plugin) {
             if (!$this->listOnly)
                 $this->logger->info('updating ' . $plugin->name);
             if (file_exists(PLUGIN_DIR . '/' . $plugin->name . '/.git')) {
