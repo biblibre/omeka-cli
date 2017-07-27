@@ -39,7 +39,7 @@ final class OptionsCommandTest extends AbstractTest
                       $this->application);
         $output = ob_get_clean();
 
-        $this->assertNotEmpty($output);
+        $this->assertRegexp('/\A[0-9]+(\.[0-9]+)*\n\z/', $output);
     }
 
     public function testShowErrorOnNonExistingTableEntries()
