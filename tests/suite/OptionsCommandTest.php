@@ -59,22 +59,8 @@ final class OptionsCommandTest extends AbstractTest
         $command = $this->getCommand('options');
 
         ob_start();
-        $command->run(array(),
-                      array('omeka_version'),
-                      $this->application);
-        $oldVal = rtrim(ob_get_clean());
-
-        ob_start();
-        $command->run(array(),
-                      array('omeka_version', '0.0.0'),
-                      $this->application);
+        $command->run(array(), array('site_title', 'yee'), $this->application);
         $output = ob_get_clean();
-        $this->assertNotEmpty($output, "\n");
-
-        ob_start();
-        $command->run(array(),
-                      array('omeka_version', $oldVal,),
-                      $this->application);
-        ob_end_clean();
+        $this->assertEquals(get_option('site_title'), 'yee');
     }
 }
