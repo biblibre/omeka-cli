@@ -222,7 +222,7 @@ class PluginCommand extends AbstractCommand
 
             $this->logger->info('downloading from ' . $repoName . '...');
             try {
-                $dest = $repo->download($pluginName, $destDir);
+                $dest = $repo->download($plugin, $destDir);
                 $this->logger->info('downloaded into ' . $dest . '...');
             } catch (\Exception $e) {
                 $this->logger->error('download failed: ' . $e->getMessage());
@@ -299,13 +299,8 @@ class PluginCommand extends AbstractCommand
                 );
             }
 
-            if (isset($toMenu)) {
+            if (isset($toMenu))
                 $chosenIdx = UIUtils::menuPrompt('Choose one', $toMenu);
-                if ($chosenIdx > 0) {
-                    $repoClass = 'OmekaCli\Command\PluginUtil\Repository\GithubRepository';
-                    $repoClass::setUrl($allPlugins[$chosenIdx]['info']['url']); // TODO change it, this is madness.
-                }
-            }
 
             if ($chosenIdx >= 0)
                 $chosenPlugin = $allPlugins[$chosenIdx];
@@ -436,7 +431,8 @@ class PluginCommand extends AbstractCommand
                     shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . ' '
                                      . BASE_DIR   . '/' . $plugin->name . '.bak');
                     try {
-                        $repo->download($plugin->name, PLUGIN_DIR);
+                        $pluginInfo = $repo->find($plugin->name);
+                        $repo->download($pluginInfo, PLUGIN_DIR);
                         if (!$this->save)
                             shell_exec('rm -rf ' . BASE_DIR . '/'. $plugin->name . '.bak');
                     } catch (\Exception $e) {

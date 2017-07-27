@@ -8,16 +8,9 @@ use Github\Exception\ApiLimitExceedException;
 
 class GithubRepository implements RepositoryInterface
 {
-    protected static $url; // TODO change it, this is madness.
-
     public function __construct()
     {
         $this->client = new Client();
-    }
-
-    public static function setUrl($newurl)
-    {
-        self::$url = $newurl;
     }
 
     public function getDisplayName()
@@ -50,14 +43,14 @@ class GithubRepository implements RepositoryInterface
         return (!empty($infos)) ? $infos : null;
     }
 
-    public function download($pluginName, $destDir)
+    public function download($plugin, $destDir)
     {
-        $dest = $destDir . '/' . $pluginName;
+        $dest = $destDir . '/' . $plugin['name'];
         if (file_exists($dest))
             throw new \Exception("destination $dest already exists");
 
         $exitCode = null;
-        $url = self::$url;
+        $url = $plugin['url'];
         system("git clone -q $url $dest", $exitCode);
 
         if ($exitCode !== 0)
