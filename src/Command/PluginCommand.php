@@ -144,13 +144,19 @@ class PluginCommand extends AbstractCommand
 
     protected function activate($pluginName)
     {
-        $plugin = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
+        $plugins = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
 
-        if (empty($plugin)) {
+        if (empty($plugins)) {
             echo 'Error: plugin not installed.' . PHP_EOL;
             return 1;
         }
-        $plugin = $plugin[0];
+        $plugin = $plugins[0];
+
+        $missingDeps = $this->getMissingDependencies($plugin);
+        if (!empty($missingDeps)) {
+            echo 'Error: missing plugins ' . implode(',', $missingDeps) . PHP_EOL;
+            return 1;
+        }
 
         $broker = $plugin->getPluginBroker();
         $loader = new \Omeka_Plugin_Loader($broker,
@@ -338,18 +344,12 @@ class PluginCommand extends AbstractCommand
         $plugin = new \Plugin;
         $plugin->name = $pluginName;
 
-        $ini = parse_ini_file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini');
-        if (isset($ini['required_plugins'])) {
-            $deps = $ini['required_plugins'];
-            $deps = explode(',', $deps);
-            $deps = array_map("trim", $deps);
-            foreach ($deps as $dep) {
-                if (!plugin_is_active($dep)) {
-                    echo 'Error: plugin ' . $dep . ' not active' . PHP_EOL;
-                    return 1;
-                }
-            }
+        $missingDeps = $this->getMissingDependencies($plugin);
+        if (!empty($missingDeps)) {
+            echo 'Error: missing plugins ' . implode(',', $missingDeps) . PHP_EOL;
+            return 1;
         }
+
         $version = $ini['version'];
         $plugin->setIniVersion($version);
         $plugin->setLoaded(true);
@@ -465,5 +465,21 @@ class PluginCommand extends AbstractCommand
         }
 
         return 0;
+    }
+
+    protected function getMissingDependencies($plugin)
+    {
+        $missingDeps = array();
+        $ini = parse_ini_file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini');
+        if (isset($ini['required_plugins'])) {
+            $deps = $ini['required_plugins'];
+            $deps = explode(',', $deps);
+            $deps = array_map("trim", $deps);
+            $deps = array_filter($deps);
+            foreach ($deps as $dep)
+                if (!plugin_is_active($dep))
+                    $missingDeps[] = $dep;
+        }
+        return $missingDeps;
     }
 }
