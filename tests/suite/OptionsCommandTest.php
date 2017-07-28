@@ -38,8 +38,7 @@ final class OptionsCommandTest extends AbstractTest
                       array('omeka_version',),
                       $this->application);
         $output = ob_get_clean();
-
-        $this->assertRegexp('/\A[0-9]+(\.[0-9]+)*\n\z/', $output);
+        $this->assertRegexp('/\A[0-9a-zA-Z]+([\.-][0-9a-zA-Z]+)*\n\z/', $output);
     }
 
     public function testShowErrorOnNonExistingTableEntries()
