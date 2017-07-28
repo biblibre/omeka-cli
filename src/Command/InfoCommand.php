@@ -34,22 +34,15 @@ class InfoCommand extends AbstractCommand
 
     public function run($options, $args, Application $application)
     {
+        echo 'omeka-cli: ';
         if (file_exists(OMEKACLI_PATH . '/.git')) {
-            $c = new Client();
-            $localCommitHash = rtrim(shell_exec('git -C ' . OMEKACLI_PATH . ' rev-parse origin/master'), PHP_EOL);
-            try {
-                $remoteCommitHash = $c->api('repo')->commits()->all('biblibre', 'omeka-cli', array())[0]['sha'];
-                echo 'omeka-cli: ';
-                if ($localCommitHash == $remoteCommitHash)
-                    echo 'up-to-date' . PHP_EOL;
-                else
-                    echo 'new version available' . PHP_EOL;
-            } catch (\RuntimeException $e) {
-                echo $e->getMessage() . PHP_EOL;
-            }
+            $output = shell_exec('git -C ' . OMEKACLI_PATH . ' log --oneline HEAD..@{u}');
+            if (empty($output))
+                echo 'up-to-date' . PHP_EOL;
+            else
+                echo 'new version available' . PHP_EOL;
         } else {
             $remoteVersion = shell_exec('git -C ' . OMEKACLI_PATH . ' ls-remote --tags https://github.com/biblibre/omeka-cli 2>/dev/null | grep -o \'[0-9]\+\.[0-9]\+\.[0-9]\+\' | sort -rV | sed 1q');
-            echo 'omeka-cli: ';
             if (OMEKACLI_VERSION == $remoteVersion)
                 echo 'up-to-date' . PHP_EOL;
             else

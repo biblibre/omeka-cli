@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - plugins backups location.
 
+### Fixed
+- GitHub api limitation with `info` command.
+
 ## [0.14.0] - 2017-07-27
 ### Added
 - `update` command can update a specific plugin.

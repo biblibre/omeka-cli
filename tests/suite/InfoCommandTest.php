@@ -20,7 +20,7 @@ final class InfoCommandTest extends AbstractTest
         $output = ob_get_clean();
 
         $this->assertRegExp(
-'/\A(You have reached GitHub hourly limit! Actual limit is: 60\n)?omeka-cli: (up-to-date|new version available)
+'/\Aomeka-cli: (up-to-date|new version available)
 Omeka base directory: +.+
 Omeka version: +.+ - (up-to-date|new version available)
 Database version: +.+(\nWarning: Omeka version and database version are not the same!)?
