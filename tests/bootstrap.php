@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 define('OMEKACLI_PATH', __DIR__ . '/..');
+define('BACKUPS_DIR', getenv('HOME') . '/.omeka-cli/backups');
 
 use OmekaCli\Application;
 

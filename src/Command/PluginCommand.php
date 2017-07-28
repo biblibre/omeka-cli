@@ -47,12 +47,10 @@ class PluginCommand extends AbstractCommand
                . '    de|deactivate {NAME}' . PHP_EOL
                . '    in|install  {NAME}' . PHP_EOL
                . '    un|uninstall  {NAME}' . PHP_EOL
-               . '    up|update [--save] [--list] {NAME}' . PHP_EOL
+               . '    up|update [--list] {NAME}' . PHP_EOL
                . PHP_EOL
-               . 'The --save option of the update command will save all '
-               . 'plugins before updating them into the Omeka root '
-               . 'directory using name like this: "pluginName.bak".'
-               . PHP_EOL
+               . '`update` command save the old version of the plugin in '
+               . 'the ~/.omeka-cli/backups directory.' . PHP_EOL
                . 'The --info option of the update command will only list '
                . 'which can be updated.'
                . PHP_EOL;
@@ -436,17 +434,22 @@ class PluginCommand extends AbstractCommand
                         echo $plugin->name . PHP_EOL;
                         continue;
                     }
+
+                    $backDir = getenv('HOME') . '/.omeka-cli/backups';
+                    if (!is_dir($backDir))
+                        if (!mkdir($backDir, 0755, true))
+                            if (!UIUtils::confirmPrompt('Cannot create backups directory. Anyway?'))
+                                continue;
+
                     shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . ' '
-                                     . BASE_DIR   . '/' . $plugin->name . '.bak');
+                                     . $backDir . '/' . $plugin->name . '_' . date('YmdHi'));
                     try {
                         $pluginInfo = $repo->find($plugin->name);
                         $repo->download($pluginInfo, PLUGIN_DIR);
-                        if (!$this->save)
-                            shell_exec('rm -rf ' . BASE_DIR . '/'. $plugin->name . '.bak');
                     } catch (\Exception $e) {
                         $this->logger->error('cannot update plugin.');
                         echo $e->getMessage() . PHP_EOL;
-                        shell_exec('mv ' . BASE_DIR   . '/' . $plugin->name . '.bak '
+                        shell_exec('mv ' . $backDir . '/' . $plugin->name . '_' . date('YmdHi') . ' '
                                          . PLUGIN_DIR . '/' . $plugin->name);
                     }
                 }

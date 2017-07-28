@@ -114,9 +114,10 @@ final class PluginCommandTest extends AbstractTest
         $output = ob_get_clean();
 
         $this->assertRegExp('/Info: updating .+\Z/', $this->fakeLogger->getOutput());
-        $this->assertFileExists(BASE_DIR . '/Coins.bak');
-        $this->assertFileIsReadable(BASE_DIR . '/Coins.bak');
-        shell_exec('rm -rf ' . BASE_DIR . '/Coins.bak');
+
+        // May fail, "It's beyond my control".
+        $this->assertFileExists(BACKUPS_DIR . '/Coins_' . date('YmdHi'));
+        $this->assertFileIsReadable(BACKUPS_DIR . '/Coins_' . date('YmdHi'));
     }
 
     public function testCanDeactivateInstalledPlugin()
@@ -151,5 +152,7 @@ final class PluginCommandTest extends AbstractTest
         shell_exec('rm -rf ' . PLUGIN_DIR . '/Coins');
 
         $this->assertEquals('Info: plugin uninstalled.', $this->fakeLogger->getOutput());
+
+        system('rm -rf ' . BACKUPS_DIR . '/*');
     }
 }
