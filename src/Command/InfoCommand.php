@@ -36,7 +36,7 @@ class InfoCommand extends AbstractCommand
     {
         if (file_exists(OMEKACLI_PATH . '/.git')) {
             $c = new Client();
-            $localCommitHash = rtrim(shell_exec('git -C ' . OMEKACLI_PATH . ' rev-parse master'), PHP_EOL);
+            $localCommitHash = rtrim(shell_exec('git -C ' . OMEKACLI_PATH . ' rev-parse origin/master'), PHP_EOL);
             try {
                 $remoteCommitHash = $c->api('repo')->commits()->all('biblibre', 'omeka-cli', array())[0]['sha'];
                 echo 'omeka-cli: ';
