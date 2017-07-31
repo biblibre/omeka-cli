@@ -78,6 +78,7 @@ class Manager
         $this->registerCommand('list',    'OmekaCli\Command\ListCommand');
         $this->registerCommand('options', 'OmekaCli\Command\OptionsCommand');
         $this->registerCommand('plugin',  'OmekaCli\Command\PluginCommand');
+        $this->registerCommand('update',  'OmekaCli\Command\UpdateCommand');
         $this->registerCommand('version', 'OmekaCli\Command\VersionCommand');
 
         $this->registerPluginCommands();
