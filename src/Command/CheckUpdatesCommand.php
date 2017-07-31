@@ -4,7 +4,7 @@ namespace OmekaCli\Command;
 
 use OmekaCli\Application;
 
-class UpdateCommand extends AbstractCommand
+class CheckUpdatesCommand extends AbstractCommand
 {
     public function getDescription()
     {
@@ -14,7 +14,7 @@ class UpdateCommand extends AbstractCommand
     public function getUsage()
     {
         $usage = 'Usage:' . PHP_EOL
-               . '    update' . PHP_EOL
+               . '    check-updates|chup' . PHP_EOL
                . PHP_EOL
                . 'Tell is omeka-cli, Omeka and its plugins are up-to-date.'
                . PHP_EOL;

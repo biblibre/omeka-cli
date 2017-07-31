@@ -1,19 +1,19 @@
 <?php
 
-use OmekaCli\Command\InfoCommand;
+use OmekaCli\Command\CheckUpdatesCommand;
 
 use PHPUnit\Framework\TestCase;
 
 require_once 'AbstractTest.php';
 
 /**
- * @covers UpdateCommand
+ * @covers CheckUpdateCommand
  */
-final class UpdateCommandTest extends AbstractTest
+final class CheckUpdatesCommandTest extends AbstractTest
 {
     public function testIsOutputFormatOk()
     {
-        $command = $this->getCommand('update');
+        $command = $this->getCommand('check-updates');
 
         ob_start();
         $ans = $command->run(array(), array(), $this->application);

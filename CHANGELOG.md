@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - plugins backups location.
+- rename `update` to `check-updates`
 
 ### Fixed
 - GitHub api limitation with `info` command.
