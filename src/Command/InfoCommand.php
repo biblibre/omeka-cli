@@ -31,7 +31,7 @@ class InfoCommand extends AbstractCommand
 
     public function run($options, $args, Application $application)
     {
-        echo 'omeka-cli:            ' . OMEKA_VERSION . PHP_EOL;
+        echo 'omeka-cli:            ' . OMEKACLI_VERSION . PHP_EOL;
 
         if (!$application->isOmekaInitialized()) {
             $this->logger->error('Omeka is not initialized here.');
