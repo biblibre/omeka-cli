@@ -20,15 +20,14 @@ final class InfoCommandTest extends AbstractTest
         $output = ob_get_clean();
 
         $this->assertRegExp(
-'/\Aomeka-cli: (up-to-date|new version available)
+'/\Aomeka-cli: +.+
 Omeka base directory: +.+
-Omeka version: +.+ - (up-to-date|new version available)
+Omeka version: +.+
 Database version: +.+(\nWarning: Omeka version and database version are not the same!)?
 Admin theme: +.+
 Public theme: +.+
 Plugins \(actives\):(\n.+)*
-Plugins \(inactives\):(\n.+)*
-Plugins to update:
+Plugins \(inactives\):
 (.+\n)*\Z/', $output);
     }
 }

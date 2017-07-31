@@ -31,20 +31,7 @@ class InfoCommand extends AbstractCommand
 
     public function run($options, $args, Application $application)
     {
-        echo 'omeka-cli: ';
-        if (file_exists(OMEKACLI_PATH . '/.git')) {
-            $output = shell_exec('git -C ' . OMEKACLI_PATH . ' log --oneline HEAD..@{u}');
-            if (empty($output))
-                echo 'up-to-date' . PHP_EOL;
-            else
-                echo 'new version available' . PHP_EOL;
-        } else {
-            $remoteVersion = shell_exec('git -C ' . OMEKACLI_PATH . ' ls-remote --tags https://github.com/biblibre/omeka-cli 2>/dev/null | grep -o \'[0-9]\+\.[0-9]\+\.[0-9]\+\' | sort -rV | sed 1q');
-            if (OMEKACLI_VERSION == $remoteVersion)
-                echo 'up-to-date' . PHP_EOL;
-            else
-                echo 'new version available' . PHP_EOL;
-        }
+        echo 'omeka-cli:            ' . OMEKA_VERSION . PHP_EOL;
 
         if (!$application->isOmekaInitialized()) {
             $this->logger->error('Omeka is not initialized here.');
@@ -57,11 +44,7 @@ class InfoCommand extends AbstractCommand
         $inactivePlugins = $pluginsTable->findBy(array('active' => 0));
 
         echo 'Omeka base directory: ' . BASE_DIR . PHP_EOL;
-        echo 'Omeka version:        ' . OMEKA_VERSION . ' - ';
-        if (version_compare(OMEKA_VERSION, latest_omeka_version() ) >= 0)
-            echo 'up-to-date' . PHP_EOL;
-        else
-            echo 'new version available' . PHP_EOL;
+        echo 'Omeka version:        ' . OMEKA_VERSION . PHP_EOL;
         echo 'Database version:     ' . get_option('omeka_version') . PHP_EOL;
 
         if (OMEKA_VERSION != get_option('omeka_version'))
@@ -75,10 +58,6 @@ class InfoCommand extends AbstractCommand
         echo 'Plugins (inactives):' . PHP_EOL;
         foreach ($inactivePlugins as $plugin)
             echo $plugin->name . ' - ' . $plugin->version . PHP_EOL;
-        echo 'Plugins to update:' . PHP_EOL;
-        $pluginCommand = new PluginCommand();
-        $pluginCommand->setLogger($this->logger);
-        $pluginCommand->run(array(), array('up', '--list'), $application);
 
         return 0;
     }
