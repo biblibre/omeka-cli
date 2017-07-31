@@ -4,9 +4,6 @@ namespace OmekaCli\Command;
 
 use OmekaCli\Application;
 
-use Github\Client;
-use Github\Exception\RuntimeException;
-
 class InfoCommand extends AbstractCommand
 {
     public function getDescription()
