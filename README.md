@@ -14,6 +14,7 @@ It also provides everything needed for Omeka plugins to create custom commands.
 
     help     print help for a specific command
     info     print informations about current Omeka installation
+    install  install Omeka
     list     list available commands
     options  edit and see the "omeka_options" table
     plugin   manage plugins
