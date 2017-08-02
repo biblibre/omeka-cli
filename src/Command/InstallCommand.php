@@ -56,6 +56,20 @@ class InstallCommand extends AbstractCommand
             }
         }
 
+        $this->logger->info('checking the database');
+        $cwd = getcwd();
+        chdir($dir);
+        ob_start();
+        $application->initialize();
+        ob_end_clean();
+        $db = get_db();
+        $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
+        if (!empty($tables)) {
+            $this->logger->error('database not empty');
+            return 1;
+        }
+        chdir($cwd);
+
         $this->logger->info('copying changeme files');
         $files = array(
             'db.ini',
@@ -84,17 +98,13 @@ class InstallCommand extends AbstractCommand
             $this->configDb($dir . '/db.ini');
         }
 
-        chdir($dir);
-        ob_start();
-        $application->initialize();
-        ob_end_clean();
         $this->logger->info('configuring Omeka');
         $form = new \Omeka_Form_Install();
         $form->init();
         $this->configOmeka($form);
 
         $this->logger->info('installing Omeka');
-        $installer = new \Installer_Default(get_db());
+        $installer = new \Installer_Default($db);
         $installer->setForm($form);
         \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
         try {
