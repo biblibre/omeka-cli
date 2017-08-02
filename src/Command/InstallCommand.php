@@ -5,11 +5,9 @@ namespace OmekaCli\Command;
 use OmekaCli\Application;
 use OmekaCli\UIUtils;
 
-
 use Omeka\Install;
 use Omeka\Form;
 
-// TODO: tests!
 class InstallCommand extends AbstractCommand
 {
     public function getDescription()
@@ -59,46 +57,24 @@ class InstallCommand extends AbstractCommand
         }
 
         $this->logger->info('copying changeme files');
-        // TODO: make a loop
-        if (!file_exists($dir . '/db.ini')) {
-            $ans = copy($dir . '/db.ini.changeme',
-                        $dir . '/db.ini');
-            if (!$ans) {
-                $this->logger->error('cannot copy db.ini.changeme file');
-                return 1;
+        $files = array(
+            'db.ini',
+            '.htaccess',
+            'application/tests/config.ini',
+            'application/tests/config.ini',
+            'application/config/config.ini',
+        );
+        foreach ($files as $file) {
+            if (!file_exists($dir . '/'. $file)) {
+                $ans = copy($dir . '/'. $file . '.changeme',
+                            $dir . '/'. $file);
+                if (!$ans) {
+                    $this->logger->error('cannot copy ' . $file . '.changeme file');
+                    return 1;
+                }
+            } else {
+                $this->logger->info($dir . $file . ' file already exists');
             }
-        } else {
-            $this->logger->info($dir . 'db.ini file already exists');
-        }
-        if (!file_exists($dir . '/.htaccess')) {
-            $ans = copy($dir . '/.htaccess.changeme',
-                        $dir . '/.htaccess');
-            if (!$ans) {
-                $this->logger->error('cannot copy .htaccess.changeme file');
-                return 1;
-            }
-        } else {
-            $this->logger->info($dir . '/.htaccess file already exists');
-        }
-        if (!file_exists($dir . '/application/tests/config.ini')) {
-            $ans = copy($dir . '/application/tests/config.ini.changeme',
-                        $dir . '/application/tests/config.ini');
-            if (!$ans) {
-                $this->logger->error('cannot copy config.ini.changeme file');
-                return 1;
-            }
-        } else {
-            $this->logger->info($dir . '/application/tests/config.ini file already exists');
-        }
-        if (!file_exists($dir . '/application/config/config.ini')) {
-            $ans = copy($dir . '/application/config/config.ini.changeme',
-                        $dir . '/application/config/config.ini');
-            if (!$ans) {
-                $this->logger->error('cannot copy config.ini.changeme file');
-                return 1;
-            }
-        } else {
-            $this->logger->info($dir . '/application/config/config.ini file already exists');
         }
 
         $this->logger->info('configuring database');
