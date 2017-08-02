@@ -46,9 +46,9 @@ class InstallCommand extends AbstractCommand
         } else {
             $this->logger->info('downloading Omeka');
             if (isset($ver))
-                $cmd = 'git clone -b ' . $ver . ' git://github.com/omeka/Omeka ' . $dir;
+                $cmd = 'git clone --depth=1 -b ' . $ver . ' git://github.com/omeka/Omeka ' . $dir;
             else
-                $cmd = 'git clone ' . ' git://github.com/omeka/Omeka ' . $dir;
+                $cmd = 'git clone --depth=1 ' . ' git://github.com/omeka/Omeka ' . $dir;
             exec($cmd, $out, $ans);
             if ($ans) {
                 $this->logger->error('cannot download Omeka');
