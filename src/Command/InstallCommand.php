@@ -77,8 +77,6 @@ class InstallCommand extends AbstractCommand
         $files = array(
             'db.ini',
             '.htaccess',
-            'application/tests/config.ini',
-            'application/tests/config.ini',
             'application/config/config.ini',
         );
         foreach ($files as $file) {
