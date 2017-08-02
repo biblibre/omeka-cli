@@ -6,7 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.15.0] - 2017-08-02
+## [0.16.1] - 2017-08-02
+### Fixed
+- Installation fail when giving two args to `install`.
+- Installation fail when database already in use.
+- Uncaught exceptions.
+- Version in CHANGELOG.md
+
+## [0.16.0] - 2017-08-02
 ### Added
 - `install` command, hellyeah!
 
