@@ -62,11 +62,14 @@ class InstallCommand extends AbstractCommand
         ob_start();
         $application->initialize();
         ob_end_clean();
-        $db = get_db();
-        $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
-        if (!empty($tables)) {
-            $this->logger->error('database not empty');
-            return 1;
+        try {
+            $db = get_db();
+            $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
+            if (!empty($tables)) {
+                $this->logger->error('database not empty');
+                return 1;
+            }
+        } catch (\Exception $e) {
         }
         chdir($cwd);
 
@@ -104,7 +107,7 @@ class InstallCommand extends AbstractCommand
         $this->configOmeka($form);
 
         $this->logger->info('installing Omeka');
-        $installer = new \Installer_Default($db);
+        $installer = new \Installer_Default(get_db());
         $installer->setForm($form);
         \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
         try {
