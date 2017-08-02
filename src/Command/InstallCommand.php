@@ -34,7 +34,7 @@ class InstallCommand extends AbstractCommand
     public function run($options, $args, Application $application)
     {
         if (count($args) == 2) {
-            $ver= $args[2];
+            $ver= array_pop($args);
         } else if (count($args) != 1) {
             echo $this->getUsage();
             return 1;
