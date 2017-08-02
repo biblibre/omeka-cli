@@ -242,8 +242,25 @@ class Application
             \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
         }
 
-        $application->initialize();
-        $this->omekaApplication = $application;
+        $application->getBootstrap()->getPluginResource('Options')->setInstallerRedirect(false);
+
+        try {
+            $bootstrap = $application->getBootstrap();
+            $bootstrap->bootstrap('Db');
+            $db = $bootstrap->getResource('Db');
+        } catch (\Exception $e) {
+            echo $e->getMessage() . PHP_EOL ;
+        }
+
+        if (isset($db)) {
+            try {
+                $db->getTable('Options')->count();
+                $application->initialize();
+                $this->omekaApplication = $application;
+            } catch (\Exception $e) {
+                echo $e->getMessage() . PHP_EOL ;
+            }
+        }
     }
 
     protected function setupCache()
