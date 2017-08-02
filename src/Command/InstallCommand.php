@@ -73,7 +73,7 @@ class InstallCommand extends AbstractCommand
                     return 1;
                 }
             } else {
-                $this->logger->info($dir . $file . ' file already exists');
+                $this->logger->info($dir . '/' . $file . ' file already exists');
             }
         }
 
