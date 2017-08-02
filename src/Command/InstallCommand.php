@@ -97,7 +97,11 @@ class InstallCommand extends AbstractCommand
         $installer = new \Installer_Default(get_db());
         $installer->setForm($form);
         \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
-        $installer->install();
+        try {
+            $installer->install();
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
 
         return 0;
     }
