@@ -105,14 +105,21 @@ class InstallCommand extends AbstractCommand
         $this->configOmeka($form);
 
         $this->logger->info('installing Omeka');
-        $installer = new \Installer_Default(get_db());
+        try {
+            $installer = new \Installer_Default(get_db());
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            return 1;
+        }
         $installer->setForm($form);
         \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
         try {
             $installer->install();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
+            return 1;
         }
+        $this->logger->info('installation successful');
 
         return 0;
     }
