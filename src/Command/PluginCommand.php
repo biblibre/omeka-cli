@@ -224,7 +224,7 @@ class PluginCommand extends AbstractCommand
 
             $this->logger->info('downloading from ' . $repoName . '...');
             try {
-                $dest = $repo->download($plugin, $destDir);
+                $dest = $repo->download($plugin['info'], $destDir);
                 $this->logger->info('downloaded into ' . $dest . '...');
             } catch (\Exception $e) {
                 $this->logger->error('download failed: ' . $e->getMessage());
