@@ -56,23 +56,6 @@ class InstallCommand extends AbstractCommand
             }
         }
 
-        $this->logger->info('checking the database');
-        $cwd = getcwd();
-        chdir($dir);
-        ob_start();
-        $application->initialize();
-        ob_end_clean();
-        try {
-            $db = get_db();
-            $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
-            if (!empty($tables)) {
-                $this->logger->error('database not empty');
-                return 1;
-            }
-        } catch (\Exception $e) {
-        }
-        chdir($cwd);
-
         $this->logger->info('copying changeme files');
         $files = array(
             'db.ini',
@@ -98,6 +81,23 @@ class InstallCommand extends AbstractCommand
                         $dir . '/db.ini');
             $this->configDb($dir . '/db.ini');
         }
+
+        $this->logger->info('checking the database');
+        $cwd = getcwd();
+        chdir($dir);
+        ob_start();
+        $application->initialize();
+        ob_end_clean();
+        try {
+            $db = get_db();
+            $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
+            if (!empty($tables)) {
+                $this->logger->error('database not empty');
+                return 1;
+            }
+        } catch (\Exception $e) {
+        }
+        chdir($cwd);
 
         $this->logger->info('configuring Omeka');
         $form = new \Omeka_Form_Install();
