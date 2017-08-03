@@ -21,6 +21,8 @@ class GithubRepository implements RepositoryInterface
     public function find($pluginName)
     {
         $possibleRepos = $this->findRepo($pluginName);
+        if (!$possibleRepos)
+            return null;
         $infos = array();
 
         foreach ($possibleRepos as $repo) {
@@ -98,10 +100,15 @@ class GithubRepository implements RepositoryInterface
         $ans = array();
 
         foreach ($repos as $repo) {
-            $files = $this->client->api('repo')->contents()->show(
-                $repo['owner']['login'],
-                $repo['name']
-            );
+            try {
+                $files = $this->client->api('repo')->contents()->show(
+                    $repo['owner']['login'],
+                    $repo['name']
+                );
+            } catch (\Exception $e) {
+                echo 'Warning: ' . $e->getMessage() . PHP_EOL;
+                return null;
+            }
 
             // Search <name>Plugin.php file.
             $phpFileFound = false;
