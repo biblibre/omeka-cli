@@ -80,6 +80,7 @@ class Manager
         $this->registerCommand('options',       'OmekaCli\Command\OptionsCommand');
         $this->registerCommand('plugin',        'OmekaCli\Command\PluginCommand');
         $this->registerCommand('check-updates', 'OmekaCli\Command\CheckUpdatesCommand', array('chup'));
+        $this->registerCommand('upgrade',       'OmekaCli\Command\UpgradeCommand');
         $this->registerCommand('version',       'OmekaCli\Command\VersionCommand');
 
         $this->registerPluginCommands();
