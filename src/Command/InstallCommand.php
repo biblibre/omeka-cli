@@ -5,9 +5,6 @@ namespace OmekaCli\Command;
 use OmekaCli\Application;
 use OmekaCli\UIUtils;
 
-use Omeka\Install;
-use Omeka\Form;
-
 class InstallCommand extends AbstractCommand
 {
     public function getDescription()
@@ -46,9 +43,9 @@ class InstallCommand extends AbstractCommand
         } else {
             $this->logger->info('downloading Omeka');
             if (isset($ver))
-                $cmd = 'git clone --depth=1 -b ' . $ver . ' git://github.com/omeka/Omeka ' . $dir;
+                $cmd = 'git clone -b ' . $ver . ' https://github.com/omeka/Omeka ' . $dir;
             else
-                $cmd = 'git clone --depth=1 ' . ' git://github.com/omeka/Omeka ' . $dir;
+                $cmd = 'git clone ' . ' https://github.com/omeka/Omeka ' . $dir;
             exec($cmd, $out, $ans);
             if ($ans) {
                 $this->logger->error('cannot download Omeka');
@@ -83,11 +80,7 @@ class InstallCommand extends AbstractCommand
         }
 
         $this->logger->info('checking the database');
-        $cwd = getcwd();
-        chdir($dir);
-        ob_start();
-        $application->initialize();
-        ob_end_clean();
+        require_once($dir . '/bootstrap.php');
         try {
             $db = get_db();
             $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
@@ -97,9 +90,9 @@ class InstallCommand extends AbstractCommand
             }
         } catch (\Exception $e) {
         }
-        chdir($cwd);
 
         $this->logger->info('configuring Omeka');
+        require_once(FORM_DIR . '/Install.php');
         $form = new \Omeka_Form_Install();
         $form->init();
         $this->configOmeka($form);
