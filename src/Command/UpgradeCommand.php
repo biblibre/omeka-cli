@@ -134,7 +134,6 @@ class UpgradeCommand extends AbstractCommand
 
     protected function saveOmeka()
     {
-        $dir = opendir(BASE_DIR); 
         if (!is_dir(getenv('HOME') . '/.omeka-cli/backups')) {
             if (!is_dir(getenv('HOME') . '/.omeka-cli'))
                 mkdir(getenv('HOME') . '/.omeka-cli');
