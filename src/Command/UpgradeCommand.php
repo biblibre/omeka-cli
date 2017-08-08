@@ -45,10 +45,11 @@ class UpgradeCommand extends AbstractCommand
         }
 
         $this->logger->info('saving database');
-        if ($this->backupDb()) {
+        if ($this->saveDb()) {
             $this->logger->error('database dumping failed');
             return 1;
         }
+        $this->logger->info('database saved in ~/.omeka-cli/backups/omeka_db_backup.sql');
 
         $this->logger->info('deactivating plugins');
         $this->deactivatePlugins();
@@ -58,6 +59,7 @@ class UpgradeCommand extends AbstractCommand
             $this->logger->error('cannot save Omeka');
             return 1;
         }
+        $this->logger->info('Omeka saved in ~/.omeka-cli/backups/Omeka');
 
         $this->logger->info('upgrading Omeka');
         if ($this->upgradeOmeka($lastVersion)) {
@@ -86,7 +88,7 @@ class UpgradeCommand extends AbstractCommand
         return version_compare(OMEKA_VERSION, $lastVersion) < 0 ? $lastVersion : null;
     }
 
-    protected function backupDb()
+    protected function saveDb()
     {
         if (!is_dir(getenv('HOME') . '/.omeka-cli/backups')) {
             if (!is_dir(getenv('HOME') . '/.omeka-cli'))
@@ -180,12 +182,19 @@ class UpgradeCommand extends AbstractCommand
             $infos[$line[0]] = $line[1];
         }
 
-        exec('cp -fr ' . getenv('HOME') . '/.omeka-cli/backups/Omeka'. ' ' . BASE_DIR , $out, $ans1);
-        exec('mysqldump -h\'' . $infos['host']     . '\''
-           . ' -u\'' .          $infos['username'] . '\''
-           . ' -p\'' .          $infos['password'] . '\''
-           . ' \'' .            $infos['dbname']   . '\''
-           . ' < ~/.omeka-cli/backups/omeka_db_backup.sql', $out, $ans2);
+        if (UIUtils::confirmPrompt('Do you want to recover Omeka?')) {
+            exec('cp -fr ' . getenv('HOME') . '/.omeka-cli/backups/Omeka'. ' ' . BASE_DIR , $out, $ans1);
+            if (UIUtils::confirmPrompt('Do you want to recover the database?'))
+                exec('mysql -h\'' .     $infos['host']     . '\''
+                   . ' -u\'' .          $infos['username'] . '\''
+                   . ' -p\'' .          $infos['password'] . '\''
+                   . ' \'' .            $infos['dbname']   . '\''
+                   . ' < ~/.omeka-cli/backups/omeka_db_backup.sql', $out, $ans2);
+            else
+                return 1;
+        } else {
+            return 1;
+        }
 
         return $ans1 | $ans2;
     }
