@@ -163,9 +163,12 @@ class UpgradeCommand extends AbstractCommand
     protected function recover()
     {
         if (!is_dir(getenv('HOME') . '/.omeka-cli/backups')) {
-            if (!is_dir(getenv('HOME') . '/.omeka-cli'))
-                mkdir(getenv('HOME') . '/.omeka-cli');
-            mkdir(getenv('HOME') . '/.omeka-cli/backups');
+            $this->logger->error('no backups directory found');
+            return 1;
+        }
+        if (count(scandir(getenv('HOME') . '/.omeka-cli/backups')) == 2) {
+            $this->logger->error('no backup found');
+            return 1;
         }
         $lines = file(BASE_DIR . '/db.ini', FILE_IGNORE_NEW_LINES);
         $lines = array_filter(
