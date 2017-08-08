@@ -31,29 +31,77 @@ class InstallCommand extends AbstractCommand
     public function run($options, $args, Application $application)
     {
         if (count($args) == 2) {
-            $ver= array_pop($args);
+            $ver = array_pop($args);
         } else if (count($args) != 1) {
             echo $this->getUsage();
             return 1;
+        } else {
+            $ver = null;
         }
         $dir = array_pop($args);
 
-        if (file_exists($dir)) {
-            $this->logger->info($dir . ' directory already exists');
-        } else {
-            $this->logger->info('downloading Omeka');
-            if (isset($ver))
-                $cmd = 'git clone -b ' . $ver . ' https://github.com/omeka/Omeka ' . $dir;
-            else
-                $cmd = 'git clone ' . ' https://github.com/omeka/Omeka ' . $dir;
-            exec($cmd, $out, $ans);
-            if ($ans) {
-                $this->logger->error('cannot download Omeka');
-                return 1;
-            }
+        $this->logger->info('downloading Omeka');
+        if ($this->dlOmeka($dir, $ver)) {
+            $this->logger->error('installation failed');
+            return 1;
         }
 
         $this->logger->info('copying changeme files');
+        if ($this->copyFiles($dir)) {
+            $this->logger->error('installation failed');
+            return 1;
+        }
+
+        $this->logger->info('configuring database');
+        $this->configDb($dir);
+
+        $this->logger->info('checking the database');
+        if ($this->checkDb($dir)) {
+            $this->logger->error('installation failed');
+            return 1;
+        }
+
+        $this->logger->info('configuring Omeka');
+        $form = $this->configOmeka($form);
+
+        $this->logger->info('installing Omeka');
+        if ($this->installOmeka($form)) {
+            $this->logger->error('installation failed');
+            return 1;
+        }
+        $this->logger->info('installation successful');
+
+        return 0;
+    }
+
+    protected function dlOmeka($dir, $ver)
+    {
+        if (!is_dir($dir) || count(scandir($dir)) == 2) {
+            if (isset($ver)) {
+                $cmd = 'git clone -b ' . $ver . ' https://github.com/omeka/Omeka ' . $dir;
+            } else {
+                $lastVersion = shell_exec('git ls-remote --tags https://github.com/omeka/Omeka | grep -ho \'v[0-9]\+\(\.[0-9]\+\)*\' | tail -n1 | tr -d \'\n\'');
+                $cmd = 'git clone -b ' . $lastVersion . ' https://github.com/omeka/Omeka ' . $dir;
+            }
+            exec($cmd, $out, $ans);
+            if ($ans) {
+                $this->logger->error('cannot clone Omeka repository');
+                return 1;
+            }
+        } elseif (!(file_exists($dir . '/.git')
+              &&    file_exists($dir . '/db.ini.changeme')
+              &&    file_exists($dir . '/bootstrap.php'))) {
+            $this->logger->info('Omeka already downloaded');
+        } else {
+            $this->logger->error($dir . ' not empty');
+            return 1;
+        }
+
+        return 0;
+    }
+
+    protected function copyFiles($dir)
+    {
         $files = array(
             'db.ini',
             '.htaccess',
@@ -72,53 +120,14 @@ class InstallCommand extends AbstractCommand
             }
         }
 
-        $this->logger->info('configuring database');
-        if (preg_match('/XXXXXXX/', file_get_contents($dir . '/db.ini'))) {
-            $ans = copy($dir . '/db.ini.changeme',
-                        $dir . '/db.ini');
-            $this->configDb($dir . '/db.ini');
-        }
-
-        $this->logger->info('checking the database');
-        require_once($dir . '/bootstrap.php');
-        try {
-            $db = get_db();
-            $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
-            if (!empty($tables)) {
-                $this->logger->error('database not empty');
-                return 1;
-            }
-        } catch (\Exception $e) {
-        }
-
-        $this->logger->info('configuring Omeka');
-        require_once(FORM_DIR . '/Install.php');
-        $form = new \Omeka_Form_Install();
-        $form->init();
-        $this->configOmeka($form);
-
-        $this->logger->info('installing Omeka');
-        try {
-            $installer = new \Installer_Default(get_db());
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            return 1;
-        }
-        $installer->setForm($form);
-        \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
-        try {
-            $installer->install();
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            return 1;
-        }
-        $this->logger->info('installation successful');
-
         return 0;
     }
 
-    protected function configDb($dbini)
+    protected function configDb($dir)
     {
+        $dbini = $dir . '/db.ini';
+        if (preg_match('/XXXXXXX/', file_get_contents($dbini)))
+            copy($dbini . '.changeme', $dbini);
         do {
             echo 'host: '; $host = trim(fgets(STDIN));
             echo 'username: '; $username = trim(fgets(STDIN));
@@ -137,8 +146,26 @@ class InstallCommand extends AbstractCommand
         exec('sed -i \'0,/XXXXXXX/s//' . $dbname   . '/\' ' . $dbini);
     }
 
+    protected function checkDb($dir)
+    {
+        require_once($dir . '/bootstrap.php');
+        try {
+            $db = get_db();
+            $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
+            if (!empty($tables)) {
+                $this->logger->error('database not empty');
+                return 1;
+            }
+        } catch (\Exception $e) { }
+
+        return 0;
+    }
+
     protected function configOmeka($form)
     {
+        require_once(FORM_DIR . '/Install.php');
+        $form = new \Omeka_Form_Install();
+        $form->init();
         do {
             echo 'username: '; $username = trim(fgets(STDIN));
             echo 'password: ' . "\x1b[8m"; $password = trim(fgets(STDIN)); echo "\x1b[0m";
@@ -173,5 +200,25 @@ class InstallCommand extends AbstractCommand
             echo 'site_title:          ' . $site_title . PHP_EOL;
             echo 'administrator_email: ' . $administrator_email . PHP_EOL;
         } while (!$formIsValid || !UIUtils::confirmPrompt('Are those informations correct?'));
+    }
+
+    protected function installOmeka($form)
+    {
+        try {
+            $installer = new \Installer_Default(get_db());
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            return 1;
+        }
+        $installer->setForm($form);
+        \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
+        try {
+            $installer->install();
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+            return 1;
+        }
+
+        return 0;
     }
 }
