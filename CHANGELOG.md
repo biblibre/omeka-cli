@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Ability to reconfigure the DB when revovering a snapshot.
 
+### Changed
+- Add --no-prompt option to help.
+
 ## [0.17.0] - 2017-08-08
 ### Changed
 - `install` command installs last tagged version by default.

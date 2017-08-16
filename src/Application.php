@@ -56,7 +56,7 @@ class Application
     {
         $usage = "Usage:\n"
             . "\tomeka-cli --help\n"
-            . "\tomeka-cli [-C <omeka-path>] COMMAND [ARGS...]\n"
+            . "\tomeka-cli [-C <omeka-path>] [--no-prompt] COMMAND [ARGS...]\n"
             . "\n";
 
         return $usage;
