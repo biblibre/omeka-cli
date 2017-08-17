@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Add --no-prompt option to help.
 
+### Removed
+- `plugin *` commands.
+
 ## [0.17.0] - 2017-08-08
 ### Changed
 - `install` command installs last tagged version by default.

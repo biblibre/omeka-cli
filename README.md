@@ -19,7 +19,6 @@ commands.
     install        install Omeka
     list           list available commands
     options        edit and see the "omeka_options" table
-    plugin         manage plugins
     snapshot       create or recover a snapshot
     upgrade        upgrade Omeka
     version        print version of omeka-cli
