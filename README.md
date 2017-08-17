@@ -1,9 +1,10 @@
 # Omeka CLI
 
-Command line tool for [Omeka](http://omeka.org/)
+Command line tool for [Omeka][omeka]
 
 This tool allows to interact with Omeka by using a command line interface.
-It also provides everything needed for Omeka plugins to create custom commands.
+It also provides everything needed for Omeka plugins to create custom
+commands.
 
 ## Usage
 
@@ -34,31 +35,28 @@ It also provides everything needed for Omeka plugins to create custom commands.
 
 ## Creating custom commands
 
-To create a custom command, put the following code in the `initialize` hook of
-your plugin's main class:
+To create a custom command named `bar` with the Foo plugin, put the
+following code in the `initialize` hook of your plugin's main class:
 
 ```php
 $events = Zend_EventManager_StaticEventManager::getInstance();
 $events->attach('OmekaCli', 'commands', function() {
-    return array(
-        'myplugin:mycommand' => array(
-            'class' => 'MyPlugin_MyCommand',
-            'aliases' => array('mycommand'),
-        ),
-    );
+    return array(array(
+        'class' => 'Foo_Bar',
+        'aliases' => array('bar'),
+    ));
 });
 ```
 
-and define a class `MyPlugin_MyCommand` which implements
-[OmekaCli\Command\CommandInterface](src/Command/CommandInterface.php)
+and define a class `Foo_Bar` which extends
+[OmekaCli\Command\AbstractCommands](src/Command/AbstractCommands.php)
 
 Then you will be able to run
 
-    $ omeka-cli myplugin:mycommand [OPTION...] [ARG...]
+    $ omeka-cli bar [OPTION...] [ARG...]
 
-or, using the alias,
-
-    $ omeka-cli mycommand [OPTION...] [ARG...]
+Read this [example][example] to see how to create a custom command from a
+plugin in practice.
 
 ## Running tests
 
@@ -66,10 +64,13 @@ or, using the alias,
 
 If you want to test `omeka-cli`, run:
 
-    $ OMEKA_PATH=<path_to_omeka> vendor/bin/phpunit -c tests/phpunit.xml 
+    $ OMEKA_PATH=<path_to_omeka> vendor/bin/phpunit -c tests/phpunit.xml
 
 The environment variable `OMEKA_PATH` must be defined to run the tests.
 
 ## License
 
 GPL 3.0+
+
+[example]: https://github.com/biblibre/omeka-plugin-Foo
+[omeka]:   http://omeka.org/
