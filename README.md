@@ -41,17 +41,23 @@ following code in the `initialize` hook of your plugin's main class:
 ```php
 $events = Zend_EventManager_StaticEventManager::getInstance();
 $events->attach('OmekaCli', 'commands', function() {
-    return array(array(
-        'class' => 'Foo_Bar',
-        'aliases' => array('bar'),
-    ));
+    return array(
+        'Foo:Bar' => array(
+            'class' => 'Foo_Bar',
+            'aliases' => array('bar'),
+        ),
+    );
 });
 ```
 
 and define a class `Foo_Bar` which extends
 [OmekaCli\Command\AbstractCommands](src/Command/AbstractCommands.php)
 
-Then you will be able to run
+Then you will be able to run the command either this way:
+
+    $ omeka-cli Foo:Bar [OPTION...] [ARG...]
+
+or using the alias:
 
     $ omeka-cli bar [OPTION...] [ARG...]
 
