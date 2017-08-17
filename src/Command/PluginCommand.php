@@ -398,6 +398,7 @@ class PluginCommand extends AbstractCommand
 
         $c = new Client();
         $plugins = get_db()->getTable('Plugin')->findBy($pluginName == null ? array() : array('name' => $pluginName));
+        $pluginsAreUpToDate = true;
         foreach ($plugins as $plugin) {
             if (!$this->listOnly)
                 $this->logger->info('updating ' . $plugin->name);
@@ -410,8 +411,9 @@ class PluginCommand extends AbstractCommand
                 }
                 shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' fetch 2>/dev/null');
                 $output = shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' log --oneline HEAD..@{u}');
-                if (empty($output)) {
-                    $this->logger->info('up-to-date.');
+                if (!empty($output)) {
+                    $pluginsAreUpToDate = false;
+                } else {
                     continue;
                 }
                 if ($this->listOnly) {
@@ -464,8 +466,11 @@ class PluginCommand extends AbstractCommand
                 $version = parse_ini_file(PLUGIN_DIR . '/' . $plugin->name . '/plugin.ini')['version'];
                 $plugin->setIniVersion($version);
             }
+            $this->logger->info('Upgrading ' . $plugin->name);
             $installer->upgrade($plugin);
         }
+        if ($pluginsAreUpToDate)
+            $this->logger->info('All plugins are up-to-date');
 
         return 0;
     }
