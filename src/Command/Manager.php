@@ -79,10 +79,12 @@ class Manager
         $this->registerCommand('install',       'OmekaCli\Command\InstallCommand');
         $this->registerCommand('list',          'OmekaCli\Command\ListCommand');
         $this->registerCommand('options',       'OmekaCli\Command\OptionsCommand');
-        $this->registerCommand('plugin',        'OmekaCli\Command\PluginCommands\PluginCommand');
         $this->registerCommand('snapshot',      'OmekaCli\Command\SnapshotCommand', array('snap'));
         $this->registerCommand('upgrade',       'OmekaCli\Command\UpgradeCommand');
         $this->registerCommand('version',       'OmekaCli\Command\VersionCommand');
+
+        $this->registerCommand('plugin-activate', 'OmekaCli\Command\PluginCommands\Activate', array('plac'));
+        $this->registerCommand('plugin-deactivate', 'OmekaCli\Command\PluginCommands\Deactivate', array('plde'));
 
         $this->registerPluginCommands();
     }
