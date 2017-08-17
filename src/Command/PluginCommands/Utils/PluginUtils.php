@@ -11,12 +11,8 @@ class PluginUtils
     public static function getPlugin($pluginName)
     {
         $plugins = get_db()->getTable('Plugin')->findBy(array('name' => $pluginName));
-        if (empty($plugins)) {
-            $this->logger->error('plugin not installed');
-            return 1;
-        }
 
-        return array_pop($plugins);
+        return empty($plugins) ? null : array_pop($plugins);
     }
 
     public static function getMissingDependencies($plugin)
@@ -34,5 +30,16 @@ class PluginUtils
         }
 
         return $missingDeps;
+    }
+
+    public static function getInstaller($plugin)
+    {
+        $broker = $plugin->getPluginBroker();
+        $loader = new \Omeka_Plugin_Loader($broker,
+                                           new \Omeka_Plugin_Ini(PLUGIN_DIR),
+                                           new \Omeka_Plugin_Mvc(PLUGIN_DIR),
+                                           PLUGIN_DIR);
+
+        return new \Omeka_Plugin_Installer($broker, $loader);
     }
 }
