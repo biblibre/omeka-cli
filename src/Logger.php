@@ -21,7 +21,11 @@ class Logger extends AbstractLogger
     protected function getMessage($level, $message, $context)
     {
         $message = $this->interpolate($message, $context);
-        return sprintf('%s: %s', ucfirst($level), $message);
+        if ($level == LogLevel::INFO)
+            $msg = sprintf('%s', $message);
+        else
+            $msg = sprintf('%s: %s', ucfirst($level), $message);
+        return $msg;
     }
 
     protected function isLogLevelKnown($level)
