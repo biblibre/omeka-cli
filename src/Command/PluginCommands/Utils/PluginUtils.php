@@ -2,6 +2,9 @@
 
 namespace OmekaCli\Command\PluginCommands\Utils;
 
+use OmekaCli\Command\PluginCommands\Utils\Repository\OmekaDotOrgRepository;
+use OmekaCli\Command\PluginCommands\Utils\Repository\GithubRepository;
+
 use Omeka\Plugin;
 use Omeka\Plugin\Broker;
 use Omeka\Plugin\Installer;
@@ -46,5 +49,34 @@ class PluginUtils
                                            PLUGIN_DIR);
 
         return new \Omeka_Plugin_Installer($broker, $loader);
+    }
+
+    public static function findAvailablePlugins($pluginName, $no_prompt = false)
+    {
+        $plugins = array();
+
+        $repo = new OmekaDotOrgRepository;
+        $pluginInfo = $repo->find($pluginName);
+        if ($pluginInfo) {
+            $pluginsOmeka[] = array(
+                'info'       => $pluginInfo,
+                'repository' => $repo,
+            );
+        }
+
+        if (!$no_prompt) {
+            $repo = new GithubRepository;
+            foreach ($repo->find($pluginName) as $info) {
+                $pluginsGitHub[] = array(
+                    'info'       => $info,
+                    'repository' => $repo,
+                );
+            }
+        }
+
+        return array(
+            'atOmeka'  => empty($pluginsOmeka)  ? array() : $pluginsOmeka,
+            'atGithub' => empty($pluginsGitHub) ? array() : $pluginsGitHub,
+        );
     }
 }

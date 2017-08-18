@@ -31,6 +31,7 @@ Plugin related commands
     plugin-deactivate  deactivate a plugin
     plugin-install     install a plugin
     plugin-uninstall   uninstall a plugin
+    plugin-downloads   downloads a plugin
 
 ## Installation
 
