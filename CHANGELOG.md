@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- `plugin-{,un}install` commands.
 - `plugin-{,de}activate` commands.
 - `plugin-activate` command.
 - Ability to reconfigure the DB when revovering a snapshot.

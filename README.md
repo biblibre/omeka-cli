@@ -13,6 +13,8 @@ commands.
 
 ## Available commands
 
+General commands
+
     check-updates  check for updates
     help           print help for a specific command
     info           print informations about current Omeka installation
@@ -22,6 +24,13 @@ commands.
     snapshot       create or recover a snapshot
     upgrade        upgrade Omeka
     version        print version of omeka-cli
+
+Plugin related commands
+
+    plugin-activate    activate a plugin
+    plugin-deactivate  deactivate a plugin
+    plugin-install     install a plugin
+    plugin-uninstall   uninstall a plugin
 
 ## Installation
 

@@ -85,6 +85,8 @@ class Manager
 
         $this->registerCommand('plugin-activate', 'OmekaCli\Command\PluginCommands\Activate', array('plac'));
         $this->registerCommand('plugin-deactivate', 'OmekaCli\Command\PluginCommands\Deactivate', array('plde'));
+        $this->registerCommand('plugin-install', 'OmekaCli\Command\PluginCommands\Install', array('plin'));
+        $this->registerCommand('plugin-uninstall', 'OmekaCli\Command\PluginCommands\Uninstall', array('plun'));
 
         $this->registerPluginCommands();
     }
