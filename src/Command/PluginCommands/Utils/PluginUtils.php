@@ -15,10 +15,15 @@ class PluginUtils
         return empty($plugins) ? null : array_pop($plugins);
     }
 
+    public static function getIniInfos($pluginName)
+    {
+        return parse_ini_file(PLUGIN_DIR . '/' . $pluginName . '/plugin.ini');
+    }
+
     public static function getMissingDependencies($pluginName)
     {
         $missingDeps = array();
-        $ini = parse_ini_file(PLUGIN_DIR . '/' . $pluginName . '/plugin.ini');
+        $ini = self::getIniInfos($pluginName);
         if (isset($ini['required_plugins'])) {
             $deps = $ini['required_plugins'];
             $deps = explode(',', $deps);
