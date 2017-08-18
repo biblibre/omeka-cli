@@ -43,7 +43,7 @@ class Activate extends AbstractCommand
         }
 
         $this->logger->info('Checking dependencies');
-        $missingDeps = PUtils::getMissingDependencies($plugin);
+        $missingDeps = PUtils::getMissingDependencies($plugin->name);
         if (!empty($missingDeps)) {
             $this->logger->error('missing plugins ' . implode(',', $missingDeps));
             return 1;
