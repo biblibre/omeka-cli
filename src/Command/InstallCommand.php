@@ -67,7 +67,7 @@ class InstallCommand extends AbstractCommand
         }
 
         $this->logger->info('configuring Omeka');
-        $form = $this->configOmeka($form);
+        $form = $this->configOmeka();
 
         $this->logger->info('installing Omeka');
         if ($this->installOmeka($form)) {
@@ -165,7 +165,7 @@ class InstallCommand extends AbstractCommand
         return 0;
     }
 
-    protected function configOmeka($form)
+    protected function configOmeka()
     {
         require_once(FORM_DIR . '/Install.php');
         $form = new \Omeka_Form_Install();
@@ -204,6 +204,8 @@ class InstallCommand extends AbstractCommand
             echo 'site_title:          ' . $site_title . PHP_EOL;
             echo 'administrator_email: ' . $administrator_email . PHP_EOL;
         } while (!$formIsValid || !UIUtils::confirmPrompt('Are those informations correct?'));
+
+        return $form;
     }
 
     protected function installOmeka($form)
