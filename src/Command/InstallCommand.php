@@ -56,6 +56,11 @@ class InstallCommand extends AbstractCommand
         $this->configDb($dir);
 
         $this->logger->info('checking the database');
+        $cwd = getcwd();
+        chdir($dir);
+        ob_start();
+        $application->initialize();
+        ob_end_clean();
         if ($this->checkDb($dir)) {
             $this->logger->error('installation failed');
             return 1;
@@ -148,7 +153,6 @@ class InstallCommand extends AbstractCommand
 
     protected function checkDb($dir)
     {
-        require_once($dir . '/bootstrap.php');
         try {
             $db = get_db();
             $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
