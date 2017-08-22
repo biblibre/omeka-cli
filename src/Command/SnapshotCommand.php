@@ -116,7 +116,7 @@ class SnapshotCommand extends AbstractCommand
             return 1;
         }
 
-        $this->logger->info('snapshot created: ' . $snapPath . '/Omeka.tar.gz');
+        $this->logger->info('snapshot created: ' . $snapPath . '.tar');
 
         return 0;
     }
