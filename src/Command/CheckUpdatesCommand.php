@@ -3,6 +3,7 @@
 namespace OmekaCli\Command;
 
 use OmekaCli\Application;
+use OmekaCli\Command\PluginCommands\Update;
 
 class CheckUpdatesCommand extends AbstractCommand
 {
@@ -57,8 +58,8 @@ class CheckUpdatesCommand extends AbstractCommand
             $this->logger->warning('Omeka version and database version do not match!');
 
         $this->logger->info('Plugins to update:');
-        $pluginCommand = new PluginCommand();
-        $pluginCommand->setLogger($this->logger);
-        return $pluginCommand->run(array(), array('up', '--list'), $application);
+        $updateCommand = new Update();
+        $updateCommand->setLogger($this->logger);
+        return $updateCommand->run(array('list' => true), array(), $application);
     }
 }
