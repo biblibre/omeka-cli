@@ -134,16 +134,16 @@ class InstallCommand extends AbstractCommand
         if (preg_match('/XXXXXXX/', file_get_contents($dbini)))
             copy($dbini . '.changeme', $dbini);
         do {
-            echo 'host: '; $host = trim(fgets(STDIN));
-            echo 'username: '; $username = trim(fgets(STDIN));
-            echo 'password: '; $password = trim(fgets(STDIN));
-            echo 'dbname: '; $dbname = trim(fgets(STDIN));
+            fprintf(STDERR, 'host: '); $host = trim(fgets(STDIN));
+            fprintf(STDERR, 'username: '); $username = trim(fgets(STDIN));
+            fprintf(STDERR, 'password: '); $password = trim(fgets(STDIN));
+            fprintf(STDERR, 'dbname: '); $dbname = trim(fgets(STDIN));
 
-            echo PHP_EOL;
-            echo 'host:     ' . $host . PHP_EOL;
-            echo 'username: ' . $username . PHP_EOL;
-            echo 'password: ' . $password . PHP_EOL;
-            echo 'dbname:   ' . $dbname . PHP_EOL;
+            fprintf(STDERR, PHP_EOL);
+            fprintf(STDERR, 'host:     ' . $host . PHP_EOL);
+            fprintf(STDERR, 'username: ' . $username . PHP_EOL);
+            fprintf(STDERR, 'password: ' . $password . PHP_EOL);
+            fprintf(STDERR, 'dbname:   ' . $dbname . PHP_EOL);
         } while (!UIUtils::confirmPrompt('Are those informations correct?'));
         exec('sed -i \'0,/XXXXXXX/s//' . $host     . '/\' ' . $dbini);
         exec('sed -i \'0,/XXXXXXX/s//' . $username . '/\' ' . $dbini);
@@ -171,12 +171,12 @@ class InstallCommand extends AbstractCommand
         $form = new \Omeka_Form_Install();
         $form->init();
         do {
-            echo 'username: '; $username = trim(fgets(STDIN));
-            echo 'password: ' . "\x1b[8m"; $password = trim(fgets(STDIN)); echo "\x1b[0m";
-            echo 'password_confirm: ' . "\x1b[8m"; $password_confirm = trim(fgets(STDIN)); echo "\x1b[0m";
-            echo 'super_email: '; $super_email = trim(fgets(STDIN));
-            echo 'site_title: '; $site_title = trim(fgets(STDIN));
-            echo 'administrator_email: '; $administrator_email = trim(fgets(STDIN));
+            fprintf(STDERR, 'username: '); $username = trim(fgets(STDIN));
+            fprintf(STDERR, 'password: ' . "\x1b[8m"); $password = trim(fgets(STDIN)); fprintf(STDERR, "\x1b[0m");
+            fprintf(STDERR, 'password_confirm: ' . "\x1b[8m"); $password_confirm = trim(fgets(STDIN)); fprintf(STDERR, "\x1b[0m");
+            fprintf(STDERR, 'super_email: '); $super_email = trim(fgets(STDIN));
+            fprintf(STDERR, 'site_title: '); $site_title = trim(fgets(STDIN));
+            fprintf(STDERR, 'administrator_email: '); $administrator_email = trim(fgets(STDIN));
             $formIsValid = $form->isValid(array(
                 'username' => $username,
                 'password' => $password,
@@ -192,17 +192,17 @@ class InstallCommand extends AbstractCommand
                 'per_page_public' => '10',
             ));
             if (!$formIsValid) {
-                echo 'The following fields are not do not match a condition.' . PHP_EOL;
+                fprintf(STDERR, 'The following fields are not do not match a condition.' . PHP_EOL);
                 $errors = $form->getErrors();
                 $errors = array_filter($errors, function($var) { return !empty($var); });
                 foreach (array_keys($errors) as $field)
-                    echo $field . ': ' . implode(', ', $errors[$field]) . PHP_EOL;
+                    fprintf(STDERR, $field . ': ' . implode(', ', $errors[$field]) . PHP_EOL);
             }
-            echo PHP_EOL;
-            echo 'username:            ' . $username . PHP_EOL;
-            echo 'super_email:         ' . $super_email . PHP_EOL;
-            echo 'site_title:          ' . $site_title . PHP_EOL;
-            echo 'administrator_email: ' . $administrator_email . PHP_EOL;
+            fprintf(STDERR, PHP_EOL);
+            fprintf(STDERR, 'username:            ' . $username . PHP_EOL);
+            fprintf(STDERR, 'super_email:         ' . $super_email . PHP_EOL);
+            fprintf(STDERR, 'site_title:          ' . $site_title . PHP_EOL);
+            fprintf(STDERR, 'administrator_email: ' . $administrator_email . PHP_EOL);
         } while (!$formIsValid || !UIUtils::confirmPrompt('Are those informations correct?'));
 
         return $form;

@@ -7,7 +7,7 @@ class UIUtils
     public static function confirmPrompt($text)
     {
         do {
-            echo "$text [y,n] ";
+            fprintf(STDERR, "$text [y,n] ");
             $ans = trim(fgets(STDIN));
         } while ($ans != 'y' && $ans != 'n');
 
@@ -19,11 +19,11 @@ class UIUtils
         do {
             $i = 0;
             foreach ($options as $option) {
-                echo "[$i] $option\n";
+                fprintf(STDERR, "[$i] $option\n");
                 ++$i;
             }
             $max = $i - 1;
-            echo "$text [0-$max,q] ";
+            fprintf(STDERR, "$text [0-$max,q] ");
             $ans = trim(fgets(STDIN));
         } while ((!is_numeric($ans) || $ans < 0 || $ans > $max) &&
                  $ans != 'q');
