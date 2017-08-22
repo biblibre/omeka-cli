@@ -47,7 +47,7 @@ class GithubRepository implements RepositoryInterface
 
     public function download($plugin, $destDir)
     {
-        $dest = $destDir . '/' . $plugin['name'];
+        $dest = $destDir . '/' . $plugin['displayName'];
         if (file_exists($dest))
             throw new \Exception("destination $dest already exists");
 
