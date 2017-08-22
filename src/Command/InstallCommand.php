@@ -88,9 +88,9 @@ class InstallCommand extends AbstractCommand
                 $this->logger->error('cannot clone Omeka repository');
                 return 1;
             }
-        } elseif (!(file_exists($dir . '/.git')
-              &&    file_exists($dir . '/db.ini.changeme')
-              &&    file_exists($dir . '/bootstrap.php'))) {
+        } elseif ((file_exists($dir . '/.git')
+              &&   file_exists($dir . '/db.ini.changeme')
+              &&   file_exists($dir . '/bootstrap.php'))) {
             $this->logger->info('Omeka already downloaded');
         } else {
             $this->logger->error($dir . ' not empty');
