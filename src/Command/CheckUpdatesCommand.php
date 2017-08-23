@@ -57,7 +57,7 @@ class CheckUpdatesCommand extends AbstractCommand
         if (OMEKA_VERSION != get_option('omeka_version'))
             $this->logger->warning('Omeka version and database version do not match!');
 
-        $this->logger->info('Plugins to update:');
+        $this->logger->info('Plugins status:');
         $updateCommand = new Update();
         $updateCommand->setLogger($this->logger);
         return $updateCommand->run(array('list' => true), array(), $application);

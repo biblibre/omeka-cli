@@ -72,11 +72,11 @@ class Update extends AbstractCommand
                 shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' fetch 2>/dev/null');
                 $output = shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' log --oneline HEAD..@{u}');
                 if (empty($output)) {
-                    $this->logger->info('up-to-date.');
+                    $this->logger->info($plugin->name . ' is up-to-date');
                     continue;
                 }
                 if ($listOnly) {
-                    echo $plugin->name . PHP_EOL;
+                    echo $plugin->name . ' can be updated' . PHP_EOL;
                     continue;
                 } else {
                     $this->logger->info('new version available.');
@@ -92,7 +92,7 @@ class Update extends AbstractCommand
                     continue;
                 } else {
                     if ($listOnly) {
-                        echo $plugin->name . PHP_EOL;
+                        echo $plugin->name . ' can be updated' . PHP_EOL;
                         continue;
                     }
                     $backDir = getenv('HOME') . '/.omeka-cli/backups';
