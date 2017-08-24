@@ -13,43 +13,65 @@ class OptionsCommand extends AbstractCommand
 
     public function getUsage()
     {
-        $usage = "Usage:\n"
-               . "\toptions OPTION [VALUE]\n"
-               . "\n"
-               . "Edit and retrieve elements from the \"omeka_options\" table.\n"
-               . "\n"
-               . "OPTION\n"
-               . "\tthe name of the option to retrieve.\n"
-               . "VALUE\n"
-               . "\tif set, the new value of the option.\n"
-               . "NB\n"
-               . "\tThis command return an empty line in those cases:\n"
-               . "\t- the option does not exists ;\n"
-               . "\t- the option actually has no value.\n"
-               . "\tWith -g and -s options, the command always show the new or current value of the option.\n";
-
-        return $usage;
+        return 'Usage:' . PHP_EOL
+             . '    options [OPTION_NAME [VALUE]]' . PHP_EOL
+             . PHP_EOL
+             . 'Edit and see the "omeka_options" table.' . PHP_EOL
+             . PHP_EOL
+             . 'OPTION_NAME' . PHP_EOL
+             . '    the name of the option to retrieve.' . PHP_EOL
+             . 'VALUE' . PHP_EOL
+             . '    if set, the new value of the option.' . PHP_EOL
+             . PHP_EOL
+             . 'This command return an empty line in those cases:' . PHP_EOL
+             . '- the option does not exists ;' . PHP_EOL
+             . '- the option has no value.' . PHP_EOL;
     }
 
     public function run($options, $args, Application $application)
     {
-        if (count($args) == 0 || count($args) > 2) {
-            echo $this->getUsage();
-            return 1;
-        }
-
-        $db = get_db();
-        $optionsTable = $db->getTable('Option');
-        $query = $optionsTable->findBy(array('name' => $args[0]));
-        if (!$query) {
-            $this->logger->error('option ' . $args[0] . ' not found.');
-            return 1;
-        }
-
-        if (count($args) == 2)
+        switch (count($args)) {
+        case '0':
+            $this->showAllOptions();
+            break;
+        case '1':
+            if (!$this->isOption($args[0])) {
+                $this->logger->error('option not found');
+                return 1;
+            }
+            echo get_option($args[0]) . PHP_EOL;
+            break;
+        case '2':
+            if (!$this->isOption($args[0])) {
+                $this->logger->error('this option does not exists');
+                return 1;
+            }
             set_option($args[0], $args[1]);
-        echo get_option($args[0]) . PHP_EOL;
+            echo get_option($args[0]) . PHP_EOL;
+            break;
+        default:
+            $this->logger->error($this->getUsage());
+            return 1;
+        }
 
         return 0;
+    }
+
+    protected function isOption($optionName)
+    {
+        $db = get_db();
+        $optionsTable = $db->getTable('Option');
+        $query = $optionsTable->findBy(array('name' => $optionName));
+
+        return !empty($query);
+    }
+
+    protected function showAllOptions()
+    {
+        $db = get_db();
+        $optionsTable = $db->getTable('Option');
+        $options = $optionsTable->findAll();
+        foreach ($options as $option)
+            echo $option['name'] . '=' . $option['value'] . PHP_EOL;
     }
 }

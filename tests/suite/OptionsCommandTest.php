@@ -11,7 +11,7 @@ require_once 'AbstractTest.php';
  */
 final class OptionsCommandTest extends AbstractTest
 {
-    public function testShowUsageWhenRunWithoutArgument()
+    public function testShowAllOptionsWhenRunWithoutArgument()
     {
         $command = $this->getCommand('options');
 
@@ -19,14 +19,7 @@ final class OptionsCommandTest extends AbstractTest
         $command->run(array(), array(), $this->application);
         $output = ob_get_clean();
 
-        $this->assertNotEmpty($output);
-        $this->assertRegExp('
-/\AUsage:
-\toptions .+
-
-.+
-
-((.+)\n)*\z/', $output);
+        $this->assertRegExp('/\A(.+=.*\n)*\Z/', $output);
     }
 
     public function testCanRetrieveExistingTableEntries()
@@ -34,9 +27,7 @@ final class OptionsCommandTest extends AbstractTest
         $command = $this->getCommand('options');
 
         ob_start();
-        $command->run(array(),
-                      array('omeka_version',),
-                      $this->application);
+        $command->run(array(), array('omeka_version'), $this->application);
         $output = ob_get_clean();
         $this->assertRegexp('/\A[0-9a-zA-Z]+([\.-][0-9a-zA-Z]+)*\n\z/', $output);
     }
@@ -50,7 +41,7 @@ final class OptionsCommandTest extends AbstractTest
                       $this->application);
 
         $this->assertEquals(1, $retCode);
-        $this->assertRegExp('/Error: option .* not found./', $this->fakeLogger->getOutput());
+        $this->assertRegExp('/\AError: option not found\Z/', $this->fakeLogger->getOutput());
     }
 
     public function testCanEditExistingTableEntries()
