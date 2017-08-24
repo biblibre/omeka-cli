@@ -9,7 +9,7 @@ class CheckUpdatesCommand extends AbstractCommand
 {
     public function getDescription()
     {
-        return 'tell is omeka-cli, Omeka and its plugins are up-to-date';
+        return 'tell if omeka-cli, Omeka and its plugins are up-to-date';
     }
 
     public function getUsage()
@@ -17,7 +17,7 @@ class CheckUpdatesCommand extends AbstractCommand
         $usage = 'Usage:' . PHP_EOL
                . '    check-updates|chup' . PHP_EOL
                . PHP_EOL
-               . 'Tell is omeka-cli, Omeka and its plugins are up-to-date.'
+               . 'Tell if omeka-cli, Omeka and its plugins are up-to-date.'
                . PHP_EOL;
 
         return $usage;
