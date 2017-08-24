@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.18.0] - 2017-08-24
 ### Added
 - `plugin-update` command.
 - `plugin-download` command.
@@ -15,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Add --no-prompt option to help.
+- Add --no-prompt option handling to `install` command.
+- Add a way to show all Omeka's options to `options` command.
 
 ### Fixed
 - `install` command.
