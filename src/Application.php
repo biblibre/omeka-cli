@@ -9,7 +9,6 @@ use phpFastCache\CacheManager;
 
 use GetOptionKit\OptionCollection;
 use GetOptionKit\ContinuousOptionParser;
-use GetOptionKit\Exception\InvalidOptionException;
 
 class Application
 {
@@ -184,7 +183,7 @@ class Application
         $parser = new ContinuousOptionParser($cmdSpec);
         try {
             $cmdArgv = $parser->parse($this->args);
-        } catch (InvalidOptionException $e) {
+        } catch (\Exception $e) {
             $logger->error($e->getMessage());
             echo $command->getUsage();
 
