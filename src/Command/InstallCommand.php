@@ -5,10 +5,38 @@ namespace OmekaCli\Command;
 use OmekaCli\Application;
 use OmekaCli\UIUtils;
 
+use GetOptionKit\OptionCollection;
+
 class InstallCommand extends AbstractCommand
 {
-    protected $dbOptions    = array();
-    protected $omekaOptions = array();
+    protected $options = array();
+
+    public function getOptionsSpec()
+    {
+        $cmdSpec = new OptionCollection;
+        $cmdSpec->add('v|version:',             'Omeka version')
+                ->isa('String');
+        $cmdSpec->add('h|db-host?',             'database host')
+                ->isa('String');
+        $cmdSpec->add('u|db-user:',             'database user name')
+                ->isa('String');
+        $cmdSpec->add('p|db-pass?',             'database user password')
+                ->isa('String');
+        $cmdSpec->add('n|db-name:',             'database name')
+                ->isa('String');
+        $cmdSpec->add('U|omeka-user-name:',     'Omeka superuser name')
+                ->isa('String');
+        $cmdSpec->add('P|omeka-user-password:', 'Omeka superuser password')
+                ->isa('String');
+        $cmdSpec->add('E|omeka-user-email:',    'Omeka superuser email')
+                ->isa('String');
+        $cmdSpec->add('T|omeka-site-title?',    'Omeka site title')
+                ->isa('String');
+        $cmdSpec->add('A|omeka-admin-email:',   'Omeka admin email')
+                ->isa('String');
+
+        return $cmdSpec;
+    }
 
     public function getDescription()
     {
@@ -18,63 +46,66 @@ class InstallCommand extends AbstractCommand
     public function getUsage()
     {
         return 'Usage:' . PHP_EOL
-             . '    install [VERSION] DIR [INSTALLATION_ARGS]' . PHP_EOL
+             . '    install [OPTIONS] DIR' . PHP_EOL
              . PHP_EOL
              . 'Arguments' . PHP_EOL
              . '    DIR  the Omeka installation directory' . PHP_EOL
-             . '    VERSION  the Omeka version to install' . PHP_EOL
              . PHP_EOL
-             . 'Install Omeka. This command needs all the requierements '
+             . 'Install Omeka. This command needs all the requirements '
              . 'needed to install Omeka the classic way. See omeka.org '
              . 'for more informations.' . PHP_EOL
-             . 'When calling this with with the --no-prompt option of '
-             . 'omeka-cli, you will have to pass all needed information '
-             . 'through the argument INSTALLATION_ARGS. Those argument '
-             . 'are in this order:' . PHP_EOL
-             . '- database host' . PHP_EOL
-             . '- database username' . PHP_EOL
-             . '- database user password' . PHP_EOL
-             . '- database name' . PHP_EOL
-             . '- omeka superuser name' . PHP_EOL
-             . '- omeka superuser password' . PHP_EOL
-             . '- omeka superuser email' . PHP_EOL
-             . '- omeka site title' . PHP_EOL
-             . '- omeka admin email' . PHP_EOL
              . PHP_EOL
-             . 'EXAMPLE:' . PHP_EOL
-             . 'omeka-cli --no-prompt install a_directory localhost '
-             . 'dbuser dbP4ssword dbname root omekaP4ssword root@.yee '
-             . '\'Hello, Omeka!\' admin@example.yee' . PHP_EOL;
-
-        return $usage;
+             . 'OPTIONS:' . PHP_EOL
+             . '-v, --version TAG' . PHP_EOL
+             . '    git tag refering to an Omeka version' . PHP_EOL
+             . '-h, --db-host DB_HOST' . PHP_EOL
+             . '    database host, default: \'localhost\'' . PHP_EOL
+             . '-u, --db-user DB_USER' . PHP_EOL
+             . '    database user name' . PHP_EOL
+             . '-p, --db-pass DB_PASS' . PHP_EOL
+             . '    database user password, default: \'\'' . PHP_EOL
+             . '-n, --db-name DB_NAME' . PHP_EOL
+             . '    database name' . PHP_EOL
+             . '-U, --omeka-user-name OMEKA_USER_NAME' . PHP_EOL
+             . '    Omeka superuser name' . PHP_EOL
+             . '-P, --omeka-user-password OMEKA_USER_PASSWORD' . PHP_EOL
+             . '    Omeka superuser password' . PHP_EOL
+             . '-E, --omeka-user-email OMEKA_USER_EMAIL' . PHP_EOL
+             . '    Omeka superuser email' . PHP_EOL
+             . '-T, --omeka-site-title OMEKA_SITE_TITLE' . PHP_EOL
+             . '    Omeka site title, default: \'Hello, Omeka!\'' . PHP_EOL
+             . '-A, --omeka-admin-email OMEKA_ADMIN_EMAIL' . PHP_EOL
+             . '    Omeka admin email' . PHP_EOL
+             . 'All options, except --version, must be given if one, '
+             . 'except --version, is given.' . PHP_EOL;
     }
 
     public function run($options, $args, Application $application)
     {
-        if (NO_PROMPT) {
-            $this->omekaOptions['admin_email'] = array_pop($args);
-            $this->omekaOptions['site_title']  = array_pop($args);
-            $this->omekaOptions['super_email'] = array_pop($args);
-            $this->omekaOptions['password']    = array_pop($args);
-            $this->omekaOptions['username']    = array_pop($args);
-            $this->dbOptions['dbname']   = array_pop($args);
-            $this->dbOptions['password'] = array_pop($args);
-            $this->dbOptions['username'] = array_pop($args);
-            $this->dbOptions['host']     = array_pop($args);
-            foreach(array_merge($this->dbOptions, $this->omekaOptions) as $option) {
-                if (!$option) {
-                    $this->logger->error($this->getUsage());
-                    return 1;
-                }
+        $ver = null;
+        if (!empty($options)) {
+            if (array_key_exists('version', $options)) {
+                $ver = $options['version'];
+                unset($options['version']);
             }
+            if (!array_key_exists('host', $options)) {
+                $options['db-host'] = 'localhost';
+            }
+            if (!array_key_exists('db-pass', $options)) {
+                $options['db-pass'] = null;
+            }
+            if (!array_key_exists('omeka-site-title', $options)) {
+                $options['omeka-site-title'] = 'Hello, Omeka!';
+            }
+            if (count($options) != 9) {
+                $this->logger->error('missing options');
+                return 1;
+            }
+            $this->options = $options;
         }
-        if (count($args) == 2) {
-            $ver = array_pop($args);
-        } else if (count($args) != 1) {
+        if (count($args) != 1) {
             echo $this->getUsage();
             return 1;
-        } else {
-            $ver = null;
         }
         $dir = array_pop($args);
 
@@ -91,10 +122,10 @@ class InstallCommand extends AbstractCommand
         }
 
         $this->logger->info('configuring database');
-        if (NO_PROMPT)
-            $this->applyDbConfig($dir);
-        else
+        if (empty($this->options))
             $this->configDb($dir);
+        else
+            $this->applyDbConfig($dir);
 
         $this->logger->info('checking the database');
         $cwd = getcwd();
@@ -108,13 +139,13 @@ class InstallCommand extends AbstractCommand
         }
 
         $this->logger->info('configuring Omeka');
-        if (NO_PROMPT) {
+        if (empty($this->options)) {
+            $form = $this->configOmeka();
+        } else {
             if (!$form = $this->applyOmekaConfig($dir)) {
                 $this->logger->error('something went wrong during Omeka configuration');
                 return 1;
             }
-        } else {
-            $form = $this->configOmeka();
         }
 
         $this->logger->info('installing Omeka');
@@ -181,10 +212,10 @@ class InstallCommand extends AbstractCommand
         $dbini = $dir . '/db.ini';
         if (preg_match('/XXXXXXX/', file_get_contents($dbini)))
             copy($dbini . '.changeme', $dbini);
-        exec('sed -i \'0,/XXXXXXX/s//' . $this->dbOptions['host']     . '/\' ' . $dbini);
-        exec('sed -i \'0,/XXXXXXX/s//' . $this->dbOptions['username'] . '/\' ' . $dbini);
-        exec('sed -i \'0,/XXXXXXX/s//' . $this->dbOptions['password'] . '/\' ' . $dbini);
-        exec('sed -i \'0,/XXXXXXX/s//' . $this->dbOptions['dbname']   . '/\' ' . $dbini);
+        exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-host']     . '/\' ' . $dbini);
+        exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-user'] . '/\' ' . $dbini);
+        exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-pass'] . '/\' ' . $dbini);
+        exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-name']   . '/\' ' . $dbini);
     }
 
     protected function configDb($dir)
@@ -230,12 +261,12 @@ class InstallCommand extends AbstractCommand
         $form = new \Omeka_Form_Install();
         $form->init();
         $formIsValid = $form->isValid(array(
-        'username'            => $this->omekaOptions['username'],
-        'password'            => $this->omekaOptions['password'],
-        'password_confirm'    => $this->omekaOptions['password'],
-        'super_email'         => $this->omekaOptions['super_email'],
-        'site_title'          => $this->omekaOptions['site_title'],
-        'administrator_email' => $this->omekaOptions['admin_email'],
+        'username'            => $this->options['omeka-user-name'],
+        'password'            => $this->options['omeka-user-password'],
+        'password_confirm'    => $this->options['omeka-user-password'],
+        'super_email'         => $this->options['omeka-user-email'],
+        'site_title'          => $this->options['omeka-site-title'],
+        'administrator_email' => $this->options['omeka-admin-email'],
         'tag_delimiter'               => ',',
         'fullsize_constraint'         => '800',
         'thumbnail_constraint'        => '200',

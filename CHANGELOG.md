@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ###Changed
+- installation infos are given as options to the `install` commands.
 - --no-prompt can be replaced by -n option.
 
 ### Fixed
