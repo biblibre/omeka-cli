@@ -9,7 +9,7 @@ commands.
 ## Usage
 
     omeka-cli {-h|--help}
-    omeka-cli [-C <omeka-path>] [--no-prompt] COMMAND [ARGS...]
+    omeka-cli [-C <omeka-path>] [-n|--no-prompt] COMMAND [ARGS...]
 
 ## Available commands
 

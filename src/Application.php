@@ -32,7 +32,7 @@ class Application
         $appSpec->add('h|help',        'show help');
         $appSpec->add('C|omeka-path:', 'path to Omeka')
                 ->isa('String');
-        $appSpec->add('no-prompt',     'do not prompt anything');
+        $appSpec->add('n|no-prompt',     'do not prompt anything');
 
         $args    = array();
         $options = array();
@@ -55,7 +55,7 @@ class Application
     {
         $usage = "Usage:\n"
             . "\tomeka-cli --help\n"
-            . "\tomeka-cli [-C <omeka-path>] [--no-prompt] COMMAND [ARGS...]\n"
+            . "\tomeka-cli [-C <omeka-path>] [-n|--no-prompt] COMMAND [ARGS...]\n"
             . "\n";
 
         return $usage;
