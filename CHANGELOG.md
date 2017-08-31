@@ -8,9 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ###Changed
 - installation infos are given as options to the `install` commands.
 - --no-prompt can be replaced by -n option.
+- `install` ask for missing options
 
 ### Fixed
 - Uncaught option parsing exceptions.
+- `install` default options.
 
 ## [0.18.0] - 2017-08-24
 ### Added
