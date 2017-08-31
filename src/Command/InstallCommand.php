@@ -89,11 +89,14 @@ class InstallCommand extends AbstractCommand
 
         $dir = array_pop($args);
         $ver = null;
-        if (!empty($options)) {
-            if (array_key_exists('version', $options)) {
+        if (array_key_exists('version', $options)) {
+            if ($options['version'][0] != 'v')
+                $ver = 'v' . $options['version'];
+            else
                 $ver = $options['version'];
-                unset($options['version']);
-            }
+            unset($options['version']);
+        }
+        if (!empty($options)) {
             if (!array_key_exists('db-host', $options))
                 $options['db-host'] = 'localhost';
             if (!array_key_exists('db-user', $options))

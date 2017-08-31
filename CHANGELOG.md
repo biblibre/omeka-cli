@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `install` default options.
 - administator_email empty with `install` command.
 - Typo in `install` command.
+- `install`: do not ask for other options if only -v is given
 
 ## [0.18.0] - 2017-08-24
 ### Added
