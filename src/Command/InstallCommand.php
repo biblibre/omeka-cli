@@ -301,8 +301,7 @@ class InstallCommand extends AbstractCommand
         'per_page_public'             => '10',
         ));
         if (!$formIsValid) {
-            fprintf(STDERR, 'The following fields are not do not match a '
-                          . 'condition.' . PHP_EOL);
+            fprintf(STDERR, 'The following fields do not match a condition.' . PHP_EOL);
             $errors = $form->getErrors();
             $errors = array_filter($errors, function($var) {
                 return !empty($var);
