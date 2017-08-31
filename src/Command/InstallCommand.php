@@ -76,8 +76,9 @@ class InstallCommand extends AbstractCommand
              . '    Omeka site title, default: \'Hello, Omeka!\'' . PHP_EOL
              . '-A, --omeka-admin-email OMEKA_ADMIN_EMAIL' . PHP_EOL
              . '    Omeka admin email' . PHP_EOL
-             . 'All options, except --version, must be given if one, '
-             . 'except --version, is given.' . PHP_EOL;
+             . 'All options, except -v, should be given. Otherwise, '
+             . 'omeka-cli will either prompt the user or use default the'
+             . ' value.' . PHP_EOL;
     }
 
     public function run($options, $args, Application $application)
