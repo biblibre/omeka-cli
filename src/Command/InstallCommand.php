@@ -82,6 +82,12 @@ class InstallCommand extends AbstractCommand
 
     public function run($options, $args, Application $application)
     {
+        if (count($args) != 1) {
+            echo $this->getUsage();
+            return 1;
+        }
+
+        $dir = array_pop($args);
         $ver = null;
         if (!empty($options)) {
             if (array_key_exists('version', $options)) {
@@ -97,16 +103,37 @@ class InstallCommand extends AbstractCommand
             if (!array_key_exists('omeka-site-title', $options))
                 $options['omeka-site-title'] = 'Hello, Omeka!';
             if (count($options) != 9) {
-                $this->logger->error('missing options');
-                return 1;
+                if (NO_PROMPT) {
+                    $this->logger->error('missing options');
+                    return 1;
+                }
+                if (!array_key_exists('db-name', $options)) {
+                    echo 'Database name?' . PHP_EOL;
+                    $options['db-host'] = trim(fgets(STDIN));
+                }
+                if (!array_key_exists('omeka-user-name', $options)) {
+                    echo 'Omeka user name?' . PHP_EOL;
+                    $options['omeka-user-name'] = trim(fgets(STDIN));
+                }
+                if (!array_key_exists('omeka-user-password', $options)) {
+                    echo 'Omeka user password?' . PHP_EOL;
+                    $options['omeka-user-password'] = trim(fgets(STDIN));
+                }
+                if (!array_key_exists('omeka-user-email', $options)) {
+                    echo 'Omeka user email?' . PHP_EOL;
+                    $options['omeka-user-email'] = trim(fgets(STDIN));
+                }
+                if (!array_key_exists('omeka-site-title', $options)) {
+                    echo 'Omeka site title?' . PHP_EOL;
+                    $options['omeka-site-title'] = trim(fgets(STDIN));
+                }
+                if (!array_key_exists('omeka-admin-email', $options)) {
+                    echo 'Omeka admin email?' . PHP_EOL;
+                    $options['omeka-admin-email'] = trim(fgets(STDIN));
+                }
             }
             $this->options = $options;
         }
-        if (count($args) != 1) {
-            echo $this->getUsage();
-            return 1;
-        }
-        $dir = array_pop($args);
 
         $this->logger->info('downloading Omeka');
         if ($this->dlOmeka($dir, $ver)) {
