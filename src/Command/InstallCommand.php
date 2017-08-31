@@ -202,6 +202,9 @@ class InstallCommand extends AbstractCommand
                 $this->logger->error('cannot clone Omeka repository');
                 return 1;
             }
+            exec('git -C ' . $dir . ' submodule update --init --recursive', $out, $ans);
+            if ($ans)
+                $this->logger->warning('cannot initialize Omeka submodules');
         } elseif ((file_exists($dir . '/.git')
               &&   file_exists($dir . '/db.ini.changeme')
               &&   file_exists($dir . '/bootstrap.php'))) {

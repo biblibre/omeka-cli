@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - --no-prompt can be replaced by -n option.
 - `install` ask for missing options
 - `install`: make help more understandable.
+- `install`: also initialize git submodules.
 
 ### Fixed
 - Uncaught option parsing exceptions.
