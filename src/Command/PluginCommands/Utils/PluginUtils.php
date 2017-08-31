@@ -66,11 +66,14 @@ class PluginUtils
 
         if (!$no_prompt) {
             $repo = new GithubRepository;
-            foreach ($repo->find($pluginName) as $info) {
-                $pluginsGitHub[] = array(
-                    'info'       => $info,
-                    'repository' => $repo,
-                );
+            $repos = $repo->find($pluginName);
+            if ($repos) {
+                foreach ($repos as $info) {
+                    $pluginsGitHub[] = array(
+                        'info'       => $info,
+                        'repository' => $repo,
+                    );
+                }
             }
         }
 
