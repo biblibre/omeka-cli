@@ -333,7 +333,7 @@ class InstallCommand extends AbstractCommand
                 'password_confirm' => $password_confirm,
                 'super_email' => $super_email,
                 'site_title' => $site_title,
-                'admin_email' => $admin_email,
+                'administrator_email' => $admin_email,
                 'tag_delimiter' => ',',
                 'fullsize_constraint' => '800',
                 'thumbnail_constraint' => '200',
