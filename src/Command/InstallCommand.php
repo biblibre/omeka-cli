@@ -18,7 +18,7 @@ class InstallCommand extends AbstractCommand
                 ->isa('String');
         $cmdSpec->add('h|db-host?',             'database host')
                 ->isa('String');
-        $cmdSpec->add('u|db-user:',             'database user name')
+        $cmdSpec->add('u|db-user?',             'database user name')
                 ->isa('String');
         $cmdSpec->add('p|db-pass?',             'database user password')
                 ->isa('String');
@@ -61,7 +61,7 @@ class InstallCommand extends AbstractCommand
              . '-h, --db-host DB_HOST' . PHP_EOL
              . '    database host, default: \'localhost\'' . PHP_EOL
              . '-u, --db-user DB_USER' . PHP_EOL
-             . '    database user name' . PHP_EOL
+             . '    database user name, default: \'root\'' . PHP_EOL
              . '-p, --db-pass DB_PASS' . PHP_EOL
              . '    database user password, default: \'\'' . PHP_EOL
              . '-n, --db-name DB_NAME' . PHP_EOL
@@ -88,15 +88,14 @@ class InstallCommand extends AbstractCommand
                 $ver = $options['version'];
                 unset($options['version']);
             }
-            if (!array_key_exists('host', $options)) {
+            if (!array_key_exists('db-host', $options))
                 $options['db-host'] = 'localhost';
-            }
-            if (!array_key_exists('db-pass', $options)) {
+            if (!array_key_exists('db-user', $options))
+                $options['db-user'] = 'root';
+            if (!array_key_exists('db-pass', $options))
                 $options['db-pass'] = null;
-            }
-            if (!array_key_exists('omeka-site-title', $options)) {
+            if (!array_key_exists('omeka-site-title', $options))
                 $options['omeka-site-title'] = 'Hello, Omeka!';
-            }
             if (count($options) != 9) {
                 $this->logger->error('missing options');
                 return 1;
