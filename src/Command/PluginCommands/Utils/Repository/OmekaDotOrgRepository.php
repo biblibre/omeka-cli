@@ -43,7 +43,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
     public function download($plugin, $destDir)
     {
-        $pluginName = $plugin['displayName'];
+        $pluginName = $plugin['name'];
         $plugin = $this->findPlugin($pluginName);
 
         if (!$plugin) {
