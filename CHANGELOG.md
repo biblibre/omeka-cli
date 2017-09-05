@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0-alpha.1] - 2017-09-05
 ###Changed
 - installation infos are given as options to the `install` command.
 - --no-prompt can be replaced by -n option.
@@ -13,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - `install`: also initialize git submodules.
 
 ### Fixed
+- Bug whan downloads plugins whose name has more than one word.
 - Uncaught option parsing exceptions.
 - `install` default options.
 - administator_email empty with `install` command.
