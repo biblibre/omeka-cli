@@ -6,11 +6,10 @@ class Sandbox
 {
     public function run(callable $callback)
     {
-        if (function_exists('get_db') ) {
+        if (function_exists('get_db')) {
             try {
                 get_db()->closeConnection();
             } catch (\Exception $e) {
-                //
             }
         }
 

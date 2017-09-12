@@ -26,6 +26,7 @@ class Activate extends AbstractCommand
     {
         if (count($args) != 1) {
             $this->logger->error($this->getUsage());
+
             return 1;
         }
 
@@ -33,12 +34,14 @@ class Activate extends AbstractCommand
         $plugin = PUtils::getPlugin(array_pop($args));
         if (!$plugin) {
             $this->logger->error('plugin not found');
+
             return 1;
         }
 
         $this->logger->info('Checking plugin status');
         if ($plugin->isActive()) {
             $this->logger->error('plugin already activated');
+
             return 1;
         }
 
@@ -46,6 +49,7 @@ class Activate extends AbstractCommand
         $missingDeps = PUtils::getMissingDependencies($plugin->name);
         if (!empty($missingDeps)) {
             $this->logger->error('missing plugins ' . implode(',', $missingDeps));
+
             return 1;
         }
 

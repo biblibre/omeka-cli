@@ -27,20 +27,23 @@ class CheckUpdatesCommand extends AbstractCommand
     {
         if (file_exists(OMEKACLI_PATH . '/.git')) {
             $output = shell_exec('git -C ' . OMEKACLI_PATH . ' log --oneline HEAD..@{u}');
-            if (empty($output))
+            if (empty($output)) {
                 $this->logger->info('omeka-cli is up-to-date.');
-            else
+            } else {
                 echo 'omeka-cli' . PHP_EOL;
+            }
         } else {
             $remoteVersion = shell_exec('git -C ' . OMEKACLI_PATH . ' ls-remote --tags https://github.com/biblibre/omeka-cli 2>/dev/null | grep -o \'[0-9]\+\.[0-9]\+\.[0-9]\+\' | sort -rV | sed 1q');
-            if (OMEKACLI_VERSION == $remoteVersion)
+            if (OMEKACLI_VERSION == $remoteVersion) {
                 $this->logger->info('omeka-cli is up-to-date.');
-            else
+            } else {
                 echo 'omeka-cli' . PHP_EOL;
+            }
         }
 
         if (!$application->isOmekaInitialized()) {
             $this->logger->error('Omeka is not initialized here.');
+
             return 1;
         }
 
@@ -49,17 +52,20 @@ class CheckUpdatesCommand extends AbstractCommand
         $activePlugins = $pluginsTable->findBy(array('active' => 1));
         $inactivePlugins = $pluginsTable->findBy(array('active' => 0));
 
-        if (version_compare(OMEKA_VERSION, latest_omeka_version() ) >= 0)
+        if (version_compare(OMEKA_VERSION, latest_omeka_version()) >= 0) {
             $this->logger->info('Omeka is up-to-date.');
-        else
+        } else {
             echo 'Omeka' . PHP_EOL;
+        }
 
-        if (OMEKA_VERSION != get_option('omeka_version'))
+        if (OMEKA_VERSION != get_option('omeka_version')) {
             $this->logger->warning('Omeka version and database version do not match!');
+        }
 
         $this->logger->info('Plugins status:');
         $updateCommand = new Update();
         $updateCommand->setLogger($this->logger);
+
         return $updateCommand->run(array('list' => true), array(), $application);
     }
 }

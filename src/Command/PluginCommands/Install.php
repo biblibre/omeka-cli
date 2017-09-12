@@ -28,18 +28,21 @@ class Install extends AbstractCommand
             $pluginName = array_shift($args);
         } else {
             $this->logger->error($this->getUsage());
+
             return 1;
         }
 
         $this->logger->info('Checking Omeka status');
         if (!$application->isOmekaInitialized()) {
             $this->logger->error('omeka not initialized here');
+
             return 1;
         }
 
         $this->logger->info('Checking plugin directory');
         if (!file_exists(PLUGIN_DIR . '/' . $pluginName)) {
             $this->logger->error('plugin not found');
+
             return 1;
         }
 
@@ -47,6 +50,7 @@ class Install extends AbstractCommand
         $missingDeps = PUtils::getMissingDependencies($pluginName);
         if (!empty($missingDeps)) {
             $this->logger->error('error: missing plugins ' . implode(',', $missingDeps));
+
             return 1;
         }
 
@@ -54,7 +58,7 @@ class Install extends AbstractCommand
         $ini = parse_ini_file(PLUGIN_DIR . '/' . $pluginName . '/plugin.ini');
         $version = $ini['version'];
 
-        $plugin = new \Plugin;
+        $plugin = new \Plugin();
         $plugin->name = $pluginName;
         $plugin->setIniVersion($version);
         $plugin->setLoaded(true);
@@ -65,12 +69,13 @@ class Install extends AbstractCommand
 
         $results = get_db()->getTable('Plugin')->findBy(array(
             'active' => 1,
-            'name'   => $plugin->name,
+            'name' => $plugin->name,
         ));
-        if (!empty($results) && array_shift($results)->isActive())
+        if (!empty($results) && array_shift($results)->isActive()) {
             $this->logger->info('Installation succeeded');
-        else
+        } else {
             $this->logger->error('installation failed');
+        }
 
         return 0;
     }

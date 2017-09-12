@@ -6,7 +6,6 @@ use OmekaCli\Command\Manager;
 use OmekaCli\Exception\BadUsageException;
 use OmekaCli\Util\Sandbox;
 use phpFastCache\CacheManager;
-
 use GetOptionKit\OptionCollection;
 use GetOptionKit\ContinuousOptionParser;
 
@@ -28,13 +27,13 @@ class Application
     {
         global $argv;
 
-        $appSpec = new OptionCollection;
-        $appSpec->add('h|help',        'show help');
+        $appSpec = new OptionCollection();
+        $appSpec->add('h|help', 'show help');
         $appSpec->add('C|omeka-path:', 'path to Omeka')
                 ->isa('String');
-        $appSpec->add('n|no-prompt',     'do not prompt anything');
+        $appSpec->add('n|no-prompt', 'do not prompt anything');
 
-        $args    = array();
+        $args = array();
         $options = array();
         $parser = new ContinuousOptionParser($appSpec);
         try {
@@ -43,10 +42,12 @@ class Application
             throw new BadUsageException($e->getMessage(), 0, $e);
         }
 
-        while (!$parser->isEnd())
+        while (!$parser->isEnd()) {
             $args[] = $parser->advance();
-        foreach ($appOptions->keys as $key => $appSpec)
+        }
+        foreach ($appOptions->keys as $key => $appSpec) {
             $options[$key] = $appOptions->keys[$key]->value;
+        }
 
         return new self($options, $args);
     }
@@ -170,7 +171,7 @@ class Application
 
         $command = $commands->get($commandName);
         if (!isset($command)) {
-            $logger->error('Command {command} does not exist', array('command' => $commandName,));
+            $logger->error('Command {command} does not exist', array('command' => $commandName));
             echo $this->usage();
 
             return 1;
@@ -178,7 +179,7 @@ class Application
 
         $cmdSpec = $command->getOptionsSpec();
 
-        $cmdArgs    = array();
+        $cmdArgs = array();
         $cmdOptions = array();
         $parser = new ContinuousOptionParser($cmdSpec);
         try {
@@ -190,10 +191,12 @@ class Application
             return 1;
         }
 
-        while (!$parser->isEnd())
+        while (!$parser->isEnd()) {
             $cmdArgs[] = $parser->advance();
-        foreach ($cmdArgv->keys as $key => $cmdSpec)
+        }
+        foreach ($cmdArgv->keys as $key => $cmdSpec) {
             $cmdOptions[$key] = $cmdArgv->keys[$key]->value;
+        }
 
         return $command->run($cmdOptions, $cmdArgs, $this);
     }
@@ -248,7 +251,7 @@ class Application
             $bootstrap->bootstrap('Db');
             $db = $bootstrap->getResource('Db');
         } catch (\Exception $e) {
-            echo $e->getMessage() . PHP_EOL ;
+            echo $e->getMessage() . PHP_EOL;
         }
 
         if (isset($db)) {
@@ -257,7 +260,7 @@ class Application
                 $application->initialize();
                 $this->omekaApplication = $application;
             } catch (\Exception $e) {
-                echo $e->getMessage() . PHP_EOL ;
+                echo $e->getMessage() . PHP_EOL;
             }
         }
     }

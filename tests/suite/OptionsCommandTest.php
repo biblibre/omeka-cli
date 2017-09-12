@@ -1,14 +1,7 @@
 <?php
 
-use OmekaCli\Command\OptionsCommand;
-
-use PHPUnit\Framework\TestCase;
-
 require_once 'AbstractTest.php';
 
-/**
- * @covers OptionsCommand
- */
 final class OptionsCommandTest extends AbstractTest
 {
     public function testShowAllOptionsWhenRunWithoutArgument()
@@ -37,7 +30,7 @@ final class OptionsCommandTest extends AbstractTest
         $command = $this->getCommand('options');
 
         $retCode = $command->run(array(),
-                      array('NonExistingTableEntries',),
+                      array('NonExistingTableEntries'),
                       $this->application);
 
         $this->assertEquals(1, $retCode);

@@ -9,7 +9,7 @@ use DateInterval;
 
 class OmekaDotOrgRepository implements RepositoryInterface
 {
-    static protected $cache;
+    protected static $cache;
 
     const PLUGINS_URL = 'http://omeka.org/add-ons/plugins/';
 
@@ -31,9 +31,9 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
         if ($plugin) {
             $info = array(
-                'name'                => $pluginName,
-                'displayName'         => $plugin['display_name'],
-                'version'             => $plugin['version'],
+                'name' => $pluginName,
+                'displayName' => $plugin['display_name'],
+                'version' => $plugin['version'],
                 'omekaMinimumVersion' => $plugin['omeka_minimum_version'],
             );
 
@@ -102,8 +102,9 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
     protected function getPlugins()
     {
-        if (self::$cache == null)
+        if (self::$cache == null) {
             self::$cache = CacheManager::getInstance('Files');
+        }
         $cacheKey = __METHOD__;
         $cacheItem = self::$cache->getItem($cacheKey);
 

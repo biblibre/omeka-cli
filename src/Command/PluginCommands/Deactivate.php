@@ -26,6 +26,7 @@ class Deactivate extends AbstractCommand
     {
         if (count($args) != 1) {
             $this->logger->error($this->getUsage());
+
             return 1;
         }
 
@@ -33,12 +34,14 @@ class Deactivate extends AbstractCommand
         $plugin = PUtils::getPlugin(array_pop($args));
         if (!$plugin) {
             $this->logger->error('plugin not found');
+
             return 1;
         }
 
         $this->logger->info('Checking plugin status');
         if (!$plugin->isActive()) {
             $this->logger->error('plugin already deactivated');
+
             return 1;
         }
 

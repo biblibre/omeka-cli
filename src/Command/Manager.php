@@ -74,14 +74,14 @@ class Manager
         $this->commands = array();
 
         $this->registerCommand('check-updates', 'OmekaCli\Command\CheckUpdatesCommand', array('chup'));
-        $this->registerCommand('help',          'OmekaCli\Command\HelpCommand');
-        $this->registerCommand('info',          'OmekaCli\Command\InfoCommand');
-        $this->registerCommand('install',       'OmekaCli\Command\InstallCommand');
-        $this->registerCommand('list',          'OmekaCli\Command\ListCommand');
-        $this->registerCommand('options',       'OmekaCli\Command\OptionsCommand');
-        $this->registerCommand('snapshot',      'OmekaCli\Command\SnapshotCommand', array('snap'));
-        $this->registerCommand('upgrade',       'OmekaCli\Command\UpgradeCommand');
-        $this->registerCommand('version',       'OmekaCli\Command\VersionCommand');
+        $this->registerCommand('help', 'OmekaCli\Command\HelpCommand');
+        $this->registerCommand('info', 'OmekaCli\Command\InfoCommand');
+        $this->registerCommand('install', 'OmekaCli\Command\InstallCommand');
+        $this->registerCommand('list', 'OmekaCli\Command\ListCommand');
+        $this->registerCommand('options', 'OmekaCli\Command\OptionsCommand');
+        $this->registerCommand('snapshot', 'OmekaCli\Command\SnapshotCommand', array('snap'));
+        $this->registerCommand('upgrade', 'OmekaCli\Command\UpgradeCommand');
+        $this->registerCommand('version', 'OmekaCli\Command\VersionCommand');
 
         $this->registerCommand('plugin-activate', 'OmekaCli\Command\PluginCommands\Activate', array('plac'));
         $this->registerCommand('plugin-deactivate', 'OmekaCli\Command\PluginCommands\Deactivate', array('plde'));

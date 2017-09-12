@@ -12,7 +12,7 @@ abstract class AbstractCommand implements CommandInterface, LoggerAwareInterface
 
     public function getOptionsSpec()
     {
-        return new OptionCollection;
+        return new OptionCollection();
     }
 
     public function getDescription()

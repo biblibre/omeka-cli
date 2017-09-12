@@ -4,10 +4,7 @@ namespace OmekaCli\Command\PluginCommands\Utils;
 
 use OmekaCli\Command\PluginCommands\Utils\Repository\OmekaDotOrgRepository;
 use OmekaCli\Command\PluginCommands\Utils\Repository\GithubRepository;
-
 use Omeka\Plugin;
-use Omeka\Plugin\Broker;
-use Omeka\Plugin\Installer;
 
 class PluginUtils
 {
@@ -30,11 +27,13 @@ class PluginUtils
         if (isset($ini['required_plugins'])) {
             $deps = $ini['required_plugins'];
             $deps = explode(',', $deps);
-            $deps = array_map("trim", $deps);
+            $deps = array_map('trim', $deps);
             $deps = array_filter($deps);
-            foreach ($deps as $dep)
-                if (!plugin_is_active($dep))
+            foreach ($deps as $dep) {
+                if (!plugin_is_active($dep)) {
                     $missingDeps[] = $dep;
+                }
+            }
         }
 
         return $missingDeps;
@@ -55,22 +54,22 @@ class PluginUtils
     {
         $plugins = array();
 
-        $repo = new OmekaDotOrgRepository;
+        $repo = new OmekaDotOrgRepository();
         $pluginInfo = $repo->find($pluginName);
         if ($pluginInfo) {
             $pluginsOmeka[] = array(
-                'info'       => $pluginInfo,
+                'info' => $pluginInfo,
                 'repository' => $repo,
             );
         }
 
         if (!$no_prompt) {
-            $repo = new GithubRepository;
+            $repo = new GithubRepository();
             $repos = $repo->find($pluginName);
             if ($repos) {
                 foreach ($repos as $info) {
                     $pluginsGitHub[] = array(
-                        'info'       => $info,
+                        'info' => $info,
                         'repository' => $repo,
                     );
                 }
@@ -78,7 +77,7 @@ class PluginUtils
         }
 
         return array(
-            'atOmeka'  => empty($pluginsOmeka)  ? array() : $pluginsOmeka,
+            'atOmeka' => empty($pluginsOmeka) ? array() : $pluginsOmeka,
             'atGithub' => empty($pluginsGitHub) ? array() : $pluginsGitHub,
         );
     }

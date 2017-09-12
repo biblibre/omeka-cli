@@ -35,6 +35,7 @@ class InfoCommand extends AbstractCommand
 
         if (!$application->isOmekaInitialized()) {
             $this->logger->error('Omeka is not initialized here.');
+
             return 1;
         }
 
@@ -47,17 +48,20 @@ class InfoCommand extends AbstractCommand
         echo 'Omeka version:        ' . OMEKA_VERSION . PHP_EOL;
         echo 'Database version:     ' . get_option('omeka_version') . PHP_EOL;
 
-        if (OMEKA_VERSION != get_option('omeka_version'))
+        if (OMEKA_VERSION != get_option('omeka_version')) {
             echo 'Warning: Omeka version and database version are not the same!' . PHP_EOL;
+        }
 
-        echo 'Admin theme:          ' . get_option('admin_theme')  . PHP_EOL;
+        echo 'Admin theme:          ' . get_option('admin_theme') . PHP_EOL;
         echo 'Public theme:         ' . get_option('public_theme') . PHP_EOL;
         echo 'Plugins (actives):' . PHP_EOL;
-        foreach ($activePlugins as $plugin)
+        foreach ($activePlugins as $plugin) {
             echo $plugin->name . ' - ' . $plugin->version . PHP_EOL;
+        }
         echo 'Plugins (inactives):' . PHP_EOL;
-        foreach ($inactivePlugins as $plugin)
+        foreach ($inactivePlugins as $plugin) {
             echo $plugin->name . ' - ' . $plugin->version . PHP_EOL;
+        }
 
         return 0;
     }

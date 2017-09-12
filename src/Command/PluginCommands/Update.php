@@ -4,17 +4,14 @@ namespace OmekaCli\Command\PluginCommands;
 
 use OmekaCli\Application;
 use OmekaCli\Command\AbstractCommand;
-use OmekaCli\Command\PluginCommands\Utils\PluginUtils as PUtils;
-
 use GetOptionKit\OptionCollection;
-
 use Github\Client;
 
 class Update extends AbstractCommand
 {
     public function getOptionsSpec()
     {
-        $cmdSpec = new OptionCollection;
+        $cmdSpec = new OptionCollection();
         $cmdSpec->add('list', 'list plugins to update only');
 
         return $cmdSpec;
@@ -37,10 +34,11 @@ class Update extends AbstractCommand
 
     public function run($options, $args, Application $application)
     {
-        if (!empty($options))
+        if (!empty($options)) {
             $listOnly = $options['list'];
-        else
+        } else {
             $listOnly = false;
+        }
         switch (count($args)) {
         case 0:
             $pluginName = null;
@@ -50,18 +48,21 @@ class Update extends AbstractCommand
             break;
         default:
             $this->logger->error($this->getUsage());
+
             return 1;
         }
 
-       if (!$application->isOmekaInitialized()) {
+        if (!$application->isOmekaInitialized()) {
             $this->logger->error('Omeka not initialized here.');
+
             return 1;
         }
         $c = new Client();
         $plugins = get_db()->getTable('Plugin')->findBy($pluginName == null ? array() : array('name' => $pluginName));
         foreach ($plugins as $plugin) {
-            if (!$listOnly)
+            if (!$listOnly) {
                 $this->logger->info('updating ' . $plugin->name);
+            }
             if (file_exists(PLUGIN_DIR . '/' . $plugin->name . '/.git')) {
                 // TODO: Move github specific code to GitHub repo class.
                 system('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' rev-parse @{u} 1>/dev/null 2>/dev/null', $ans);
@@ -84,7 +85,7 @@ class Update extends AbstractCommand
                 shell_exec('git -C ' . PLUGIN_DIR . '/' . $plugin->name . ' pull --rebase');
             } else {
                 $repoClass = 'OmekaCli\Command\PluginCommands\Utils\Repository\OmekaDotOrgRepository';
-                $repo = new $repoClass;
+                $repo = new $repoClass();
                 $version = $repo->findPlugin($plugin->name)['url'];
                 $tmp = preg_replace('/\.zip$/', '', preg_split('/-/', $version));
                 $version = end($tmp);
@@ -96,10 +97,13 @@ class Update extends AbstractCommand
                         continue;
                     }
                     $backDir = getenv('HOME') . '/.omeka-cli/backups';
-                    if (!is_dir($backDir))
-                        if (!mkdir($backDir, 0755, true))
-                            if (!UIUtils::confirmPrompt('Cannot create backups directory. Anyway?'))
+                    if (!is_dir($backDir)) {
+                        if (!mkdir($backDir, 0755, true)) {
+                            if (!UIUtils::confirmPrompt('Cannot create backups directory. Anyway?')) {
                                 continue;
+                            }
+                        }
+                    }
                     shell_exec('mv ' . PLUGIN_DIR . '/' . $plugin->name . ' '
                                      . $backDir . '/' . $plugin->name . '_' . date('YmdHi'));
                     try {

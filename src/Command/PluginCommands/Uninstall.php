@@ -28,12 +28,14 @@ class Uninstall extends AbstractCommand
             $pluginName = array_shift($args);
         } else {
             $this->logger->error($this->getUsage());
+
             return 1;
         }
 
         $this->logger->info('Checking Omeka status');
         if (!$application->isOmekaInitialized()) {
             $this->logger->error('omeka not initialized here');
+
             return 1;
         }
 
@@ -41,6 +43,7 @@ class Uninstall extends AbstractCommand
         $plugin = PUtils::getPlugin($pluginName);
         if (!$plugin) {
             $this->logger->error('plugin not installed');
+
             return 1;
         }
 

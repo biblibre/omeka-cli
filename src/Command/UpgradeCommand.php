@@ -29,11 +29,13 @@ class UpgradeCommand extends AbstractCommand
     {
         if (!$application->isOmekaInitialized()) {
             $this->logger->error('not in an Omeka directory');
+
             return 1;
         }
 
         if (!is_dir(BASE_DIR . '/.git')) {
             $this->logger->Error('omeka-cli needs a git repo to upgrade Omeka');
+
             return 1;
         }
 
@@ -41,12 +43,14 @@ class UpgradeCommand extends AbstractCommand
         $lastVersion = $this->getNewVersion();
         if (!$lastVersion) {
             $this->logger->error('Omeka is already up-to-date');
+
             return 1;
         }
 
         $this->logger->info('saving database');
         if ($this->saveDb()) {
             $this->logger->error('database dumping failed');
+
             return 1;
         }
         $this->logger->info('database saved in ~/.omeka-cli/backups/omeka_db_backup.sql');
@@ -57,6 +61,7 @@ class UpgradeCommand extends AbstractCommand
         $this->logger->info('saving Omeka');
         if ($this->saveOmeka()) {
             $this->logger->error('cannot save Omeka');
+
             return 1;
         }
         $this->logger->info('Omeka saved in ~/.omeka-cli/backups/Omeka');
@@ -65,10 +70,12 @@ class UpgradeCommand extends AbstractCommand
         if ($this->upgradeOmeka($lastVersion)) {
             $this->logger->error('cannot upgrade Omeka');
             $this->logger->info('recovering Omeka and its database');
-            if ($this->recover())
+            if ($this->recover()) {
                 $this->logger->error('cannot recover Omeka or its database');
-            else
+            } else {
                 $this->logger->info('recovery successful');
+            }
+
             return 1;
         }
 
@@ -91,8 +98,9 @@ class UpgradeCommand extends AbstractCommand
     protected function saveDb()
     {
         if (!is_dir(getenv('HOME') . '/.omeka-cli/backups')) {
-            if (!is_dir(getenv('HOME') . '/.omeka-cli'))
+            if (!is_dir(getenv('HOME') . '/.omeka-cli')) {
                 mkdir(getenv('HOME') . '/.omeka-cli');
+            }
             mkdir(getenv('HOME') . '/.omeka-cli/backups');
         }
         $lines = file(BASE_DIR . '/db.ini', FILE_IGNORE_NEW_LINES);
@@ -109,10 +117,10 @@ class UpgradeCommand extends AbstractCommand
             $infos[$line[0]] = $line[1];
         }
 
-        exec('mysqldump -h\'' . $infos['host']     . '\''
-           . ' -u\'' .          $infos['username'] . '\''
-           . ' -p\'' .          $infos['password'] . '\''
-           . ' \'' .            $infos['dbname']   . '\''
+        exec('mysqldump -h\'' . $infos['host'] . '\''
+           . ' -u\'' . $infos['username'] . '\''
+           . ' -p\'' . $infos['password'] . '\''
+           . ' \'' . $infos['dbname'] . '\''
            . ' > ~/.omeka-cli/backups/omeka_db_backup.sql', $out, $ans);
 
         return $ans;
@@ -135,8 +143,9 @@ class UpgradeCommand extends AbstractCommand
     protected function saveOmeka()
     {
         if (!is_dir(getenv('HOME') . '/.omeka-cli/backups')) {
-            if (!is_dir(getenv('HOME') . '/.omeka-cli'))
+            if (!is_dir(getenv('HOME') . '/.omeka-cli')) {
                 mkdir(getenv('HOME') . '/.omeka-cli');
+            }
             mkdir(getenv('HOME') . '/.omeka-cli/backups');
         }
         exec('cp -fr ' . BASE_DIR . ' ' . getenv('HOME') . '/.omeka-cli/backups/Omeka', $out, $ans);
@@ -164,10 +173,12 @@ class UpgradeCommand extends AbstractCommand
     {
         if (!is_dir(getenv('HOME') . '/.omeka-cli/backups')) {
             $this->logger->error('no backups directory found');
+
             return 1;
         }
         if (count(scandir(getenv('HOME') . '/.omeka-cli/backups')) == 2) {
             $this->logger->error('no backup found');
+
             return 1;
         }
         $lines = file(BASE_DIR . '/db.ini', FILE_IGNORE_NEW_LINES);
@@ -185,15 +196,16 @@ class UpgradeCommand extends AbstractCommand
         }
 
         if (UIUtils::confirmPrompt('Do you want to recover Omeka?')) {
-            exec('cp -fr ' . getenv('HOME') . '/.omeka-cli/backups/Omeka'. ' ' . BASE_DIR , $out, $ans1);
-            if (UIUtils::confirmPrompt('Do you want to recover the database?'))
-                exec('mysql -h\'' .     $infos['host']     . '\''
-                   . ' -u\'' .          $infos['username'] . '\''
-                   . ' -p\'' .          $infos['password'] . '\''
-                   . ' \'' .            $infos['dbname']   . '\''
+            exec('cp -fr ' . getenv('HOME') . '/.omeka-cli/backups/Omeka' . ' ' . BASE_DIR, $out, $ans1);
+            if (UIUtils::confirmPrompt('Do you want to recover the database?')) {
+                exec('mysql -h\'' . $infos['host'] . '\''
+                   . ' -u\'' . $infos['username'] . '\''
+                   . ' -p\'' . $infos['password'] . '\''
+                   . ' \'' . $infos['dbname'] . '\''
                    . ' < ~/.omeka-cli/backups/omeka_db_backup.sql', $out, $ans2);
-            else
+            } else {
                 return 1;
+            }
         } else {
             return 1;
         }

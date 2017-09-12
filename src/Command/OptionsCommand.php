@@ -37,6 +37,7 @@ class OptionsCommand extends AbstractCommand
         case '1':
             if (!$this->isOption($args[0])) {
                 $this->logger->error('option not found');
+
                 return 1;
             }
             echo get_option($args[0]) . PHP_EOL;
@@ -44,6 +45,7 @@ class OptionsCommand extends AbstractCommand
         case '2':
             if (!$this->isOption($args[0])) {
                 $this->logger->error('this option does not exists');
+
                 return 1;
             }
             set_option($args[0], $args[1]);
@@ -51,6 +53,7 @@ class OptionsCommand extends AbstractCommand
             break;
         default:
             $this->logger->error($this->getUsage());
+
             return 1;
         }
 
@@ -71,7 +74,8 @@ class OptionsCommand extends AbstractCommand
         $db = get_db();
         $optionsTable = $db->getTable('Option');
         $options = $optionsTable->findAll();
-        foreach ($options as $option)
+        foreach ($options as $option) {
             echo $option['name'] . '=' . $option['value'] . PHP_EOL;
+        }
     }
 }

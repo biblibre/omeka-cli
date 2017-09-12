@@ -4,7 +4,6 @@ namespace OmekaCli\Command;
 
 use OmekaCli\Application;
 use OmekaCli\UIUtils;
-
 use GetOptionKit\OptionCollection;
 
 class InstallCommand extends AbstractCommand
@@ -13,26 +12,26 @@ class InstallCommand extends AbstractCommand
 
     public function getOptionsSpec()
     {
-        $cmdSpec = new OptionCollection;
-        $cmdSpec->add('v|version:',             'Omeka version')
+        $cmdSpec = new OptionCollection();
+        $cmdSpec->add('v|version:', 'Omeka version')
                 ->isa('String');
-        $cmdSpec->add('h|db-host?',             'database host')
+        $cmdSpec->add('h|db-host?', 'database host')
                 ->isa('String');
-        $cmdSpec->add('u|db-user?',             'database user name')
+        $cmdSpec->add('u|db-user?', 'database user name')
                 ->isa('String');
-        $cmdSpec->add('p|db-pass?',             'database user password')
+        $cmdSpec->add('p|db-pass?', 'database user password')
                 ->isa('String');
-        $cmdSpec->add('n|db-name:',             'database name')
+        $cmdSpec->add('n|db-name:', 'database name')
                 ->isa('String');
-        $cmdSpec->add('U|omeka-user-name:',     'Omeka superuser name')
+        $cmdSpec->add('U|omeka-user-name:', 'Omeka superuser name')
                 ->isa('String');
         $cmdSpec->add('P|omeka-user-password:', 'Omeka superuser password')
                 ->isa('String');
-        $cmdSpec->add('E|omeka-user-email:',    'Omeka superuser email')
+        $cmdSpec->add('E|omeka-user-email:', 'Omeka superuser email')
                 ->isa('String');
-        $cmdSpec->add('T|omeka-site-title?',    'Omeka site title')
+        $cmdSpec->add('T|omeka-site-title?', 'Omeka site title')
                 ->isa('String');
-        $cmdSpec->add('A|omeka-admin-email:',   'Omeka admin email')
+        $cmdSpec->add('A|omeka-admin-email:', 'Omeka admin email')
                 ->isa('String');
 
         return $cmdSpec;
@@ -85,30 +84,37 @@ class InstallCommand extends AbstractCommand
     {
         if (count($args) != 1) {
             echo $this->getUsage();
+
             return 1;
         }
 
         $dir = array_pop($args);
         $ver = null;
         if (array_key_exists('version', $options)) {
-            if ($options['version'][0] != 'v')
+            if ($options['version'][0] != 'v') {
                 $ver = 'v' . $options['version'];
-            else
+            } else {
                 $ver = $options['version'];
+            }
             unset($options['version']);
         }
         if (!empty($options)) {
-            if (!array_key_exists('db-host', $options))
+            if (!array_key_exists('db-host', $options)) {
                 $options['db-host'] = 'localhost';
-            if (!array_key_exists('db-user', $options))
+            }
+            if (!array_key_exists('db-user', $options)) {
                 $options['db-user'] = 'root';
-            if (!array_key_exists('db-pass', $options))
+            }
+            if (!array_key_exists('db-pass', $options)) {
                 $options['db-pass'] = null;
-            if (!array_key_exists('omeka-site-title', $options))
+            }
+            if (!array_key_exists('omeka-site-title', $options)) {
                 $options['omeka-site-title'] = 'Hello, Omeka!';
+            }
             if (count($options) != 9) {
                 if (NO_PROMPT) {
                     $this->logger->error('missing options');
+
                     return 1;
                 }
                 if (!array_key_exists('db-name', $options)) {
@@ -142,20 +148,23 @@ class InstallCommand extends AbstractCommand
         $this->logger->info('downloading Omeka');
         if ($this->dlOmeka($dir, $ver)) {
             $this->logger->error('installation failed');
+
             return 1;
         }
 
         $this->logger->info('copying changeme files');
         if ($this->copyFiles($dir)) {
             $this->logger->error('installation failed');
+
             return 1;
         }
 
         $this->logger->info('configuring database');
-        if (empty($this->options))
+        if (empty($this->options)) {
             $this->configDb($dir);
-        else
+        } else {
             $this->applyDbConfig($dir);
+        }
 
         $this->logger->info('checking the database');
         $cwd = getcwd();
@@ -165,6 +174,7 @@ class InstallCommand extends AbstractCommand
         ob_end_clean();
         if ($this->checkDb($dir)) {
             $this->logger->error('installation failed');
+
             return 1;
         }
 
@@ -174,6 +184,7 @@ class InstallCommand extends AbstractCommand
         } else {
             if (!$form = $this->applyOmekaConfig($dir)) {
                 $this->logger->error('something went wrong during Omeka configuration');
+
                 return 1;
             }
         }
@@ -181,6 +192,7 @@ class InstallCommand extends AbstractCommand
         $this->logger->info('installing Omeka');
         if ($this->installOmeka($form)) {
             $this->logger->error('installation failed');
+
             return 1;
         }
         $this->logger->info('installation successful');
@@ -200,17 +212,20 @@ class InstallCommand extends AbstractCommand
             exec($cmd, $out, $ans);
             if ($ans) {
                 $this->logger->error('cannot clone Omeka repository');
+
                 return 1;
             }
             exec('git -C ' . $dir . ' submodule update --init --recursive', $out, $ans);
-            if ($ans)
+            if ($ans) {
                 $this->logger->warning('cannot initialize Omeka submodules');
+            }
         } elseif ((file_exists($dir . '/.git')
-              &&   file_exists($dir . '/db.ini.changeme')
-              &&   file_exists($dir . '/bootstrap.php'))) {
+              && file_exists($dir . '/db.ini.changeme')
+              && file_exists($dir . '/bootstrap.php'))) {
             $this->logger->info('Omeka already downloaded');
         } else {
             $this->logger->error($dir . ' not empty');
+
             return 1;
         }
 
@@ -225,11 +240,12 @@ class InstallCommand extends AbstractCommand
             'application/config/config.ini',
         );
         foreach ($files as $file) {
-            if (!file_exists($dir . '/'. $file)) {
-                $ans = copy($dir . '/'. $file . '.changeme',
-                            $dir . '/'. $file);
+            if (!file_exists($dir . '/' . $file)) {
+                $ans = copy($dir . '/' . $file . '.changeme',
+                            $dir . '/' . $file);
                 if (!$ans) {
                     $this->logger->error('cannot copy ' . $file . '.changeme file');
+
                     return 1;
                 }
             } else {
@@ -243,24 +259,30 @@ class InstallCommand extends AbstractCommand
     protected function applyDbConfig($dir)
     {
         $dbini = $dir . '/db.ini';
-        if (preg_match('/XXXXXXX/', file_get_contents($dbini)))
+        if (preg_match('/XXXXXXX/', file_get_contents($dbini))) {
             copy($dbini . '.changeme', $dbini);
-        exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-host']     . '/\' ' . $dbini);
+        }
+        exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-host'] . '/\' ' . $dbini);
         exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-user'] . '/\' ' . $dbini);
         exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-pass'] . '/\' ' . $dbini);
-        exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-name']   . '/\' ' . $dbini);
+        exec('sed -i \'0,/XXXXXXX/s//' . $this->options['db-name'] . '/\' ' . $dbini);
     }
 
     protected function configDb($dir)
     {
         $dbini = $dir . '/db.ini';
-        if (preg_match('/XXXXXXX/', file_get_contents($dbini)))
+        if (preg_match('/XXXXXXX/', file_get_contents($dbini))) {
             copy($dbini . '.changeme', $dbini);
+        }
         do {
-            fprintf(STDERR, 'host: '); $host = trim(fgets(STDIN));
-            fprintf(STDERR, 'username: '); $username = trim(fgets(STDIN));
-            fprintf(STDERR, 'password: '); $password = trim(fgets(STDIN));
-            fprintf(STDERR, 'dbname: '); $dbname = trim(fgets(STDIN));
+            fprintf(STDERR, 'host: ');
+            $host = trim(fgets(STDIN));
+            fprintf(STDERR, 'username: ');
+            $username = trim(fgets(STDIN));
+            fprintf(STDERR, 'password: ');
+            $password = trim(fgets(STDIN));
+            fprintf(STDERR, 'dbname: ');
+            $dbname = trim(fgets(STDIN));
 
             fprintf(STDERR, PHP_EOL);
             fprintf(STDERR, 'host:     ' . $host . PHP_EOL);
@@ -268,10 +290,10 @@ class InstallCommand extends AbstractCommand
             fprintf(STDERR, 'password: ' . $password . PHP_EOL);
             fprintf(STDERR, 'dbname:   ' . $dbname . PHP_EOL);
         } while (!UIUtils::confirmPrompt('Are those informations correct?'));
-        exec('sed -i \'0,/XXXXXXX/s//' . $host     . '/\' ' . $dbini);
+        exec('sed -i \'0,/XXXXXXX/s//' . $host . '/\' ' . $dbini);
         exec('sed -i \'0,/XXXXXXX/s//' . $username . '/\' ' . $dbini);
         exec('sed -i \'0,/XXXXXXX/s//' . $password . '/\' ' . $dbini);
-        exec('sed -i \'0,/XXXXXXX/s//' . $dbname   . '/\' ' . $dbini);
+        exec('sed -i \'0,/XXXXXXX/s//' . $dbname . '/\' ' . $dbini);
     }
 
     protected function checkDb($dir)
@@ -281,41 +303,44 @@ class InstallCommand extends AbstractCommand
             $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
             if (!empty($tables)) {
                 $this->logger->error('database not empty');
+
                 return 1;
             }
-        } catch (\Exception $e) { }
+        } catch (\Exception $e) {
+        }
 
         return 0;
     }
 
     protected function applyOmekaConfig()
     {
-        require_once(FORM_DIR . '/Install.php');
+        require_once FORM_DIR . '/Install.php';
         $form = new \Omeka_Form_Install();
         $form->init();
         $formIsValid = $form->isValid(array(
-        'username'            => $this->options['omeka-user-name'],
-        'password'            => $this->options['omeka-user-password'],
-        'password_confirm'    => $this->options['omeka-user-password'],
-        'super_email'         => $this->options['omeka-user-email'],
-        'site_title'          => $this->options['omeka-site-title'],
+        'username' => $this->options['omeka-user-name'],
+        'password' => $this->options['omeka-user-password'],
+        'password_confirm' => $this->options['omeka-user-password'],
+        'super_email' => $this->options['omeka-user-email'],
+        'site_title' => $this->options['omeka-site-title'],
         'administrator_email' => $this->options['omeka-admin-email'],
-        'tag_delimiter'               => ',',
-        'fullsize_constraint'         => '800',
-        'thumbnail_constraint'        => '200',
+        'tag_delimiter' => ',',
+        'fullsize_constraint' => '800',
+        'thumbnail_constraint' => '200',
         'square_thumbnail_constraint' => '200',
-        'per_page_admin'              => '10',
-        'per_page_public'             => '10',
+        'per_page_admin' => '10',
+        'per_page_public' => '10',
         ));
         if (!$formIsValid) {
             fprintf(STDERR, 'The following fields do not match a condition.' . PHP_EOL);
             $errors = $form->getErrors();
-            $errors = array_filter($errors, function($var) {
+            $errors = array_filter($errors, function ($var) {
                 return !empty($var);
             });
-            foreach (array_keys($errors) as $field)
+            foreach (array_keys($errors) as $field) {
                 fprintf(STDERR, $field . ': '
                               . implode(', ', $errors[$field]) . PHP_EOL);
+            }
         }
 
         return $formIsValid ? $form : null;
@@ -323,16 +348,24 @@ class InstallCommand extends AbstractCommand
 
     protected function configOmeka()
     {
-        require_once(FORM_DIR . '/Install.php');
+        require_once FORM_DIR . '/Install.php';
         $form = new \Omeka_Form_Install();
         $form->init();
         do {
-            fprintf(STDERR, 'username: '); $username = trim(fgets(STDIN));
-            fprintf(STDERR, 'password: ' . "\x1b[8m"); $password = trim(fgets(STDIN)); fprintf(STDERR, "\x1b[0m");
-            fprintf(STDERR, 'password_confirm: ' . "\x1b[8m"); $password_confirm = trim(fgets(STDIN)); fprintf(STDERR, "\x1b[0m");
-            fprintf(STDERR, 'super_email: '); $super_email = trim(fgets(STDIN));
-            fprintf(STDERR, 'site_title: '); $site_title = trim(fgets(STDIN));
-            fprintf(STDERR, 'admin_email: '); $admin_email = trim(fgets(STDIN));
+            fprintf(STDERR, 'username: ');
+            $username = trim(fgets(STDIN));
+            fprintf(STDERR, 'password: ' . "\x1b[8m");
+            $password = trim(fgets(STDIN));
+            fprintf(STDERR, "\x1b[0m");
+            fprintf(STDERR, 'password_confirm: ' . "\x1b[8m");
+            $password_confirm = trim(fgets(STDIN));
+            fprintf(STDERR, "\x1b[0m");
+            fprintf(STDERR, 'super_email: ');
+            $super_email = trim(fgets(STDIN));
+            fprintf(STDERR, 'site_title: ');
+            $site_title = trim(fgets(STDIN));
+            fprintf(STDERR, 'admin_email: ');
+            $admin_email = trim(fgets(STDIN));
             $formIsValid = $form->isValid(array(
                 'username' => $username,
                 'password' => $password,
@@ -350,9 +383,10 @@ class InstallCommand extends AbstractCommand
             if (!$formIsValid) {
                 fprintf(STDERR, 'The following fields are not do not match a condition.' . PHP_EOL);
                 $errors = $form->getErrors();
-                $errors = array_filter($errors, function($var) { return !empty($var); });
-                foreach (array_keys($errors) as $field)
+                $errors = array_filter($errors, function ($var) { return !empty($var); });
+                foreach (array_keys($errors) as $field) {
                     fprintf(STDERR, $field . ': ' . implode(', ', $errors[$field]) . PHP_EOL);
+                }
             }
             fprintf(STDERR, PHP_EOL);
             fprintf(STDERR, 'username:    ' . $username . PHP_EOL);
@@ -370,6 +404,7 @@ class InstallCommand extends AbstractCommand
             $installer = new \Installer_Default(get_db());
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
+
             return 1;
         }
         $installer->setForm($form);
@@ -378,6 +413,7 @@ class InstallCommand extends AbstractCommand
             $installer->install();
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
+
             return 1;
         }
 

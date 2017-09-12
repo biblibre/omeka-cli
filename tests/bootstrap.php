@@ -11,8 +11,9 @@ use OmekaCli\Application;
 define('APPLICATION_ENV', 'testing');
 
 $omeka_path = getenv('OMEKA_PATH');
-if (!$omeka_path)
+if (!$omeka_path) {
     exit("Error: OMEKA_PATH environment variable not defined.\n");
+}
 
 $application = new Application(
     array('omeka-path' => $omeka_path),

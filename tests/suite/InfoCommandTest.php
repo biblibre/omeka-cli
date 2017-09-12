@@ -1,14 +1,7 @@
 <?php
 
-use OmekaCli\Command\InfoCommand;
-
-use PHPUnit\Framework\TestCase;
-
 require_once 'AbstractTest.php';
 
-/**
- * @covers InfoCommand
- */
 final class InfoCommandTest extends AbstractTest
 {
     public function testIsOutputFormatOk()
