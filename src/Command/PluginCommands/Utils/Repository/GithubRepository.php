@@ -57,6 +57,7 @@ class GithubRepository implements RepositoryInterface
         if ($exitCode !== 0) {
             throw new \Exception('git clone failed');
         }
+
         return $dest;
     }
 
