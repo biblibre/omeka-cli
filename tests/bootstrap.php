@@ -1,12 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
-define('OMEKACLI_PATH', __DIR__ . '/..');
-define('BACKUPS_DIR', getenv('HOME') . '/.omeka-cli/backups');
-define('OMEKACLI_VERSION', '1.0.0-alpha.1');
-
 use OmekaCli\Application;
+
+require_once __DIR__ . '/../bootstrap.php';
 
 define('APPLICATION_ENV', 'testing');
 
