@@ -13,5 +13,6 @@ try {
     exit($exitCode);
 } catch (BadUsageException $e) {
     error_log('Error: ' . $e->getMessage());
-    print Application::usage();
+    fwrite(STDERR, Application::usage());
+    exit(1);
 }

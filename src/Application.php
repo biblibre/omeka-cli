@@ -8,6 +8,7 @@ use OmekaCli\Util\Sandbox;
 use phpFastCache\CacheManager;
 use GetOptionKit\OptionCollection;
 use GetOptionKit\ContinuousOptionParser;
+use GetOptionKit\Exception\InvalidOptionException;
 
 class Application
 {
