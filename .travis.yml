@@ -22,4 +22,4 @@ before_script:
 
 script:
   - OMEKA_PATH=./Omeka ./vendor/bin/phpunit -c tests/phpunit.xml
-  - ./vendor/bin/php-cs-fixer -v --dry-run --using-cache=no
+  - ./vendor/bin/php-cs-fixer fix -v --dry-run --using-cache=no
