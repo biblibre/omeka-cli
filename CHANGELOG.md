@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Global options to adjust verbosity (--quiet, --verbose)
+- Command plugin-download learned --force to bypass omeka_minimum_version
+- Command plugin-download learned --exclude-github to avoid searching plugins in
+  Github repositories
+
+### Changed
+- Command install has default values for all its options and do not prompt for
+  missing values
+- Command install tries to create the database if it does not exist
+
+## Removed
+- Global option --no-prompt
 
 ## [1.0.0-alpha.1] - 2017-09-05
 ###Changed

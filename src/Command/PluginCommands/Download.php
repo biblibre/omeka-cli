@@ -2,12 +2,13 @@
 
 namespace OmekaCli\Command\PluginCommands;
 
+use GetOptionKit\OptionCollection;
 use OmekaCli\Application;
-use OmekaCli\Command\AbstractCommand;
-use OmekaCli\Command\PluginCommands\Utils\PluginUtils as PUtils;
 use OmekaCli\UIUtils;
+use OmekaCli\Command\PluginCommands\Utils\Repository\OmekaDotOrgRepository;
+use OmekaCli\Command\PluginCommands\Utils\Repository\GithubRepository;
 
-class Download extends AbstractCommand
+class Download extends AbstractPluginCommand
 {
     public function getDescription()
     {
@@ -16,11 +17,23 @@ class Download extends AbstractCommand
 
     public function getUsage()
     {
-        return 'usage:' . PHP_EOL
-             . '    plugin-download PLUGIN_NAME' . PHP_EOL
-             . '    pldl PLUGIN_NAME' . PHP_EOL
-             . PHP_EOL
-             . 'Download a plugin' . PHP_EOL;
+        return "Usage:\n"
+             . "\tplugin-download [<options>] PLUGIN_NAME\n"
+             . "\tpldl [<options>] PLUGIN_NAME\n"
+             . "\n"
+             . "Options:\n"
+             . "\t-f, --force    Force download, even if Omeka minimum version\n"
+             . "\t               requirement is not met\n"
+             . "\t-G, --exclude-github    Do not download plugins from Github\n";
+    }
+
+    public function getOptionsSpec()
+    {
+        $optionsSpec = new OptionCollection();
+        $optionsSpec->add('f|force', 'Force download');
+        $optionsSpec->add('G|exclude-github', 'Do not download plugins from Github');
+
+        return $optionsSpec;
     }
 
     public function run($options, $args, Application $application)
@@ -31,20 +44,32 @@ class Download extends AbstractCommand
             return 1;
         }
 
-        $plugins = PUtils::findAvailablePlugins(array_shift($args), NO_PROMPT);
+        $repositories = array();
+        $repositories[] = new OmekaDotOrgRepository();
+        if (!isset($options['exclude-github']) || !$options['exclude-github']) {
+            $repositories[] = new GithubRepository();
+        }
+
+        $pluginName = reset($args);
+
+        foreach ($repositories as $repository) {
+            $pluginsInfo = $repository->find($pluginName);
+            foreach ($pluginsInfo as $pluginInfo) {
+                $plugins[] = array(
+                    'info' => $pluginInfo,
+                    'repository' => $repository,
+                );
+            }
+        }
+
         if (empty($plugins)) {
             $this->logger->error('plugin not found');
 
             return 1;
         }
 
-        if (NO_PROMPT) {
-            if (empty($plugins['atOmeka'])) {
-                $this->logger->error('plugin not found');
-
-                return 1;
-            }
-            $plugin = $plugins['atOmeka'][0];
+        if (1 === count($plugins)) {
+            $plugin = reset($plugins);
         } else {
             $plugin = $this->pluginPrompt($plugins);
         }
@@ -54,16 +79,27 @@ class Download extends AbstractCommand
 
             return 0;
         }
-        $destDir = ($application->isOmekaInitialized()) ? PLUGIN_DIR : '';
-        $repo = $plugin['repository'];
-        $repoName = $repo->getDisplayName();
+
+        $destDir = '.';
+
+        if ($application->isOmekaInitialized()) {
+            $omekaMinimumVersion = $plugin['info']['omekaMinimumVersion'];
+            $force = isset($options['force']) && $options['force'];
+            if (version_compare(OMEKA_VERSION, $omekaMinimumVersion) < 0 && !$force) {
+                $this->logger->error('The current Omeka version is too low to install this plugin. Use --force if you really want to download it.');
+                return 1;
+            }
+
+            $destDir = PLUGIN_DIR;
+        }
 
         $this->logger->info('Downloading plugin');
         try {
-            $dest = $repo->download($plugin['info'], $destDir);
-            $this->logger->info('Downloaded into ' . $dest);
+            $repository = $plugin['repository'];
+            $dest = $repository->download($plugin['info'], $destDir);
+            $this->logger->info('Downloaded into {path}', array('path' => $dest));
         } catch (\Exception $e) {
-            $this->logger->error('download failed: ' . $e->getMessage());
+            $this->logger->error('Download failed: {message}', array('message' => $e->getMessage()));
         }
 
         return 0;
@@ -71,50 +107,30 @@ class Download extends AbstractCommand
 
     protected function pluginPrompt($plugins)
     {
-        $omekaPluginCount = count($plugins['atOmeka']);
-        $githubPluginCount = count($plugins['atGithub']);
-
-        $this->logger->info($omekaPluginCount . ' plugin(s) found at omeka.org');
-        $this->logger->info($githubPluginCount . ' plugin(s) found at github.com');
-
-        if (!empty($plugins['atOmeka']) && !empty($plugins['atGithub'])) {
-            $allPlugins = array_merge($plugins['atOmeka'], $plugins['atGithub']);
-        } elseif (empty($plugin['atGithub'])) {
-            $allPlugins = $plugins['atOmeka'];
-        } elseif (empty($plugin['atOmeka'])) {
-            $allPlugins = $plugins['atGithub'];
+        if (empty($plugins)) {
+            return null;
         }
 
-        if (count($allPlugins) != 0) {
-            foreach ($allPlugins as $plugin) {
-                $toMenu[] = sprintf('%s (%s) - %s',
-                    $plugin['info']['displayName'],
-                    $plugin['info']['version'],
-                    (array_key_exists('owner', $plugin['info']))
-                        ? $plugin['repository']->getDisplayName()
-                            . '/' . $plugin['info']['owner']
-                        : $plugin['repository']->getDisplayName()
-                );
-            }
+        $this->logger->info('{count} plugin(s) found', array('count' => count($plugins)));
 
-            if (isset($toMenu)) {
-                $chosenIdx = UIUtils::menuPrompt('Choose one', $toMenu);
-            }
-
-            if ($chosenIdx >= 0) {
-                $chosenPlugin = $allPlugins[$chosenIdx];
-            } else {
-                $this->logger->info('Nothing chosen');
-            }
+        foreach ($plugins as $plugin) {
+            $toMenu[] = sprintf('%s (%s) - %s',
+                $plugin['info']['displayName'],
+                $plugin['info']['version'],
+                (array_key_exists('owner', $plugin['info']))
+                    ? $plugin['repository']->getDisplayName()
+                        . '/' . $plugin['info']['owner']
+                    : $plugin['repository']->getDisplayName()
+            );
         }
 
-        if (isset($chosenPlugin)) {
-            if (version_compare(OMEKA_VERSION, $chosenPlugin['info']['omekaMinimumVersion']) < 0) {
-                $this->logger->warning('the current Omeka version is too low to install this plugin');
-                if (!confirmPrompt('Download it anyway?')) {
-                    $chosenPlugin = null;
-                }
-            }
+        if (isset($toMenu)) {
+            $chosenIdx = UIUtils::menuPrompt('Choose one', $toMenu);
+        }
+
+        if ($chosenIdx >= 0) {
+            $chosenPlugin = $plugins[$chosenIdx];
+
         }
 
         return (isset($chosenPlugin)) ? $chosenPlugin : null;

@@ -49,36 +49,4 @@ class PluginUtils
 
         return new \Omeka_Plugin_Installer($broker, $loader);
     }
-
-    public static function findAvailablePlugins($pluginName, $no_prompt = false)
-    {
-        $plugins = array();
-
-        $repo = new OmekaDotOrgRepository();
-        $pluginInfo = $repo->find($pluginName);
-        if ($pluginInfo) {
-            $pluginsOmeka[] = array(
-                'info' => $pluginInfo,
-                'repository' => $repo,
-            );
-        }
-
-        if (!$no_prompt) {
-            $repo = new GithubRepository();
-            $repos = $repo->find($pluginName);
-            if ($repos) {
-                foreach ($repos as $info) {
-                    $pluginsGitHub[] = array(
-                        'info' => $info,
-                        'repository' => $repo,
-                    );
-                }
-            }
-        }
-
-        return array(
-            'atOmeka' => empty($pluginsOmeka) ? array() : $pluginsOmeka,
-            'atGithub' => empty($pluginsGitHub) ? array() : $pluginsGitHub,
-        );
-    }
 }

@@ -32,7 +32,6 @@ class Application
         $appSpec->add('h|help', 'show help');
         $appSpec->add('C|omeka-path:', 'path to Omeka')
                 ->isa('String');
-        $appSpec->add('n|no-prompt', 'do not prompt anything');
         $appSpec->add('v|verbose', 'verbose mode')
             ->isa('Number')
             ->incremental();
@@ -64,7 +63,7 @@ class Application
         $usage = "Usage:\n"
             . "\tomeka-cli [-h | --help]\n"
             . "\tomeka-cli [-C <omeka-path>] [-v | --verbose] [-q | --quiet]\n"
-            . "\t          [-n|--no-prompt] <command> [<args>]\n"
+            . "\t          <command> [<args>]\n"
             . "\n"
             . "Options:\n"
             . "\t-h, --help       Print this help and exit\n"
@@ -114,7 +113,6 @@ class Application
 
             $exitCode = 0;
         } else {
-            define('NO_PROMPT', $this->getOption('no-prompt') ? true : false);
             $exitCode = $this->runCommand();
         }
 
