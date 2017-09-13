@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Command install has default values for all its options and do not prompt for
   missing values
 - Command install tries to create the database if it does not exist
+- Command upgrade no longer backup the Omeka directory nor deactivate all
+  plugins before upgrading
+- Command upgrade compress the database dump with gzip
+- Command upgrade no longer ask for automatic recovering if the upgrade fails.
+  It is up to the user to manually reinject the database dump if they think it's
+  needed
 
 ## Removed
 - Global option --no-prompt
