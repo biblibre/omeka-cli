@@ -52,7 +52,6 @@ class HelpCommand extends AbstractCommand
         }
         echo "\n";
 
-
         echo "\n";
         echo $usage;
         echo "\n";

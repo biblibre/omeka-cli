@@ -2,7 +2,6 @@
 
 namespace OmekaCli\Command\PluginCommands;
 
-use Zend_Registry;
 use OmekaCli\Application;
 
 class Uninstall extends AbstractPluginCommand

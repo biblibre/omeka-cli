@@ -2,7 +2,6 @@
 
 namespace OmekaCli\Plugin;
 
-use Zend_Registry;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
@@ -47,6 +46,7 @@ class Updater implements LoggerAwareInterface
         $remoteVersion = ltrim($remoteTag, 'v');
         if (empty($remoteVersion)) {
             $this->logger->warning('{plugin}: remote {remote} has no tags', array('plugin' => $plugin->name, 'remote' => $remoteName));
+
             return null;
         }
 
@@ -62,12 +62,14 @@ class Updater implements LoggerAwareInterface
             exec("git -C $pluginDirQuoted rebase $remoteTag", $output, $exitCode);
             if ($exitCode) {
                 $this->logger->error('Cannot update {plugin}', array('plugin' => $plugin->name));
+
                 return false;
             }
         } else {
             $backupDir = getenv('HOME') . '/.omeka-cli/backups';
             if (!is_dir($backupDir) && !mkdir($backupDir, 0777, true)) {
                 $this->logger->error('Cannot create backup directory ({dir}). Plugin {plugin} will not be updated.', array('dir' => $backupDir, 'plugin' => $plugin->name));
+
                 return false;
             }
 
@@ -84,6 +86,7 @@ class Updater implements LoggerAwareInterface
                 }
             } catch (\Exception $e) {
                 $this->logger->error('cannot update plugin : {message}', array('message' => $e->getMessage()));
+
                 return false;
             }
         }

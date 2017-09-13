@@ -87,6 +87,7 @@ class Download extends AbstractPluginCommand
             $force = isset($options['force']) && $options['force'];
             if (version_compare(OMEKA_VERSION, $omekaMinimumVersion) < 0 && !$force) {
                 $this->logger->error('The current Omeka version is too low to install this plugin. Use --force if you really want to download it.');
+
                 return 1;
             }
 
@@ -130,7 +131,6 @@ class Download extends AbstractPluginCommand
 
         if ($chosenIdx >= 0) {
             $chosenPlugin = $plugins[$chosenIdx];
-
         }
 
         return (isset($chosenPlugin)) ? $chosenPlugin : null;

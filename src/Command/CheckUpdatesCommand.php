@@ -4,7 +4,6 @@ namespace OmekaCli\Command;
 
 use Zend_Registry;
 use OmekaCli\Application;
-use OmekaCli\Command\PluginCommands\Update;
 use OmekaCli\Plugin\Updater;
 
 class CheckUpdatesCommand extends AbstractCommand
@@ -27,7 +26,7 @@ class CheckUpdatesCommand extends AbstractCommand
 
     public function run($options, $args, Application $application)
     {
-        # TODO Use GitHub releases API
+        // TODO Use GitHub releases API
         $remoteTag = rtrim(`git ls-remote -q --tags --refs https://github.com/biblibre/omeka-cli | cut -f 2 | sed "s|refs/tags/||" | sort -rV | head -n1`);
         $remoteVersion = ltrim($remoteTag, 'v');
         if (OMEKACLI_VERSION === $remoteVersion) {

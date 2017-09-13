@@ -5,7 +5,6 @@ namespace OmekaCli\Command;
 use PDO;
 use PDOException;
 use OmekaCli\Application;
-use OmekaCli\UIUtils;
 use GetOptionKit\OptionCollection;
 
 class InstallCommand extends AbstractCommand
@@ -135,7 +134,7 @@ class InstallCommand extends AbstractCommand
         $this->logger->info('configuring database');
         $this->applyDbConfig($dir, $config);
 
-        if(false === $this->createDatabase($config)) {
+        if (false === $this->createDatabase($config)) {
             $this->logger->error('Failed to create database');
 
             return 1;

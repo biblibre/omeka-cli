@@ -40,7 +40,7 @@ abstract class AbstractPluginCommand extends AbstractCommand
     protected function getMissingDependencies(Plugin $plugin)
     {
         $requiredPlugins = $plugin->getRequiredPlugins();
-        $missingDeps = array_filter($requiredPlugins, function($requiredPlugin) {
+        $missingDeps = array_filter($requiredPlugins, function ($requiredPlugin) {
             return !plugin_is_active($requiredPlugin);
         });
 

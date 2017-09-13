@@ -2,11 +2,8 @@
 
 namespace OmekaCli\Command;
 
-use Zend_Registry;
 use Omeka_Db_Migration_Manager;
-use Omeka_Plugin_Installer;
 use OmekaCli\Application;
-use OmekaCli\UIUtils;
 
 class UpgradeCommand extends AbstractCommand
 {

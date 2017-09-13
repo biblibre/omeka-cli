@@ -2,7 +2,6 @@
 
 namespace OmekaCli\Command\PluginCommands;
 
-use Zend_Registry;
 use Plugin;
 use OmekaCli\Application;
 
@@ -40,6 +39,7 @@ class Install extends AbstractPluginCommand
         $plugin = $this->getPlugin($pluginName);
         if ($plugin) {
             $this->logger->error('{plugin} is already installed', array('plugin' => $plugin->name));
+
             return 1;
         }
 
