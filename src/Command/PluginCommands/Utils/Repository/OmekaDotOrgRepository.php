@@ -37,7 +37,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
                 'omekaMinimumVersion' => $plugin['omeka_minimum_version'],
             );
 
-            return $info;
+            return array($info);
         }
     }
 

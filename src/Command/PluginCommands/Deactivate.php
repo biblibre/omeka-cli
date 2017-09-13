@@ -2,11 +2,10 @@
 
 namespace OmekaCli\Command\PluginCommands;
 
+use Zend_Registry;
 use OmekaCli\Application;
-use OmekaCli\Command\AbstractCommand;
-use OmekaCli\Command\PluginCommands\Utils\PluginUtils as PUtils;
 
-class Deactivate extends AbstractCommand
+class Deactivate extends AbstractPluginCommand
 {
     public function getDescription()
     {
@@ -15,39 +14,37 @@ class Deactivate extends AbstractCommand
 
     public function getUsage()
     {
-        return 'usage:' . PHP_EOL
+        return 'Usage:' . PHP_EOL
              . '    plugin-deactivate PLUGIN_NAME' . PHP_EOL
-             . '    plde PLUGIN_NAME' . PHP_EOL
-             . PHP_EOL
-             . 'Deactivate a plugin' . PHP_EOL;
+             . '    plde PLUGIN_NAME' . PHP_EOL;
     }
 
     public function run($options, $args, Application $application)
     {
         if (count($args) != 1) {
-            $this->logger->error($this->getUsage());
+            $this->logger->error('Bad number of arguments');
+            error_log($this->getUsage());
 
             return 1;
         }
 
-        $this->logger->info('Retrieving plugin');
-        $plugin = PUtils::getPlugin(array_pop($args));
+        $pluginName = reset($args);
+        $plugin = $this->getPlugin($pluginName);
         if (!$plugin) {
             $this->logger->error('plugin not found');
 
             return 1;
         }
 
-        $this->logger->info('Checking plugin status');
         if (!$plugin->isActive()) {
-            $this->logger->error('plugin already deactivated');
+            $this->logger->error('plugin is already inactive');
 
             return 1;
         }
 
-        $this->logger->info('Deactivating plugin');
-        PUtils::getInstaller($plugin)->deactivate($plugin);
-        $this->logger->info('Plugin deactivated');
+        $this->getPluginInstaller()->deactivate($plugin);
+
+        $this->logger->info('{plugin} deactivated', array('plugin' => $plugin->name));
 
         return 0;
     }

@@ -164,7 +164,7 @@ class Application
 
         $commands = $this->getCommandManager();
         if (isset($commands)) {
-            $usage .= "Available commands:\n\n";
+            $usage .= "\nAvailable commands:\n\n";
             foreach ($commands->getAll() as $name => $command) {
                 $usage .= "\t$name";
                 $description = $command->getDescription();

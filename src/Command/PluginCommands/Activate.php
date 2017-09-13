@@ -2,11 +2,10 @@
 
 namespace OmekaCli\Command\PluginCommands;
 
+use Zend_Registry;
 use OmekaCli\Application;
-use OmekaCli\Command\AbstractCommand;
-use OmekaCli\Command\PluginCommands\Utils\PluginUtils as PUtils;
 
-class Activate extends AbstractCommand
+class Activate extends AbstractPluginCommand
 {
     public function getDescription()
     {
@@ -15,47 +14,51 @@ class Activate extends AbstractCommand
 
     public function getUsage()
     {
-        return 'usage:' . PHP_EOL
-             . '    plugin-activate PLUGIN_NAME' . PHP_EOL
-             . '    plac PLUGIN_NAME' . PHP_EOL
-             . PHP_EOL
-             . 'Activate a plugin' . PHP_EOL;
+        return "Usage:\n"
+             . "\tplugin-activate PLUGIN_NAME\n"
+             . "\tplac PLUGIN_NAME\n";
     }
 
     public function run($options, $args, Application $application)
     {
-        if (count($args) != 1) {
-            $this->logger->error($this->getUsage());
+        if (!$application->isOmekaInitialized()) {
+            $this->logger->error('Omeka is not initialized here');
 
             return 1;
         }
 
-        $this->logger->info('Retrieving plugin');
-        $plugin = PUtils::getPlugin(array_pop($args));
+        if (count($args) != 1) {
+            $this->logger->error('Bad number of arguments');
+            error_log($this->getUsage());
+
+            return 1;
+        }
+
+        $pluginName = reset($args);
+
+        $plugin = $this->getPlugin($pluginName);
         if (!$plugin) {
             $this->logger->error('plugin not found');
 
             return 1;
         }
 
-        $this->logger->info('Checking plugin status');
         if ($plugin->isActive()) {
-            $this->logger->error('plugin already activated');
+            $this->logger->error('plugin is already active');
 
             return 1;
         }
 
-        $this->logger->info('Checking dependencies');
-        $missingDeps = PUtils::getMissingDependencies($plugin->name);
+        $missingDeps = $this->getMissingDependencies($plugin);
         if (!empty($missingDeps)) {
             $this->logger->error('missing plugins ' . implode(',', $missingDeps));
 
             return 1;
         }
 
-        $this->logger->info('Activating plugin');
-        PUtils::getInstaller($plugin)->activate($plugin);
-        $this->logger->info('Plugin activated');
+        $this->getPluginInstaller()->activate($plugin);
+
+        $this->logger->info('{plugin} activated', array('plugin' => $plugin->name));
 
         return 0;
     }

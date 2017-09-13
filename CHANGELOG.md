@@ -12,10 +12,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Github repositories
 
 ### Changed
+- Command check-updates now prints old and new versions
 - Command help now prints the command description
 - Command install has default values for all its options and do not prompt for
   missing values
 - Command install tries to create the database if it does not exist
+- Move OmekaCli\Command\PluginCommands\Utils\PluginUtils static methods in
+  OmekaCli\Command\PluginCommands\AbstractPluginCommand
+- Command plugin-update refuses to update a plugin if it is active
 - OmekaDotOrgRepository extract the zip file into a temporary directory first to
   get the plugin's real name
 - Command upgrade no longer backup the Omeka directory nor deactivate all
@@ -26,10 +30,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   needed
 
 ## Removed
+- Constant OMEKA_CLI_PATH
 - Global option --no-prompt
+- Command plugin-update forgot --list
 
 ## [1.0.0-alpha.1] - 2017-09-05
-###Changed
+### Changed
 - installation infos are given as options to the `install` command.
 - --no-prompt can be replaced by -n option.
 - `install` ask for missing options

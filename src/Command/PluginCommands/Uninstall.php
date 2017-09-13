@@ -2,11 +2,10 @@
 
 namespace OmekaCli\Command\PluginCommands;
 
+use Zend_Registry;
 use OmekaCli\Application;
-use OmekaCli\Command\AbstractCommand;
-use OmekaCli\Command\PluginCommands\Utils\PluginUtils as PUtils;
 
-class Uninstall extends AbstractCommand
+class Uninstall extends AbstractPluginCommand
 {
     public function getDescription()
     {
@@ -15,43 +14,38 @@ class Uninstall extends AbstractCommand
 
     public function getUsage()
     {
-        return 'usage:' . PHP_EOL
-             . '    plugin-uninstall PLUGIN_NAME' . PHP_EOL
-             . '    plun PLUGIN_NAME' . PHP_EOL
-             . PHP_EOL
-             . 'Uninstall a plugin' . PHP_EOL;
+        return "Usage:\n"
+             . "\tplugin-uninstall PLUGIN_NAME\n"
+             . "\tplun PLUGIN_NAME\n";
     }
 
     public function run($options, $args, Application $application)
     {
-        if (count($args) == 1) {
-            $pluginName = array_shift($args);
-        } else {
-            $this->logger->error($this->getUsage());
-
-            return 1;
-        }
-
-        $this->logger->info('Checking Omeka status');
         if (!$application->isOmekaInitialized()) {
             $this->logger->error('omeka not initialized here');
 
             return 1;
         }
 
-        $this->logger->info('Retrieving plugin');
-        $plugin = PUtils::getPlugin($pluginName);
-        if (!$plugin) {
-            $this->logger->error('plugin not installed');
+        if (count($args) != 1) {
+            $this->logger->error('Bad number of arguments');
+            error_log($this->getUsage());
 
             return 1;
         }
 
-        $this->logger->info('Uninstalling plugin');
-        $installer = PUtils::getInstaller($plugin);
-        $installer->uninstall($plugin);
+        $pluginName = reset($args);
 
-        $this->logger->info('Uninstallation successful');
+        $plugin = $this->getPlugin($pluginName);
+        if (!$plugin) {
+            $this->logger->error('{plugin} is not installed', array('plugin' => $plugin->name));
+
+            return 1;
+        }
+
+        $this->getPluginInstaller()->uninstall($plugin);
+
+        $this->logger->info('{plugin} uninstalled', array('plugin' => $plugin->name));
 
         return 0;
     }
