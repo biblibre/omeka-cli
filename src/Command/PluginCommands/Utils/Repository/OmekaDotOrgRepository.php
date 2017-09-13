@@ -52,27 +52,46 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
         $url = $plugin['download_url'];
         $tmpDir = $this->tempDir();
+        if (!isset($tmpDir)) {
+            throw new \Exception('Failed to create temporary directory');
+        }
+
         $tmpZip = "$tmpDir/$pluginName.zip";
         file_put_contents($tmpZip, fopen($url, 'r'));
 
-        $handle = zip_open($tmpZip);
-        $dirhandle = zip_read($handle);
-        $realPluginName = rtrim(zip_entry_name($dirhandle), '/');
-        zip_entry_close($dirhandle);
-        zip_close($handle);
-
-        $dest = "$destDir/$realPluginName";
-        if (file_exists($dest)) {
-            throw new \Exception("$dest already exists");
-        }
-
         $zip = new ZipArchive();
-        if (true === $zip->open($tmpZip)) {
-            $zip->extractTo($destDir);
-            $zip->close();
+        if (true !== $zip->open($tmpZip)) {
+            throw new \Exception("Failed to open ZIP file '$tmpZip'");
         }
 
-        return $dest;
+        $resultDir = "$tmpDir/result";
+        mkdir($resultDir, 0700);
+        $zip->extractTo($resultDir);
+        $zip->close();
+
+        $dh = opendir($resultDir);
+        while (false !== ($entry = readdir($dh))) {
+            if ($entry != '.' && $entry != '..') {
+                $realPluginName = $entry;
+                break;
+            }
+        }
+        closedir($dh);
+
+        $tmpPluginDir = "$resultDir/$realPluginName";
+
+        if (isset($destDir)) {
+            $pluginDir = "$destDir/$realPluginName";
+            if (file_exists($pluginDir)) {
+                throw new \Exception("$pluginDir already exists");
+            }
+
+            rename($tmpPluginDir, $pluginDir);
+
+            return $pluginDir;
+        }
+
+        return $tmpPluginDir;
     }
 
     public function findPlugin($pluginName)
@@ -134,14 +153,12 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
     protected function tempDir()
     {
-        $tempDir = null;
-        $sysTmpDir = sys_get_temp_dir();
-        $tries = 0;
-        do {
-            $tempDir = "$sysTmpDir/omeka-cli." . dechex(rand());
-            ++$tries;
-        } while (true !== @mkdir($tempDir) && $tries < 5);
-
-        return $tempDir;
+        $tempFile = tempnam(sys_get_temp_dir(), 'omeka-cli.');
+        if (false !== $tempFile) {
+            unlink($tempFile);
+            if (false !== @mkdir($tempFile, 0700)) {
+                return $tempFile;
+            }
+        }
     }
 }
