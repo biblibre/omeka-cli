@@ -14,9 +14,7 @@ class HelpCommand extends AbstractCommand
     public function getUsage()
     {
         $usage = "Usage:\n"
-            . "\thelp COMMAND\n"
-            . "\n"
-            . "Print help for a specific command\n";
+            . "\thelp COMMAND\n";
 
         return $usage;
     }
@@ -39,11 +37,23 @@ class HelpCommand extends AbstractCommand
             return 1;
         }
 
+        $description = $command->getDescription();
         $usage = $command->getUsage();
-        if (!$usage) {
+        if (!$description && !$usage) {
             $this->logger->error('There is no available help for this command');
+
+            return 1;
         }
 
+        if ($description) {
+            echo sprintf('%s - %s', $commandName, $description);
+        } else {
+            echo $commandName;
+        }
+        echo "\n";
+
+
+        echo "\n";
         echo $usage;
         echo "\n";
     }

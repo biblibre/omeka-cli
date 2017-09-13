@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   Github repositories
 
 ### Changed
+- Command help now prints the command description
 - Command install has default values for all its options and do not prompt for
   missing values
 - Command install tries to create the database if it does not exist
