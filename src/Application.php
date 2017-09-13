@@ -33,6 +33,12 @@ class Application
         $appSpec->add('C|omeka-path:', 'path to Omeka')
                 ->isa('String');
         $appSpec->add('n|no-prompt', 'do not prompt anything');
+        $appSpec->add('v|verbose', 'verbose mode')
+            ->isa('Number')
+            ->incremental();
+        $appSpec->add('q|quiet', 'quiet mode')
+            ->isa('Number')
+            ->incremental();
 
         $args = array();
         $options = array();
@@ -56,9 +62,17 @@ class Application
     public static function usage()
     {
         $usage = "Usage:\n"
-            . "\tomeka-cli --help\n"
-            . "\tomeka-cli [-C <omeka-path>] [-n|--no-prompt] COMMAND [ARGS...]\n"
-            . "\n";
+            . "\tomeka-cli [-h | --help]\n"
+            . "\tomeka-cli [-C <omeka-path>] [-v | --verbose] [-q | --quiet]\n"
+            . "\t          [-n|--no-prompt] <command> [<args>]\n"
+            . "\n"
+            . "Options:\n"
+            . "\t-h, --help       Print this help and exit\n"
+            . "\t-C <omeka-path>  Tells where Omeka is installed. If omitted,\n"
+            . "\t                 Omeka will be searched in current directory\n"
+            . "\t                 and parent directories\n"
+            . "\t-v, --verbose    Repeatable. Increase verbosity\n"
+            . "\t-q, --quiet      Repeatable. Decrease verbosity\n";
 
         return $usage;
     }
@@ -116,6 +130,10 @@ class Application
     {
         if (!isset($this->logger)) {
             $this->logger = new Logger();
+            $verbose = $this->getOption('verbose', 0);
+            $quiet = $this->getOption('quiet', 0);
+            $verbosity = Logger::DEFAULT_VERBOSITY + $verbose - $quiet;
+            $this->logger->setVerbosity($verbosity);
         }
 
         return $this->logger;
