@@ -15,15 +15,16 @@ commands.
 
 ### General commands
 
-    check-updates  check for updates
-    help           print help for a specific command
-    info           print informations about current Omeka installation
-    install        install Omeka
-    list           list available commands
-    options        edit and see the "omeka_options" table
-    snapshot       create or recover a snapshot
-    upgrade        upgrade Omeka
-    version        print version of omeka-cli
+    check-updates     check for updates
+    help              print help for a specific command
+    info              print informations about current Omeka installation
+    install           install Omeka
+    list              list available commands
+    options           edit and see the "omeka_options" table
+    snapshot          create a snapshot
+    snapshot-restore  restore a snapshot
+    upgrade           upgrade Omeka
+    version           print version of omeka-cli
 
 ### Plugin related commands
 
@@ -31,7 +32,8 @@ commands.
     plugin-deactivate  deactivate a plugin
     plugin-install     install a plugin
     plugin-uninstall   uninstall a plugin
-    plugin-downloads   downloads a plugin
+    plugin-download    downloads a plugin
+    plugin-update      update a plugin
 
 ## Requirements
 
