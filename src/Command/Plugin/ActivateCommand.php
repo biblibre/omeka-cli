@@ -1,10 +1,10 @@
 <?php
 
-namespace OmekaCli\Command\PluginCommands;
+namespace OmekaCli\Command\Plugin;
 
 use OmekaCli\Application;
 
-class Activate extends AbstractPluginCommand
+class ActivateCommand extends AbstractPluginCommand
 {
     public function getDescription()
     {

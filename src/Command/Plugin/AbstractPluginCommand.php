@@ -1,6 +1,6 @@
 <?php
 
-namespace OmekaCli\Command\PluginCommands;
+namespace OmekaCli\Command\Plugin;
 
 use Zend_Registry;
 use Plugin;

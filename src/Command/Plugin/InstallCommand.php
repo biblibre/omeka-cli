@@ -1,11 +1,11 @@
 <?php
 
-namespace OmekaCli\Command\PluginCommands;
+namespace OmekaCli\Command\Plugin;
 
 use Plugin;
 use OmekaCli\Application;
 
-class Install extends AbstractPluginCommand
+class InstallCommand extends AbstractPluginCommand
 {
     public function getDescription()
     {

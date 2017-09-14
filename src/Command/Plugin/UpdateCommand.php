@@ -1,13 +1,13 @@
 <?php
 
-namespace OmekaCli\Command\PluginCommands;
+namespace OmekaCli\Command\Plugin;
 
 use Omeka_Plugin_Ini;
 use Omeka_Plugin_Installer_Exception;
 use OmekaCli\Application;
 use OmekaCli\Plugin\Updater;
 
-class Update extends AbstractPluginCommand
+class UpdateCommand extends AbstractPluginCommand
 {
     public function getDescription()
     {

@@ -1,10 +1,10 @@
 <?php
 
-namespace OmekaCli\Command\PluginCommands;
+namespace OmekaCli\Command\Plugin;
 
 use OmekaCli\Application;
 
-class Uninstall extends AbstractPluginCommand
+class UninstallCommand extends AbstractPluginCommand
 {
     public function getDescription()
     {

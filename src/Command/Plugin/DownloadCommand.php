@@ -1,6 +1,6 @@
 <?php
 
-namespace OmekaCli\Command\PluginCommands;
+namespace OmekaCli\Command\Plugin;
 
 use GetOptionKit\OptionCollection;
 use OmekaCli\Application;
@@ -8,7 +8,7 @@ use OmekaCli\UIUtils;
 use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
 use OmekaCli\Plugin\Repository\GithubRepository;
 
-class Download extends AbstractPluginCommand
+class DownloadCommand extends AbstractPluginCommand
 {
     public function getDescription()
     {
