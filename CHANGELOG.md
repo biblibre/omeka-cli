@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   needed
 - Namespace renaming
 - Command snapshot was split in two (snapshot and snapshot-restore)
+- Moved UIUtils to Console\Prompt
 
 ## Removed
 - Constant OMEKA_CLI_PATH

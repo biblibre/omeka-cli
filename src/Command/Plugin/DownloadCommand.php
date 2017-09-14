@@ -4,7 +4,7 @@ namespace OmekaCli\Command\Plugin;
 
 use GetOptionKit\OptionCollection;
 use OmekaCli\Application;
-use OmekaCli\UIUtils;
+use OmekaCli\Console\Prompt;
 use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
 use OmekaCli\Plugin\Repository\GithubRepository;
 
@@ -126,7 +126,8 @@ class DownloadCommand extends AbstractPluginCommand
         }
 
         if (isset($toMenu)) {
-            $chosenIdx = UIUtils::menuPrompt('Choose one', $toMenu);
+            $prompt = new Prompt();
+            $chosenIdx = $prompt->menu('Choose one', $toMenu);
         }
 
         if ($chosenIdx >= 0) {
