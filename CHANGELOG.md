@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.0.0-alpha.2] - 2017-09-14
 ### Added
 - Global options to adjust verbosity (--quiet, --verbose)
 - Command plugin-download learned --force to bypass omeka_minimum_version
@@ -32,12 +34,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Command snapshot was split in two (snapshot and snapshot-restore)
 - Moved UIUtils to Console\Prompt
 
-## Removed
+### Removed
 - Constant OMEKA_CLI_PATH
 - Global option --no-prompt
 - Command plugin-update forgot --list
 
-## Fixed
+### Fixed
 - omeka-cli can now be installed using composer
 
 ## [1.0.0-alpha.1] - 2017-09-05
@@ -241,7 +243,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 0.1.0 - 2016-12-11
 
-[Unreleased]: https://github.com/biblibre/omeka-cli/compare/v0.5.1...HEAD
+[Unreleased]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.2...HEAD
+[1.0.0-alpha.2]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.1...v1.0.0-alpha.2
+[1.0.0-alpha.1]: https://github.com/biblibre/omeka-cli/compare/v0.18.0...v1.0.0-alpha.1
+[0.18.0]: https://github.com/biblibre/omeka-cli/compare/v0.17.0...v0.18.0
+[0.17.0]: https://github.com/biblibre/omeka-cli/compare/v0.16.1...v0.17.0
+[0.16.1]: https://github.com/biblibre/omeka-cli/compare/v0.16.0...v0.16.1
+[0.16.0]: https://github.com/biblibre/omeka-cli/compare/v0.15.0...v0.16.0
+[0.15.0]: https://github.com/biblibre/omeka-cli/compare/v0.14.0...v0.15.0
+[0.14.0]: https://github.com/biblibre/omeka-cli/compare/v0.13.0...v0.14.0
+[0.13.0]: https://github.com/biblibre/omeka-cli/compare/v0.12.1...v0.13.0
+[0.12.1]: https://github.com/biblibre/omeka-cli/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/biblibre/omeka-cli/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/biblibre/omeka-cli/compare/v0.10.0...v0.11.0
+[0.10.0]: https://github.com/biblibre/omeka-cli/compare/v0.9.0...v0.10.0
+[0.9.0]: https://github.com/biblibre/omeka-cli/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/biblibre/omeka-cli/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/biblibre/omeka-cli/compare/v0.6.1...v0.7.0
+[0.6.1]: https://github.com/biblibre/omeka-cli/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/biblibre/omeka-cli/compare/v0.5.2...v0.6.0
+[0.5.2]: https://github.com/biblibre/omeka-cli/compare/v0.5.1...v0.5.2
 [0.5.1]: https://github.com/biblibre/omeka-cli/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/biblibre/omeka-cli/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/biblibre/omeka-cli/compare/v0.3.0...v0.4.0
