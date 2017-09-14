@@ -5,6 +5,7 @@ namespace OmekaCli\Command;
 use PDO;
 use PDOException;
 use OmekaCli\Application;
+use OmekaCli\IniWriter;
 use GetOptionKit\OptionCollection;
 
 class InstallCommand extends AbstractCommand
@@ -29,11 +30,11 @@ class InstallCommand extends AbstractCommand
         $cmdSpec = new OptionCollection();
         $cmdSpec->add('v|version:', 'Omeka version')
                 ->isa('String');
-        $cmdSpec->add('h|db-host?', 'database host')
+        $cmdSpec->add('h|db-host:', 'database host')
                 ->isa('String');
-        $cmdSpec->add('u|db-user?', 'database user name')
+        $cmdSpec->add('u|db-user:', 'database user name')
                 ->isa('String');
-        $cmdSpec->add('p|db-pass?', 'database user password')
+        $cmdSpec->add('p|db-pass:', 'database user password')
                 ->isa('String');
         $cmdSpec->add('n|db-name:', 'database name')
                 ->isa('String');
@@ -45,7 +46,7 @@ class InstallCommand extends AbstractCommand
                 ->isa('String');
         $cmdSpec->add('E|omeka-user-email:', 'Omeka superuser email')
                 ->isa('String');
-        $cmdSpec->add('T|omeka-site-title?', 'Omeka site title')
+        $cmdSpec->add('T|omeka-site-title:', 'Omeka site title')
                 ->isa('String');
         $cmdSpec->add('A|omeka-admin-email:', 'Omeka admin email')
                 ->isa('String');
@@ -245,23 +246,8 @@ class InstallCommand extends AbstractCommand
         $db['database']['dbname'] = $config['db-name'];
         $db['database']['prefix'] = $config['db-prefix'];
 
-        $ini = $this->array2Ini($db);
-        file_put_contents($dbini, $ini);
-    }
-
-    protected function array2Ini($array)
-    {
-        $out = '';
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $out .= "[$key]" . PHP_EOL;
-                $out .= $this->array2Ini($value);
-            } else {
-                $out .= "$key = \"$value\"" . PHP_EOL;
-            }
-        }
-
-        return $out;
+        $iniWriter = new IniWriter($dbini);
+        $iniWriter->writeArray($db);
     }
 
     protected function createDatabase($config)

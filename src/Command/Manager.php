@@ -80,6 +80,7 @@ class Manager
         $this->registerCommand('list', 'OmekaCli\Command\ListCommand');
         $this->registerCommand('options', 'OmekaCli\Command\OptionsCommand');
         $this->registerCommand('snapshot', 'OmekaCli\Command\SnapshotCommand', array('snap'));
+        $this->registerCommand('snapshot-restore', 'OmekaCli\Command\SnapshotRestoreCommand', array('restore'));
         $this->registerCommand('upgrade', 'OmekaCli\Command\UpgradeCommand');
         $this->registerCommand('version', 'OmekaCli\Command\VersionCommand');
 
