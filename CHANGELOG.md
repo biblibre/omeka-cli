@@ -28,11 +28,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Command upgrade no longer ask for automatic recovering if the upgrade fails.
   It is up to the user to manually reinject the database dump if they think it's
   needed
+- Namespace renaming
+- Command snapshot was split in two (snapshot and snapshot-restore)
 
 ## Removed
 - Constant OMEKA_CLI_PATH
 - Global option --no-prompt
 - Command plugin-update forgot --list
+
+## Fixed
+- omeka-cli can now be installed using composer
 
 ## [1.0.0-alpha.1] - 2017-09-05
 ### Changed
