@@ -5,8 +5,8 @@ namespace OmekaCli\Command\PluginCommands;
 use GetOptionKit\OptionCollection;
 use OmekaCli\Application;
 use OmekaCli\UIUtils;
-use OmekaCli\Command\PluginCommands\Utils\Repository\OmekaDotOrgRepository;
-use OmekaCli\Command\PluginCommands\Utils\Repository\GithubRepository;
+use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
+use OmekaCli\Plugin\Repository\GithubRepository;
 
 class Download extends AbstractPluginCommand
 {

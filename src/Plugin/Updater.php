@@ -5,7 +5,7 @@ namespace OmekaCli\Plugin;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
-use OmekaCli\Command\PluginCommands\Utils\Repository\OmekaDotOrgRepository;
+use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
 
 class Updater implements LoggerAwareInterface
 {

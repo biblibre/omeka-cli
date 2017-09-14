@@ -1,6 +1,6 @@
 <?php
 
-namespace OmekaCli\Command\PluginCommands\Utils\Repository;
+namespace OmekaCli\Plugin\Repository;
 
 use Github\Client;
 
