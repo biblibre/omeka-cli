@@ -1,6 +1,6 @@
 # Omeka CLI
 
-Command line tool for [Omeka][omeka]
+Command line tool for [Omeka]
 
 This tool allows to interact with Omeka by using a command line interface.
 It also provides everything needed for Omeka plugins to create custom
@@ -8,12 +8,12 @@ commands.
 
 ## Usage
 
-    omeka-cli {-h|--help}
-    omeka-cli [-C <omeka-path>] [-n|--no-prompt] COMMAND [ARGS...]
+    omeka-cli [-h | --help]
+    omeka-cli [-C <omeka-path>] [<options>...] COMMAND [ARGS...]
 
 ## Available commands
 
-General commands
+### General commands
 
     check-updates  check for updates
     help           print help for a specific command
@@ -25,7 +25,7 @@ General commands
     upgrade        upgrade Omeka
     version        print version of omeka-cli
 
-Plugin related commands
+### Plugin related commands
 
     plugin-activate    activate a plugin
     plugin-deactivate  deactivate a plugin
@@ -33,14 +33,47 @@ Plugin related commands
     plugin-uninstall   uninstall a plugin
     plugin-downloads   downloads a plugin
 
+## Requirements
+
+- PHP (>= 5.6)
+- git
+
 ## Installation
 
-**NOTE** You will need `git` to use omeka-cli.
+### Using composer
 
-    $ git clone https://github.com/biblibre/omeka-cli.git
-    $ cd omeka-cli
-    $ composer install --no-dev
-    $ bin/omeka-cli version
+```sh
+# For the latest released version
+composer global require biblibre/omeka-cli:@alpha   # No stable releases yet!
+
+# For the latest dev version
+composer global require biblibre/omeka-cli:@dev
+```
+
+Then add `~/.config/composer/vendor/bin` to your `PATH`
+
+```sh
+export PATH=~/.config/composer/vendor/bin:$PATH
+```
+
+### Using the phar
+
+Download the latest ̀`omeka-cli.phar` from [Releases] page.
+
+```sh
+wget https://github.com/biblibre/omeka-cli/releases/download/$VERSION/omeka-cli.phar
+chmod +x omeka-cli.phar
+sudo mv omeka-cli.phar /usr/local/bin/omeka-cli
+```
+
+### Using the sources
+
+```sh
+git clone https://github.com/biblibre/omeka-cli.git
+cd omeka-cli
+composer install --no-dev
+bin/omeka-cli version
+```
 
 ## Creating custom commands
 
@@ -59,19 +92,23 @@ $events->attach('OmekaCli', 'commands', function() {
 });
 ```
 
-and define a class `Foo_Bar` which extends
-[OmekaCli\Command\AbstractCommands](src/Command/AbstractCommands.php)
+and define a class `Foo_Bar` which implements
+[OmekaCli\Command\CommandInterface](src/Command/CommandInterface.php)
 
 Then you will be able to run the command either this way:
 
-    $ omeka-cli Foo:Bar [OPTION...] [ARG...]
+```sh
+omeka-cli Foo:Bar [OPTION...] [ARG...]
+```
 
 or using the alias:
 
-    $ omeka-cli bar [OPTION...] [ARG...]
+```sh
+omeka-cli bar [OPTION...] [ARG...]
+```
 
-Read this [example][example] to see how to create a custom command from a
-plugin in practice.
+To see how to create a custom command from a plugin in practice, see plugin
+[Foo].
 
 ## Running tests
 
@@ -79,7 +116,10 @@ plugin in practice.
 
 If you want to test `omeka-cli`, run:
 
-    $ OMEKA_PATH=<path_to_omeka> vendor/bin/phpunit -c tests/phpunit.xml
+```sh
+composer install --dev
+OMEKA_PATH=/path/to/omeka vendor/bin/phpunit -c tests/phpunit.xml
+```
 
 The environment variable `OMEKA_PATH` must be defined to run the tests.
 
@@ -87,5 +127,6 @@ The environment variable `OMEKA_PATH` must be defined to run the tests.
 
 GPL 3.0+
 
-[example]: https://github.com/biblibre/omeka-plugin-Foo
-[omeka]:   http://omeka.org/
+[Omeka]: https://omeka.org/
+[Releases]: https://github.com/biblibre/omeka-cli/releases
+[Foo]: https://github.com/biblibre/omeka-plugin-Foo
