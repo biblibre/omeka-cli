@@ -1,0 +1,41 @@
+#!/usr/bin/env php
+<?php
+
+$top = realpath(__DIR__ . '/..');
+
+if (file_exists('omeka-cli.phar')) {
+    unlink('omeka-cli.phar');
+}
+
+$composer_cmd = 'composer --working-dir=' . escapeshellarg($top)
+    . ' install -q --no-dev';
+shell_exec($composer_cmd);
+
+$phar = new Phar('omeka-cli.phar', 0, 'omeka-cli.phar');
+
+$phar->startBuffering();
+
+$directoryIterator = new RecursiveDirectoryIterator($top, FilesystemIterator::SKIP_DOTS);
+$iteratorIterator = new RecursiveIteratorIterator($directoryIterator);
+$regexIterator = new RegexIterator($iteratorIterator, '/\.php$/');
+foreach ($regexIterator as $file) {
+    $path = $file->getPathname();
+    $phar->addFile($path, str_replace($top, '', $path));
+}
+
+$bin = file_get_contents($top . '/bin/omeka-cli');
+$bin = preg_replace('|^#!/usr/bin/env php\s*|', '', $bin);
+$phar->addFromString('bin/omeka-cli', $bin);
+
+$stub = <<<'EOF'
+<?php
+Phar::mapPhar('omeka-cli.phar');
+require 'phar://omeka-cli.phar/bin/omeka-cli';
+
+__HALT_COMPILER();
+EOF;
+$phar->setStub($stub);
+
+$phar->compressFiles(Phar::GZ);
+
+$phar->stopBuffering();
