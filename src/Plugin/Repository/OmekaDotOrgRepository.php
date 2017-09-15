@@ -4,13 +4,11 @@ namespace OmekaCli\Plugin\Repository;
 
 use Goutte\Client;
 use ZipArchive;
-use phpFastCache\CacheManager;
 use DateInterval;
+use OmekaCli\Cache;
 
 class OmekaDotOrgRepository implements RepositoryInterface
 {
-    protected static $cache;
-
     const PLUGINS_URL = 'http://omeka.org/add-ons/plugins/';
 
     protected $client;
@@ -121,11 +119,9 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
     protected function getPlugins()
     {
-        if (self::$cache == null) {
-            self::$cache = CacheManager::getInstance('Files');
-        }
-        $cacheKey = __METHOD__;
-        $cacheItem = self::$cache->getItem($cacheKey);
+        $cache = Cache::getCachePool();
+        $cacheKey = 'OmekaDotOrgRepository.plugins';
+        $cacheItem = $cache->getItem($cacheKey);
 
         if (!$cacheItem->isHit()) {
             $root = $this->client->request('GET', self::PLUGINS_URL);
@@ -145,7 +141,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
             $ttl = DateInterval::createFromDateString('1 day');
             $cacheItem->set($plugins)->expiresAfter($ttl);
-            self::$cache->save($cacheItem);
+            $cache->save($cacheItem);
         }
 
         return $cacheItem->get();
