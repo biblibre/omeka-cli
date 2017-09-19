@@ -21,6 +21,7 @@
     },
     "minimum-stability": "RC",
     "require": {
+        "ext-zip": "*",
         "knplabs/github-api": "^2.0",
         "php-http/guzzle6-adapter": "^1.1",
         "psr/log": "^1.0",
