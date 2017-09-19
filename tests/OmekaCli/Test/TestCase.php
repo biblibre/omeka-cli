@@ -1,15 +1,16 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace OmekaCli\Test;
 
-require_once __DIR__ . '/../FakeLogger.php';
+use Zend_Registry;
+use OmekaCli\Test\Mock\LoggerMock;
 
-abstract class AbstractTest extends TestCase
+abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected $application;
-    protected $fakeLogger;
+    protected $logger;
 
-    final protected function setUp()
+    protected function setUp()
     {
         if (class_exists('Zend_Registry')) {
             $this->application = Zend_Registry::get('omeka-cli-application');
@@ -20,10 +21,10 @@ abstract class AbstractTest extends TestCase
 
     protected function getCommand($name)
     {
-        $this->fakeLogger = new FakeLogger();
+        $this->logger = new LoggerMock();
         $commands = $this->application->getCommandManager();
         $command = $commands->get($name);
-        $command->setLogger($this->fakeLogger);
+        $command->setLogger($this->logger);
 
         return $command;
     }

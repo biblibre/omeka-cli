@@ -1,8 +1,10 @@
 <?php
 
-require_once 'AbstractTest.php';
+namespace OmekaCli\Test\Command;
 
-final class OptionsCommandTest extends AbstractTest
+use OmekaCli\Test\TestCase;
+
+class OptionsCommandTest extends TestCase
 {
     public function testShowAllOptionsWhenRunWithoutArgument()
     {
@@ -34,7 +36,7 @@ final class OptionsCommandTest extends AbstractTest
                       $this->application);
 
         $this->assertEquals(1, $retCode);
-        $this->assertRegExp('/\AError: option not found\Z/', $this->fakeLogger->getOutput());
+        $this->assertRegExp('/\AError: option not found\Z/', $this->logger->getOutput());
     }
 
     public function testCanEditExistingTableEntries()

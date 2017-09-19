@@ -1,8 +1,10 @@
 <?php
 
-require_once 'AbstractTest.php';
+namespace OmekaCli\Test\Command;
 
-final class InfoCommandTest extends AbstractTest
+use OmekaCli\Test\TestCase;
+
+class InfoCommandTest extends TestCase
 {
     public function testIsOutputFormatOk()
     {

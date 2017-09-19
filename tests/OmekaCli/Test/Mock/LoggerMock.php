@@ -1,6 +1,10 @@
 <?php
 
-class FakeLogger extends \OmekaCli\Logger
+namespace OmekaCli\Test\Mock;
+
+use OmekaCli\Logger;
+
+class LoggerMock extends Logger
 {
     protected $output = '';
 
