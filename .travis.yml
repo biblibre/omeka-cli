@@ -21,5 +21,5 @@ before_script:
   - sed -i 's/paths.imagemagick = ""/paths.imagemagick = "\/usr\/bin\/"/' /tmp/Omeka/application/tests/config.ini
 
 script:
-  - OMEKA_PATH=/tmp/Omeka ./vendor/bin/phpunit -c tests/phpunit.xml
+  - OMEKA_PATH=/tmp/Omeka ./vendor/bin/phpunit -c phpunit.xml
   - ./vendor/bin/php-cs-fixer fix -v --dry-run --using-cache=no
