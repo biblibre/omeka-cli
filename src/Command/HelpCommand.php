@@ -2,8 +2,6 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Application;
-
 class HelpCommand extends AbstractCommand
 {
     public function getDescription()
@@ -19,7 +17,7 @@ class HelpCommand extends AbstractCommand
         return $usage;
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
         if (empty($args)) {
             echo $this->getUsage();
@@ -28,7 +26,8 @@ class HelpCommand extends AbstractCommand
         }
 
         $commandName = reset($args);
-        $command = $application->getCommandManager()->get($commandName);
+        $commands = $this->commandManager;
+        $command = $this->commandManager->getCommand($commandName);
         if (!isset($command)) {
             $this->logger->error('Command {name} does not exist', array(
                 'name' => $commandName,

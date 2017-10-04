@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Omeka code is run inside another process to keep the main process clean
+- CommandInterface now extends ContextAwareInterface and LoggerAwareInterface
+- CommandInterface::run now takes only two parameters
+- Test suite sets up a new Omeka installation before running tests
 
 ## [1.0.0-alpha.2] - 2017-09-14
 ### Added

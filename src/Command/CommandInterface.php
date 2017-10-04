@@ -2,9 +2,10 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Application;
+use Psr\Log\LoggerAwareInterface;
+use OmekaCli\Context\ContextAwareInterface;
 
-interface CommandInterface
+interface CommandInterface extends ContextAwareInterface, LoggerAwareInterface
 {
     /**
      * @return array Command options specifications.
@@ -39,11 +40,10 @@ interface CommandInterface
     /**
      * Run the command.
      *
-     * @param string[]    $options     An associative array of command line options
-     * @param string[]    $arguments   Command line arguments
-     * @param Application $application The OmekaCli Application
+     * @param string[] $options   An associative array of command line options
+     * @param string[] $arguments Command line arguments
      *
      * @return int exit code
      */
-    public function run($options, $arguments, Application $application);
+    public function run($options, $arguments);
 }

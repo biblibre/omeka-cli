@@ -2,7 +2,7 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Application;
+use OmekaCli\Omeka;
 
 class InfoCommand extends AbstractCommand
 {
@@ -29,38 +29,55 @@ class InfoCommand extends AbstractCommand
         return $usage;
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
         echo 'omeka-cli:            ' . OMEKACLI_VERSION . PHP_EOL;
 
-        if (!$application->isOmekaInitialized()) {
-            $this->logger->error('Omeka is not initialized here.');
-
-            return 1;
+        $omekaPath = $this->getContext()->getOmekaPath();
+        if (!$omekaPath) {
+            return 0;
         }
 
-        $db = get_db();
-        $pluginsTable = $db->getTable('Plugin');
-        $activePlugins = $pluginsTable->findBy(array('active' => 1));
-        $inactivePlugins = $pluginsTable->findBy(array('active' => 0));
+        $omeka = new Omeka();
+        $omeka->setContext($this->getContext());
 
-        echo 'Omeka base directory: ' . BASE_DIR . PHP_EOL;
-        echo 'Omeka version:        ' . OMEKA_VERSION . PHP_EOL;
-        echo 'Database version:     ' . get_option('omeka_version') . PHP_EOL;
+        $plugins = $this->getSandbox()->execute(function () {
+            $db = get_db();
+            $pluginsTable = $db->getTable('Plugin');
+            $plugins = array_map(function ($p) {
+                return $p->toArray();
+            }, $pluginsTable->findAll());
 
-        if (OMEKA_VERSION != get_option('omeka_version')) {
-            echo 'Warning: Omeka version and database version are not the same!' . PHP_EOL;
+            return $plugins;
+        });
+
+        $activePlugins = array_filter($plugins, function ($p) {
+            return (bool) $p['active'];
+        });
+        $inactivePlugins = array_filter($plugins, function ($p) {
+            return (bool) !$p['active'];
+        });
+
+        $version = $omeka->OMEKA_VERSION;
+        $dbVersion = $omeka->get_option('omeka_version');
+
+        echo 'Omeka base directory: ' . $omeka->BASE_DIR . "\n";
+        echo 'Omeka version:        ' . $version . "\n";
+        echo 'Database version:     ' . $dbVersion . "\n";
+
+        if (0 !== version_compare($version, $dbVersion)) {
+            echo "Warning: Omeka version and database version are not the same!\n";
         }
 
-        echo 'Admin theme:          ' . get_option('admin_theme') . PHP_EOL;
-        echo 'Public theme:         ' . get_option('public_theme') . PHP_EOL;
-        echo 'Plugins (actives):' . PHP_EOL;
+        echo 'Admin theme:          ' . $omeka->get_option('admin_theme') . "\n";
+        echo 'Public theme:         ' . $omeka->get_option('public_theme') . "\n";
+        echo 'Plugins (actives):' . "\n";
         foreach ($activePlugins as $plugin) {
-            echo $plugin->name . ' - ' . $plugin->version . PHP_EOL;
+            echo "\t" . sprintf('%s - %s', $plugin['name'], $plugin['version']) . "\n";
         }
-        echo 'Plugins (inactives):' . PHP_EOL;
+        echo 'Plugins (inactives):' . "\n";
         foreach ($inactivePlugins as $plugin) {
-            echo $plugin->name . ' - ' . $plugin->version . PHP_EOL;
+            echo "\t" . sprintf('%s - %s', $plugin['name'], $plugin['version']) . "\n";
         }
 
         return 0;

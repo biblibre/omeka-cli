@@ -3,7 +3,6 @@
 namespace OmekaCli\Command\Plugin;
 
 use GetOptionKit\OptionCollection;
-use OmekaCli\Application;
 use OmekaCli\Console\Prompt;
 use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
 use OmekaCli\Plugin\Repository\GithubRepository;
@@ -36,7 +35,7 @@ class DownloadCommand extends AbstractPluginCommand
         return $optionsSpec;
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
         if (count($args) != 1) {
             $this->logger->error($this->getUsage());
@@ -82,23 +81,24 @@ class DownloadCommand extends AbstractPluginCommand
 
         $destDir = '.';
 
-        if ($application->isOmekaInitialized()) {
+        if ($this->getContext()->getOmekaPath()) {
+            $omeka = $this->getOmeka();
             $omekaMinimumVersion = $plugin['info']['omekaMinimumVersion'];
             $force = isset($options['force']) && $options['force'];
-            if (version_compare(OMEKA_VERSION, $omekaMinimumVersion) < 0 && !$force) {
+            if (version_compare($omeka->OMEKA_VERSION, $omekaMinimumVersion) < 0 && !$force) {
                 $this->logger->error('The current Omeka version is too low to install this plugin. Use --force if you really want to download it.');
 
                 return 1;
             }
 
-            $destDir = PLUGIN_DIR;
+            $destDir = $omeka->PLUGIN_DIR;
         }
 
         $this->logger->info('Downloading plugin');
         try {
             $repository = $plugin['repository'];
             $dest = $repository->download($plugin['info'], $destDir);
-            $this->logger->info('Downloaded into {path}', array('path' => $dest));
+            $this->logger->notice('Plugin downloaded into {path}', array('path' => $dest));
         } catch (\Exception $e) {
             $this->logger->error('Download failed: {message}', array('message' => $e->getMessage()));
         }

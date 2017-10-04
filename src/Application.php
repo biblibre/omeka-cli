@@ -2,18 +2,19 @@
 
 namespace OmekaCli;
 
-use OmekaCli\Command\Manager;
-use OmekaCli\Exception\BadUsageException;
-use OmekaCli\Util\Sandbox;
 use GetOptionKit\OptionCollection;
 use GetOptionKit\ContinuousOptionParser;
 use GetOptionKit\Exception\InvalidOptionException;
+use OmekaCli\Command\Manager;
+use OmekaCli\Context\Context;
+use OmekaCli\Exception\BadUsageException;
+use OmekaCli\Sandbox\OmekaSandbox;
 
 class Application
 {
     protected $logger;
     protected $commands;
-    protected $omekaApplication;
+    protected $omekaPath;
 
     protected $options;
     protected $args;
@@ -42,16 +43,15 @@ class Application
         $options = array();
         $parser = new ContinuousOptionParser($appSpec);
         try {
-            $appOptions = $parser->parse($argv);
+            $result = $parser->parse($argv);
         } catch (InvalidOptionException $e) {
             throw new BadUsageException($e->getMessage(), 0, $e);
         }
 
+        $options = $result->toArray();
+        $args = array();
         while (!$parser->isEnd()) {
             $args[] = $parser->advance();
-        }
-        foreach ($appOptions->keys as $key => $appSpec) {
-            $options[$key] = $appOptions->keys[$key]->value;
         }
 
         return new self($options, $args);
@@ -75,7 +75,7 @@ class Application
         return $usage;
     }
 
-    public function __construct($options, $args)
+    public function __construct($options = array(), $args = array())
     {
         $this->options = $options;
         $this->args = $args;
@@ -92,33 +92,20 @@ class Application
             $omekaPath = $this->searchOmekaDir();
         }
 
-        if ($omekaPath) {
-            require_once "$omekaPath/bootstrap.php";
-            $this->initializeOmeka();
-        }
+        $this->omekaPath = $omekaPath;
     }
 
     public function run()
     {
-        $logger = $this->getLogger();
-
-        $commands = $this->getCommandManager();
         $commandName = $this->getCommandName();
 
         if ($this->getOption('help') || !$commandName) {
             echo $this->longUsage();
 
-            $exitCode = 0;
-        } else {
-            $exitCode = $this->runCommand();
+            return 0;
         }
 
-        return $exitCode;
-    }
-
-    public function isOmekaInitialized()
-    {
-        return isset($this->omekaApplication);
+        return $this->runCommand($commandName);
     }
 
     public function getLogger()
@@ -137,7 +124,13 @@ class Application
     public function getCommandManager()
     {
         if (!isset($this->commands)) {
-            $this->commands = new Manager($this, $this->getLogger());
+            $omekaPath = $this->omekaPath;
+            $commands = new Manager();
+            $commands->setLogger($this->getLogger());
+            $commands->setContext(new Context($omekaPath));
+            $commands->initialize();
+
+            $this->commands = $commands;
         }
 
         return $this->commands;
@@ -160,16 +153,15 @@ class Application
         $usage = self::usage();
 
         $commands = $this->getCommandManager();
-        if (isset($commands)) {
-            $usage .= "\nAvailable commands:\n\n";
-            foreach ($commands->getAll() as $name => $command) {
-                $usage .= "\t$name";
-                $description = $command->getDescription();
-                if ($description) {
-                    $usage .= " -- $description";
-                }
-                $usage .= "\n";
+        $usage .= "\nAvailable commands:\n\n";
+        foreach ($commands->getCommandsNames() as $name) {
+            $usage .= "\t$name";
+            $command = $commands->getCommand($name);
+            $description = $command->getDescription();
+            if ($description) {
+                $usage .= " -- $description";
             }
+            $usage .= "\n";
         }
 
         $usage .= "\n";
@@ -177,57 +169,30 @@ class Application
         return $usage;
     }
 
-    protected function runCommand()
+    protected function runCommand($commandName)
     {
         $commands = $this->getCommandManager();
-        $commandName = $this->getCommandName();
-        $logger = $this->getLogger();
 
-        $command = $commands->get($commandName);
-        if (!isset($command)) {
-            $logger->error('Command {command} does not exist', array('command' => $commandName));
-            echo $this->usage();
-
-            return 1;
-        }
-
-        $cmdSpec = $command->getOptionsSpec();
-
-        $cmdArgs = array();
-        $cmdOptions = array();
-        $parser = new ContinuousOptionParser($cmdSpec);
         try {
-            $cmdArgv = $parser->parse($this->args);
+            return $commands->run($commandName, $this->args);
         } catch (\Exception $e) {
-            $logger->error($e->getMessage());
-            echo $command->getUsage();
-
-            return 1;
+            $this->logger->error($e->getMessage());
         }
-
-        while (!$parser->isEnd()) {
-            $cmdArgs[] = $parser->advance();
-        }
-        foreach ($cmdArgv->keys as $key => $cmdSpec) {
-            $cmdOptions[$key] = $cmdArgv->keys[$key]->value;
-        }
-
-        return $command->run($cmdOptions, $cmdArgs, $this);
     }
 
     protected function isOmekaDir($dir)
     {
-        $sandbox = new Sandbox();
-        $result = $sandbox->run(function () use ($dir) {
-            include "$dir/bootstrap.php";
+        $sandbox = new OmekaSandbox();
+        $sandbox->setContext(new Context($dir));
+        $result = $sandbox->execute(function () {
             if (defined('OMEKA_VERSION')) {
-                return 0;
+                return true;
             }
 
-            return 1;
+            return false;
         });
 
-        return $result['exit_code'] === 0 ? true : null;
+        return $result;
     }
 
     protected function searchOmekaDir()
@@ -239,43 +204,6 @@ class Application
 
         if ($dir !== false && $dir !== '/') {
             return $dir;
-        }
-    }
-
-    protected function initializeOmeka()
-    {
-        $application = new \Omeka_Application(APPLICATION_ENV);
-        $application->getBootstrap()->setOptions(array(
-            'resources' => array(
-                'theme' => array(
-                    'basePath' => THEME_DIR,
-                    'webBasePath' => WEB_THEME,
-                ),
-            ),
-        ));
-
-        if (APPLICATION_ENV === 'testing') {
-            \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
-        }
-
-        $application->getBootstrap()->getPluginResource('Options')->setInstallerRedirect(false);
-
-        try {
-            $bootstrap = $application->getBootstrap();
-            $bootstrap->bootstrap('Db');
-            $db = $bootstrap->getResource('Db');
-        } catch (\Exception $e) {
-            echo $e->getMessage() . PHP_EOL;
-        }
-
-        if (isset($db)) {
-            try {
-                $db->getTable('Options')->count();
-                $application->initialize();
-                $this->omekaApplication = $application;
-            } catch (\Exception $e) {
-                echo $e->getMessage() . PHP_EOL;
-            }
         }
     }
 }

@@ -3,7 +3,6 @@
 namespace OmekaCli\Command;
 
 use GetOptionKit\OptionCollection;
-use OmekaCli\Application;
 use OmekaCli\IniWriter;
 
 class SnapshotRestoreCommand extends AbstractCommand
@@ -38,7 +37,7 @@ class SnapshotRestoreCommand extends AbstractCommand
         return $optionsSpec;
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
         if (count($args) != 2) {
             $this->logger->error('Bad number of arguments');
@@ -104,13 +103,19 @@ class SnapshotRestoreCommand extends AbstractCommand
             $iniWriter->writeArray($db);
         }
 
-        $this->logger->info('restoring database');
-        exec('tar xf ' . escapeshellarg($snapshot) . ' -O ./omeka_db_backup.sql.gz'
-           . ' | gzip -cd | '
-           . 'mysql --host=' . escapeshellarg($db['database']['host'])
-           . ' --user=' . escapeshellarg($db['database']['username'])
-           . ' --password=' . escapeshellarg($db['database']['password'])
-           . ' ' . escapeshellarg($db['database']['dbname']), $out, $exitCode);
+        $this->logger->info('Restoring database');
+        $passwordFile = tempnam(sys_get_temp_dir(), 'omeka.cnf.');
+        file_put_contents($passwordFile, '[client]' . PHP_EOL . "password = {$db['database']['password']}");
+
+        exec('tar xf ' . escapeshellarg($snapshot) . ' -O ./omeka.sql.gz'
+            . ' | gzip -cd | '
+            . 'mysql'
+            . ' --defaults-file=' . escapeshellarg($passwordFile)
+            . ' --host=' . escapeshellarg($db['database']['host'])
+            . ' --user=' . escapeshellarg($db['database']['username'])
+            . ' ' . escapeshellarg($db['database']['dbname']), $out, $exitCode);
+
+        unlink($passwordFile);
 
         if ($exitCode) {
             $this->logger->error('database recovering failed');
@@ -118,7 +123,7 @@ class SnapshotRestoreCommand extends AbstractCommand
             return 1;
         }
 
-        $this->logger->info('Snapshot restored successfully');
+        $this->logger->notice('Snapshot restored successfully');
 
         return 0;
     }

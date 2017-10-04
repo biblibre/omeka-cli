@@ -2,8 +2,6 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Application;
-
 class ListCommand extends AbstractCommand
 {
     public function getDescription()
@@ -19,10 +17,11 @@ class ListCommand extends AbstractCommand
         return $usage;
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
-        $commands = $application->getCommandManager();
-        foreach ($commands->getAll() as $name => $command) {
+        $commands = $this->commandManager;
+        foreach ($commands->getCommandsNames() as $name) {
+            $command = $commands->getCommand($name);
             $aliases = $commands->getCommandAliases($name);
             $description = $command->getDescription();
 

@@ -2,27 +2,31 @@
 
 namespace OmekaCli\Test\Command;
 
-use OmekaCli\Test\TestCase;
-
 class InfoCommandTest extends TestCase
 {
+    protected $command;
+
     public function testIsOutputFormatOk()
     {
-        $command = $this->getCommand('info');
-
         ob_start();
-        $command->run(array(), array(), $this->application);
+        $this->command->run(array(), array());
         $output = ob_get_clean();
 
-        $this->assertRegExp(
-'/\Aomeka-cli: +.+
-Omeka base directory: +.+
-Omeka version: +.+
-Database version: +.+(\nWarning: Omeka version and database version are not the same!)?
-Admin theme: +.+
-Public theme: +.+
-Plugins \(actives\):(\n.+)*
-Plugins \(inactives\):
-(.+\n)*\Z/', $output);
+        $regex = "\A";
+        $regex .= "omeka-cli: +.+\n";
+        $regex .= "Omeka base directory: +.+\n";
+        $regex .= "Omeka version: +.+\n";
+        $regex .= "Database version: +.+(\nWarning: Omeka version and database version are not the same!)?\n";
+        $regex .= "Admin theme: +.+\n";
+        $regex .= "Public theme: +.+\n";
+        $regex .= "Plugins \(actives\):(\n\t.+)*\n";
+        $regex .= "Plugins \(inactives\):(\n\t.+)*\n";
+        $regex .= "\Z";
+        $this->assertRegExp("/$regex/", $output);
+    }
+
+    protected function getCommandName()
+    {
+        return 'info';
     }
 }

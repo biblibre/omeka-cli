@@ -114,16 +114,17 @@ To see how to create a custom command from a plugin in practice, see plugin
 
 ## Running tests
 
-**Do not run tests on your own Omeka installation!**
+If you want to test `omeka-cli`, copy `phpunit.xml.dist` into `phpunit.xml` and
+change environment variables `OMEKA_DB_*` as needed.
+If you want to avoid downloading Omeka before every run, you can download the
+ZIP file manually, and put its local path in `OMEKA_ZIP_PATH`.
 
-If you want to test `omeka-cli`, run:
+After you've done that, run
 
 ```sh
-composer install --dev
-OMEKA_PATH=/path/to/omeka vendor/bin/phpunit -c tests/phpunit.xml
+composer install
+vendor/bin/phpunit
 ```
-
-The environment variable `OMEKA_PATH` must be defined to run the tests.
 
 ## License
 

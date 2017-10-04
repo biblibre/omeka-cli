@@ -3,7 +3,7 @@
 namespace OmekaCli\Command;
 
 use Omeka_Db_Migration_Manager;
-use OmekaCli\Application;
+use OmekaCli\Omeka;
 
 class UpgradeCommand extends AbstractCommand
 {
@@ -23,15 +23,18 @@ class UpgradeCommand extends AbstractCommand
         return $usage;
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
-        if (!$application->isOmekaInitialized()) {
+        $omekaPath = $this->getContext()->getOmekaPath();
+
+        if (!$omekaPath) {
             $this->logger->error('not in an Omeka directory');
 
             return 1;
         }
 
-        if (!file_exists(BASE_DIR . '/.git')) {
+        $omeka = $this->getOmeka();
+        if (!file_exists($omeka->BASE_DIR . '/.git')) {
             $this->logger->error('omeka-cli needs a git repo to upgrade Omeka');
 
             return 1;
@@ -39,7 +42,7 @@ class UpgradeCommand extends AbstractCommand
 
         $this->logger->info('checking for updates');
         $latestVersion = $this->getLatestVersion();
-        if (version_compare(OMEKA_VERSION, $latestVersion) >= 0) {
+        if (version_compare($omeka->OMEKA_VERSION, $latestVersion) >= 0) {
             $this->logger->notice('Omeka is already up-to-date');
 
             return 0;
@@ -66,14 +69,13 @@ class UpgradeCommand extends AbstractCommand
             return 1;
         }
 
-        $this->logger->info('upgrade successful');
+        $this->logger->notice('Upgrade successful');
 
         return 0;
     }
 
     protected function getLatestVersion()
     {
-        $baseDir = BASE_DIR;
         $latestTag = rtrim(`git ls-remote -q --tags --refs https://github.com/omeka/Omeka 'v*' | cut -f 2 | sed 's|refs/tags/||' | sort -rV | head -n1`);
         $latestVersion = ltrim($latestTag, 'v');
 
@@ -87,20 +89,26 @@ class UpgradeCommand extends AbstractCommand
             mkdir($backupsDir, 0777, true);
         }
 
-        $db = parse_ini_file(BASE_DIR . '/db.ini');
+        $db = parse_ini_file($this->getOmeka()->BASE_DIR . '/db.ini');
         $dest = sprintf('%s/sql/%s-%s.sql.gz', $backupsDir, $db['dbname'], date('YmdHis'));
         if (!is_dir(dirname($dest))) {
             mkdir(dirname($dest), 0777, true);
         }
 
-        $mysqldump_cmd = 'mysqldump --host=' . escapeshellarg($db['host'])
-           . ' --user=' . escapeshellarg($db['username'])
-           . ' --password=' . escapeshellarg($db['password'])
-           . ' ' . escapeshellarg($db['dbname'])
-           . ' | gzip -c > ' . escapeshellarg($dest);
+        $passwordFile = tempnam(sys_get_temp_dir(), 'omeka.cnf.');
+        file_put_contents($passwordFile, '[client]' . PHP_EOL . "password = {$db['password']}");
+        $mysqldump_cmd = 'mysqldump'
+            . ' --defaults-file=' . escapeshellarg($passwordFile)
+            . ' --host=' . escapeshellarg($db['host'])
+            . ' --user=' . escapeshellarg($db['username'])
+            . ' ' . escapeshellarg($db['dbname'])
+            . ' | gzip -c > ' . escapeshellarg($dest);
 
-        exec($mysqldump_cmd, $out, $ans);
-        if ($ans !== 0) {
+        exec($mysqldump_cmd, $out, $exitCode);
+
+        unlink($passwordFile);
+
+        if ($exitCode !== 0) {
             $this->logger->error('mysqldump failed');
 
             return false;
@@ -113,7 +121,7 @@ class UpgradeCommand extends AbstractCommand
 
     protected function upgradeOmeka($version)
     {
-        $baseDir = escapeshellarg(BASE_DIR);
+        $baseDir = escapeshellarg($this->getOmeka()->BASE_DIR);
         exec("git -C $baseDir stash save -q 'Stash made by omeka-cli upgrade'");
         exec("git -C $baseDir fetch -q origin");
         exec("git -C $baseDir reset --hard -q v$version", $out, $ans);
@@ -123,12 +131,14 @@ class UpgradeCommand extends AbstractCommand
 
     protected function upgradeDb($version)
     {
-        $migrationMgr = Omeka_Db_Migration_Manager::getDefault();
         try {
-            if ($migrationMgr->canUpgrade()) {
-                $migrationMgr->migrate();
-                set_option(Omeka_Db_Migration_Manager::VERSION_OPTION_NAME, $version);
-            }
+            $this->getSandbox()->execute(function () use ($version) {
+                $migrationMgr = Omeka_Db_Migration_Manager::getDefault();
+                if ($migrationMgr->canUpgrade()) {
+                    $migrationMgr->migrate();
+                    set_option(Omeka_Db_Migration_Manager::VERSION_OPTION_NAME, $version);
+                }
+            });
         } catch (\Exception $e) {
             $this->logger->error('Database migration failed: {message}', array('message' => $e->getMessage()));
 

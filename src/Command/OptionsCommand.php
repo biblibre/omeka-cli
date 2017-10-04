@@ -2,8 +2,6 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Application;
-
 class OptionsCommand extends AbstractCommand
 {
     public function getDescription()
@@ -28,54 +26,74 @@ class OptionsCommand extends AbstractCommand
              . '- the option has no value.' . PHP_EOL;
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
-        switch (count($args)) {
-        case '0':
-            $this->showAllOptions();
-            break;
-        case '1':
-            if (!$this->isOption($args[0])) {
-                $this->logger->error('option not found');
-
-                return 1;
-            }
-            echo get_option($args[0]) . PHP_EOL;
-            break;
-        case '2':
-            if (!$this->isOption($args[0])) {
-                $this->logger->error('this option does not exists');
-
-                return 1;
-            }
-            set_option($args[0], $args[1]);
-            echo get_option($args[0]) . PHP_EOL;
-            break;
-        default:
+        if (count($args) > 2) {
             $this->logger->error($this->getUsage());
 
             return 1;
         }
+
+        list($optionName, $optionValue) = array_pad($args, 2, null);
+
+        if (!isset($optionName)) {
+            $this->showAllOptions();
+
+            return 0;
+        }
+
+        if (!$this->isOption($optionName)) {
+            $this->logger->error('option not found');
+
+            return 1;
+        }
+
+        $sandbox = $this->getSandbox();
+        if (isset($optionValue)) {
+            $sandbox->execute(function () use ($optionName, $optionValue) {
+                set_option($optionName, $optionValue);
+            });
+        }
+
+        $optionValue = $sandbox->execute(function () use ($optionName) {
+            return get_option($optionName);
+        });
+
+        echo "$optionValue\n";
 
         return 0;
     }
 
     protected function isOption($optionName)
     {
-        $db = get_db();
-        $optionsTable = $db->getTable('Option');
-        $query = $optionsTable->findBy(array('name' => $optionName));
+        $sandbox = $this->getSandbox();
+        $isOption = $sandbox->execute(function () use ($optionName) {
+            $db = get_db();
+            $optionsTable = $db->getTable('Option');
+            $options = $optionsTable->findBy(array('name' => $optionName));
 
-        return !empty($query);
+            return !empty($options);
+        });
+
+        return $isOption;
     }
 
     protected function showAllOptions()
     {
-        $db = get_db();
-        $optionsTable = $db->getTable('Option');
-        $options = $optionsTable->findAll();
-        foreach ($options as $option) {
-            echo $option['name'] . '=' . $option['value'] . PHP_EOL;
+        $sandbox = $this->getSandbox();
+        $options = $sandbox->execute(function () {
+            $db = get_db();
+            $optionsTable = $db->getTable('Option');
+            $options = array();
+            foreach ($optionsTable->findAll() as $option) {
+                $options[$option->name] = $option->value;
+            }
+
+            return $options;
+        });
+
+        foreach ($options as $name => $value) {
+            echo sprintf('%s = %s', $name, $value) . "\n";
         }
     }
 }

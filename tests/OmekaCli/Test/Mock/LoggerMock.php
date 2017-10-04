@@ -15,7 +15,7 @@ class LoggerMock extends Logger
         }
 
         $message = $this->getMessage($level, $message, $context);
-        $this->output .= $message;
+        $this->output .= $message . "\n";
     }
 
     public function getOutput()

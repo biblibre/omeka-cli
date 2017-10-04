@@ -11,15 +11,8 @@ install:
   - composer install
 
 before_script:
-  - git clone --depth 1 https://github.com/omeka/Omeka /tmp/Omeka
-  - mysql -e "create database IF NOT EXISTS omeka_test;" -uroot
-  - mv /tmp/Omeka/application/config/config.ini.changeme /tmp/Omeka/application/config/config.ini
-  - mv /tmp/Omeka/application/tests/config.ini.changeme /tmp/Omeka/application/tests/config.ini
-  - sed -i 's/db.host = ""/db.host = "localhost"/' /tmp/Omeka/application/tests/config.ini
-  - sed -i 's/db.username = ""/db.username = "root"/' /tmp/Omeka/application/tests/config.ini
-  - sed -i 's/db.dbname = ""/db.dbname = "omeka_test"/' /tmp/Omeka/application/tests/config.ini
-  - sed -i 's/paths.imagemagick = ""/paths.imagemagick = "\/usr\/bin\/"/' /tmp/Omeka/application/tests/config.ini
+  - mysql -e "create database IF NOT EXISTS omeka_cli_test;" -uroot
 
 script:
-  - OMEKA_PATH=/tmp/Omeka ./vendor/bin/phpunit -c phpunit.xml
+  - OMEKA_DB_USER=root ./vendor/bin/phpunit
   - ./vendor/bin/php-cs-fixer fix -v --dry-run --using-cache=no

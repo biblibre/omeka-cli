@@ -2,8 +2,6 @@
 
 namespace OmekaCli\Command\Plugin;
 
-use OmekaCli\Application;
-
 class UninstallCommand extends AbstractPluginCommand
 {
     public function getDescription()
@@ -18,10 +16,11 @@ class UninstallCommand extends AbstractPluginCommand
              . "\tplun PLUGIN_NAME\n";
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
-        if (!$application->isOmekaInitialized()) {
-            $this->logger->error('omeka not initialized here');
+        $omekaPath = $this->getContext()->getOmekaPath();
+        if (!$omekaPath) {
+            $this->logger->error('Not in an Omeka directory');
 
             return 1;
         }
@@ -35,16 +34,26 @@ class UninstallCommand extends AbstractPluginCommand
 
         $pluginName = reset($args);
 
-        $plugin = $this->getPlugin($pluginName);
-        if (!$plugin) {
-            $this->logger->error('{plugin} is not installed', array('plugin' => $plugin->name));
+        try {
+            $this->getSandbox()->execute(function () use ($pluginName) {
+                $pluginLoader = \Zend_Registry::get('plugin_loader');
+                $plugin = $pluginLoader->getPlugin($pluginName);
+                if (!$plugin) {
+                    throw new \Exception("$pluginName is not installed");
+                }
+
+                $pluginBroker = \Zend_Registry::get('pluginbroker');
+                $pluginInstaller = new \Omeka_Plugin_Installer($pluginBroker, $pluginLoader);
+
+                $pluginInstaller->uninstall($plugin);
+            });
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
 
             return 1;
         }
 
-        $this->getPluginInstaller()->uninstall($plugin);
-
-        $this->logger->info('{plugin} uninstalled', array('plugin' => $plugin->name));
+        $this->logger->info('{plugin} uninstalled', array('plugin' => $pluginName));
 
         return 0;
     }

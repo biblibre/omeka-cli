@@ -6,6 +6,8 @@ use PDO;
 use PDOException;
 use OmekaCli\Application;
 use OmekaCli\IniWriter;
+use OmekaCli\Sandbox\SandboxFactory;
+use OmekaCli\Context\Context;
 use GetOptionKit\OptionCollection;
 
 class InstallCommand extends AbstractCommand
@@ -105,7 +107,7 @@ class InstallCommand extends AbstractCommand
              . "\t\tOmeka admin email, default '" . self::$defaultOptions['omeka-admin-email'] . "'\n";
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
         if (count($args) != 1) {
             $this->logger->error('Bad number of arguments');
@@ -114,26 +116,27 @@ class InstallCommand extends AbstractCommand
             return 1;
         }
 
-        $dir = reset($args);
-        $ver = null;
+        $omekaPath = reset($args);
+        $version = null;
+        if (isset($options['version'])) {
+            $version = $options['version'];
+        }
+
         $config = $options + self::$defaultOptions;
 
-        $this->logger->info('downloading Omeka');
-        if ($this->downloadOmeka($dir, $ver)) {
+        if ($this->downloadOmeka($omekaPath, $version)) {
             $this->logger->error('Failed to download Omeka');
 
             return 1;
         }
 
-        $this->logger->info('copying changeme files');
-        if ($this->copyFiles($dir)) {
+        if ($this->copyFiles($omekaPath)) {
             $this->logger->error('Failed to copy .changeme files');
 
             return 1;
         }
 
-        $this->logger->info('configuring database');
-        $this->applyDbConfig($dir, $config);
+        $this->applyDbConfig($omekaPath, $config);
 
         if (false === $this->createDatabase($config)) {
             $this->logger->error('Failed to create database');
@@ -141,67 +144,85 @@ class InstallCommand extends AbstractCommand
             return 1;
         }
 
-        $cwd = getcwd();
-        chdir($dir);
-        ob_start();
-        $application->initialize();
-        ob_end_clean();
-
-        $this->logger->info('checking the database');
-        if (!$this->isDatabaseEmpty($dir)) {
-            $this->logger->error('database is not empty');
+        if (!$this->isDatabaseEmpty($omekaPath)) {
+            $this->logger->error('Database is not empty');
 
             return 1;
         }
 
-        $this->logger->info('configuring Omeka');
-        if (!$form = $this->applyOmekaConfig($config)) {
-            $this->logger->error('something went wrong during Omeka configuration');
-
-            return 1;
-        }
-
-        $this->logger->info('installing Omeka');
-        if ($this->installOmeka($form)) {
+        if (false === $this->installOmeka($omekaPath, $config)) {
             $this->logger->error('installation failed');
 
             return 1;
         }
-        $this->logger->info('installation successful');
+
+        $this->logger->notice('Installation successful');
 
         return 0;
     }
 
-    protected function downloadOmeka($dir, $ver)
+    protected function downloadOmeka($omekaPath, $version)
     {
-        if (file_exists($dir)) {
-            if (!is_dir($dir)) {
-                $this->logger->error('{dir} is not a directory', array('dir' => $dir));
+        if (file_exists($omekaPath)) {
+            if (!is_dir($omekaPath)) {
+                $this->logger->error('{dir} is not a directory', array('dir' => $omekaPath));
 
                 return 1;
             }
 
-            if ((file_exists($dir . '/.git')
-              && file_exists($dir . '/db.ini.changeme')
-              && file_exists($dir . '/bootstrap.php'))) {
+            if ((file_exists($omekaPath . '/.git')
+              && file_exists($omekaPath . '/db.ini.changeme')
+              && file_exists($omekaPath . '/bootstrap.php'))) {
                 $this->logger->info('Omeka already downloaded');
 
                 return 0;
             }
 
-            if (count(scandir($dir)) > 2) {
-                $this->logger->error('{dir} is not empty', array('dir' => $dir));
+            if (count(scandir($omekaPath)) > 2) {
+                $this->logger->error('{dir} is not empty', array('dir' => $omekaPath));
 
                 return 1;
             }
         }
 
-        if (!isset($ver)) {
-            $ver = rtrim(`git ls-remote -q --tags --refs https://github.com/omeka/Omeka | cut -f 2 | sed 's|refs/tags/||' | sort -rV | head -n1`);
+        $repository = 'https://github.com/omeka/Omeka.git';
+
+        if (!isset($version)) {
+            $version = rtrim(`git ls-remote -q --tags --refs $repository | cut -f 2 | sed 's|refs/tags/||' | sort -rV | head -n1`);
         }
 
-        $cmd = 'git clone --recursive --branch ' . escapeshellarg($ver) . ' https://github.com/omeka/Omeka ' . escapeshellarg($dir);
-        exec($cmd, $out, $exitCode);
+        $this->logger->info("Downloading Omeka from $repository...");
+        $cmd = 'git clone --recursive --branch ' . escapeshellarg($version) . " $repository " . escapeshellarg($omekaPath);
+        $descriptorspec = array(
+            array('pipe', 'r'),
+            array('pipe', 'w'),
+            array('pipe', 'w'),
+        );
+        $proc = proc_open($cmd, $descriptorspec, $pipes);
+
+        stream_set_blocking($pipes[1], false);
+        stream_set_blocking($pipes[2], false);
+
+        do {
+            $read = array($pipes[1], $pipes[2]);
+            $write = null;
+            $except = null;
+
+            if (false !== stream_select($read, $write, $except, 0, 200000)) {
+                foreach ($read as $stream) {
+                    if (!feof($stream)) {
+                        $line = rtrim(fgets($stream));
+                        if ($line) {
+                            $this->logger->info($line);
+                        }
+                    }
+                }
+            }
+        } while (!feof($pipes[1]) || !feof($pipes[2]));
+
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exitCode = proc_close($proc);
         if ($exitCode) {
             $this->logger->error('cannot clone Omeka repository');
 
@@ -211,7 +232,7 @@ class InstallCommand extends AbstractCommand
         return 0;
     }
 
-    protected function copyFiles($dir)
+    protected function copyFiles($omekaPath)
     {
         $files = array(
             'db.ini',
@@ -219,8 +240,9 @@ class InstallCommand extends AbstractCommand
             'application/config/config.ini',
         );
 
+        $this->logger->info('Copying .changeme files');
         foreach ($files as $file) {
-            $dest = "$dir/$file";
+            $dest = "$omekaPath/$file";
             $src = "$dest.changeme";
             if (!file_exists($dest)) {
                 if (false === copy($src, $dest)) {
@@ -236,9 +258,11 @@ class InstallCommand extends AbstractCommand
         return 0;
     }
 
-    protected function applyDbConfig($dir, $config)
+    protected function applyDbConfig($omekaPath, $config)
     {
-        $dbini = $dir . '/db.ini';
+        $this->logger->info('Configuring database');
+
+        $dbini = $omekaPath . '/db.ini';
         $db = parse_ini_file($dbini, true);
         $db['database']['host'] = $config['db-host'];
         $db['database']['username'] = $config['db-user'];
@@ -275,24 +299,30 @@ class InstallCommand extends AbstractCommand
         return true;
     }
 
-    protected function isDatabaseEmpty($dir)
+    protected function isDatabaseEmpty($omekaPath)
     {
         try {
-            $db = get_db();
-            $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
-            if (!empty($tables)) {
-                return 0;
-            }
+            $sandbox = SandboxFactory::getSandbox(new Context($omekaPath));
+            $isEmpty = $sandbox->execute(function () {
+                $db = get_db();
+                $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
+                if (empty($tables)) {
+                    return true;
+                }
+
+                return false;
+            });
         } catch (\Exception $e) {
             $this->logger->warning($e->getMessage());
+            $isEmpty = null;
         }
 
-        return 1;
+        return $isEmpty;
     }
 
-    protected function applyOmekaConfig($config)
+    protected function installOmeka($omekaPath, $config)
     {
-        require_once FORM_DIR . '/Install.php';
+        $this->logger->info('Installing Omeka');
 
         $data = array(
             'username' => $config['omeka-user-name'],
@@ -309,35 +339,34 @@ class InstallCommand extends AbstractCommand
             'per_page_public' => '10',
         );
 
-        $form = new \Omeka_Form_Install();
-        $form->init();
-
-        if (!$form->isValid($data)) {
-            $message = "The following fields do not match a condition.\n";
-            $errors = array_filter($form->getErrors());
-            foreach ($errors as $field => $error) {
-                $message .= sprintf('%s: %s', $field, implode(', ', $error)) . "\n";
-            }
-
-            return null;
-        }
-
-        return $form;
-    }
-
-    protected function installOmeka($form)
-    {
+        $sandbox = SandboxFactory::getSandbox(new Context($omekaPath));
         try {
-            $installer = new \Installer_Default(get_db());
-            $installer->setForm($form);
-            \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
-            $installer->install();
+            $sandbox->execute(function () use ($data) {
+                require_once FORM_DIR . '/Install.php';
+
+                $form = new \Omeka_Form_Install();
+                $form->init();
+
+                if (!$form->isValid($data)) {
+                    $message = "The following fields do not match a condition.\n";
+                    $errors = array_filter($form->getErrors());
+                    foreach ($errors as $field => $error) {
+                        $message .= sprintf('%s: %s', $field, implode(', ', $error)) . "\n";
+                    }
+                    throw new \Exception($message);
+                }
+
+                $installer = new \Installer_Default(get_db());
+                $installer->setForm($form);
+                \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
+                $installer->install();
+            });
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
 
-            return 1;
+            return false;
         }
 
-        return 0;
+        return true;
     }
 }

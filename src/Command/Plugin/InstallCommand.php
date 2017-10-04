@@ -3,7 +3,7 @@
 namespace OmekaCli\Command\Plugin;
 
 use Plugin;
-use OmekaCli\Application;
+use Zend_Registry;
 
 class InstallCommand extends AbstractPluginCommand
 {
@@ -19,10 +19,11 @@ class InstallCommand extends AbstractPluginCommand
              . "\tplin PLUGIN_NAME\n";
     }
 
-    public function run($options, $args, Application $application)
+    public function run($options, $args)
     {
-        if (!$application->isOmekaInitialized()) {
-            $this->logger->error('Omeka is not initialized here');
+        $omekaPath = $this->getContext()->getOmekaPath();
+        if (!$omekaPath) {
+            $this->logger->error('Not in an Omeka directory');
 
             return 1;
         }
@@ -36,33 +37,51 @@ class InstallCommand extends AbstractPluginCommand
 
         $pluginName = reset($args);
 
-        $plugin = $this->getPlugin($pluginName);
-        if ($plugin) {
-            $this->logger->error('{plugin} is already installed', array('plugin' => $plugin->name));
+        $isInstalled = $this->getSandbox()->execute(function () use ($pluginName) {
+            $pluginLoader = Zend_Registry::get('plugin_loader');
+            $plugin = $pluginLoader->getPlugin($pluginName);
+
+            return $plugin ? true : false;
+        });
+        if ($isInstalled) {
+            $this->logger->error('{plugin} is already installed', array('plugin' => $pluginName));
 
             return 1;
         }
 
-        $plugin = new Plugin();
-        $plugin->name = $pluginName;
+        try {
+            $this->getSandbox()->execute(function () use ($pluginName) {
+                $plugin = new Plugin();
+                $plugin->name = $pluginName;
 
-        $this->getPluginIniReader()->load($plugin);
+                $pluginIniReader = Zend_Registry::get('plugin_ini_reader');
+                $pluginIniReader->load($plugin);
 
-        $missingDeps = $this->getMissingDependencies($plugin);
-        if (!empty($missingDeps)) {
-            $this->logger->error('Some required plugins are missing: ' . implode(', ', $missingDeps));
+                $requiredPlugins = $plugin->getRequiredPlugins();
+                $missingDeps = array_filter($requiredPlugins, function ($requiredPlugin) {
+                    return !plugin_is_active($requiredPlugin);
+                });
+                if (!empty($missingDeps)) {
+                    throw new \Exception('Some required plugins are missing: ' . implode(', ', $missingDeps));
+                }
+
+                $pluginBroker = Zend_Registry::get('pluginbroker');
+                $pluginLoader = Zend_Registry::get('plugin_loader');
+                $pluginInstaller = new \Omeka_Plugin_Installer($pluginBroker, $pluginLoader);
+                $pluginInstaller->install($plugin);
+
+                $plugin = get_db()->getTable('Plugin')->findByDirectoryName($plugin->name);
+                if (!$plugin || !$plugin->isActive()) {
+                    throw new \Exception(sprintf('Installation of %s failed', $plugin->name));
+                }
+            });
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
 
             return 1;
         }
 
-        $this->getPluginInstaller()->install($plugin);
-
-        $plugin = get_db()->getTable('Plugin')->findByDirectoryName($plugin->name);
-        if ($plugin && $plugin->isActive()) {
-            $this->logger->info('{plugin} installed', array('plugin' => $plugin->name));
-        } else {
-            $this->logger->error('Installation of {plugin} failed', array('plugin' => $plugin->name));
-        }
+        $this->logger->notice('{plugin} installed', array('plugin' => $pluginName));
 
         return 0;
     }

@@ -49,7 +49,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
         }
 
         $url = $plugin['download_url'];
-        $tmpDir = $this->tempDir();
+        $tmpDir = rtrim(`mktemp -d --tmpdir omeka-cli.XXXXXX`);
         if (!isset($tmpDir)) {
             throw new \Exception('Failed to create temporary directory');
         }
@@ -145,16 +145,5 @@ class OmekaDotOrgRepository implements RepositoryInterface
         }
 
         return $cacheItem->get();
-    }
-
-    protected function tempDir()
-    {
-        $tempFile = tempnam(sys_get_temp_dir(), 'omeka-cli.');
-        if (false !== $tempFile) {
-            unlink($tempFile);
-            if (false !== @mkdir($tempFile, 0700)) {
-                return $tempFile;
-            }
-        }
     }
 }
