@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.0-alpha.4] - 2017-10-30
 ## Added
 - New command plugin-search
 
@@ -262,7 +262,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 0.1.0 - 2016-12-11
 
-[Unreleased]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.3...master
+[1.0.0-alpha.4]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.3...v1.0.0-alpha.4
 [1.0.0-alpha.3]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.2...v1.0.0-alpha.3
 [1.0.0-alpha.2]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.1...v1.0.0-alpha.2
 [1.0.0-alpha.1]: https://github.com/biblibre/omeka-cli/compare/v0.18.0...v1.0.0-alpha.1
