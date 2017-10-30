@@ -176,7 +176,7 @@ class Manager implements ContextAwareInterface, LoggerAwareInterface
 
         $interface = self::COMMAND_INTERFACE;
 
-        if (in_array($interface, class_implements($class))) {
+        if (class_exists($class) && in_array($interface, class_implements($class))) {
             return true;
         }
 
