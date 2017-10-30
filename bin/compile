@@ -28,6 +28,7 @@ $bin = preg_replace('|^#!/usr/bin/env php\s*|', '', $bin);
 $phar->addFromString('bin/omeka-cli', $bin);
 
 $stub = <<<'EOF'
+#!/usr/bin/env php
 <?php
 Phar::mapPhar('omeka-cli.phar');
 require 'phar://omeka-cli.phar/bin/omeka-cli';
