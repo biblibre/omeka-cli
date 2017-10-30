@@ -2,59 +2,82 @@
 
 namespace OmekaCli\Plugin\Repository;
 
-use Goutte\Client;
 use ZipArchive;
 use DateInterval;
 use OmekaCli\Cache;
 
-class OmekaDotOrgRepository implements RepositoryInterface
+class OmekaDotOrgRepository extends AbstractRepository
 {
-    const PLUGINS_URL = 'http://omeka.org/add-ons/plugins/';
-
-    protected $client;
-
-    public function __construct()
-    {
-        $this->client = new Client();
-    }
+    const PLUGINS_URL = 'https://raw.githubusercontent.com/jajm/omeka-addons-index/master/data/plugins.json';
 
     public function getDisplayName()
     {
         return 'Omeka.org';
     }
 
-    public function find($pluginName)
+    public function find($id)
     {
-        $plugin = $this->findPlugin($pluginName);
+        $plugins = $this->getPlugins();
 
-        if ($plugin) {
-            $info = array(
-                'name' => $pluginName,
-                'displayName' => $plugin['display_name'],
-                'version' => $plugin['version'],
-                'omekaMinimumVersion' => $plugin['omeka_minimum_version'],
-            );
-
-            return array($info);
+        if (!array_key_exists($id, $plugins)) {
+            return null;
         }
+
+        $plugin = array(
+            'id' => $id,
+            'displayName' => $plugins[$id]['versions'][0]['info']['name'],
+            'version' => $plugins[$id]['versions'][0]['info']['version'],
+            'omekaMinimumVersion' => $plugins[$id]['versions'][0]['info']['omeka_minimum_version'],
+        );
+
+        return $plugin;
     }
 
-    public function download($plugin, $destDir)
+    public function search($query)
     {
-        $pluginName = $plugin['name'];
-        $plugin = $this->findPlugin($pluginName);
+        $plugins = $this->getPlugins();
+
+        $ids = array();
+        foreach ($plugins as $id => $plugin) {
+            $info = $plugin['versions'][0]['info'];
+            if (
+               preg_match("/$query/i", $id)
+            || preg_match("/$query/i", $info['name'])
+            || isset($info['description']) && preg_match("/$query/i", $info['description'])
+            || isset($info['tags']) && preg_match("/$query/i", $info['tags'])) {
+                $ids[] = $id;
+            }
+        }
+
+        $results = array();
+        foreach ($ids as $id) {
+            $plugin = $plugins[$id]['versions'][0];
+            $results[$id] = array(
+                'id' => $id,
+                'displayName' => $plugin['info']['name'],
+                'version' => $plugin['info']['version'],
+                'omekaMinimumVersion' => $plugin['info']['omeka_minimum_version'],
+            );
+        }
+
+        return $results;
+    }
+
+    public function download($id)
+    {
+        $plugin = $this->getPlugin($id);
 
         if (!$plugin) {
             throw new \Exception('Plugin not found');
         }
 
-        $url = $plugin['download_url'];
+        $url = $plugin['versions'][0]['url'];
         $tmpDir = rtrim(`mktemp -d --tmpdir omeka-cli.XXXXXX`);
         if (!isset($tmpDir)) {
             throw new \Exception('Failed to create temporary directory');
         }
 
-        $tmpZip = "$tmpDir/$pluginName.zip";
+        $tmpZip = "$tmpDir/$id.zip";
         file_put_contents($tmpZip, fopen($url, 'r'));
 
         $zip = new ZipArchive();
@@ -78,43 +101,14 @@ class OmekaDotOrgRepository implements RepositoryInterface
 
         $tmpPluginDir = "$resultDir/$realPluginName";
 
-        if (isset($destDir)) {
-            $pluginDir = "$destDir/$realPluginName";
-            if (file_exists($pluginDir)) {
-                throw new \Exception("$pluginDir already exists");
-            }
-
-            rename($tmpPluginDir, $pluginDir);
-
-            return $pluginDir;
-        }
-
         return $tmpPluginDir;
     }
 
-    public function findPlugin($pluginName)
+    protected function getPlugin($id)
     {
         $plugins = $this->getPlugins();
 
-        $camelCaseSplitRegex = '/(?<!^)(?=[A-Z][a-z])|(?<=[a-z])(?=[A-Z])/';
-        $words = preg_split($camelCaseSplitRegex, $pluginName);
-        $wordsRegex = implode('.*', $words);
-
-        $plugins = array_filter($plugins, function ($plugin) use ($wordsRegex) {
-            return 1 == preg_match("/$wordsRegex/i", $plugin['download_url']);
-        });
-
-        $plugin = null;
-        if (!empty($plugins)) {
-            $plugin = reset($plugins);
-            $root = $this->client->request('GET', $plugin['url']);
-            $tr = $root->filter('table.omeka-addons-versions tr')->eq(1);
-            $plugin['version'] = $tr->filter('a')->text();
-            $plugin['url'] = $tr->filter('a')->link()->getUri();
-            $plugin['omeka_minimum_version'] = $tr->filter('td')->eq(1)->text();
-        }
-
-        return $plugin;
+        return isset($plugins[$id]) ? $plugins[$id] : null;
     }
 
     protected function getPlugins()
@@ -124,20 +118,7 @@ class OmekaDotOrgRepository implements RepositoryInterface
         $cacheItem = $cache->getItem($cacheKey);
 
         if (!$cacheItem->isHit()) {
-            $root = $this->client->request('GET', self::PLUGINS_URL);
-            $downloadLinks = $root
-                ->filter('a.omeka-addons-button');
-
-            $plugins = array();
-            for ($i = 0; $i < count($downloadLinks); ++$i) {
-                $downloadLink = $downloadLinks->eq($i);
-                $pluginLink = $downloadLink->parents()->parents()->parents()->filter('h2 > a');
-                $plugins[] = array(
-                    'display_name' => $pluginLink->text(),
-                    'url' => $pluginLink->link()->getUri(),
-                    'download_url' => $downloadLink->link()->getUri(),
-                );
-            }
+            $plugins = json_decode(file_get_contents(self::PLUGINS_URL), true);
 
             $ttl = DateInterval::createFromDateString('1 day');
             $cacheItem->set($plugins)->expiresAfter($ttl);

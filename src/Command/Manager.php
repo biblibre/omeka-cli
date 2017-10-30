@@ -90,6 +90,7 @@ class Manager implements ContextAwareInterface, LoggerAwareInterface
         $this->registerCommand('plugin-deactivate', 'OmekaCli\Command\Plugin\DeactivateCommand', array('plde'));
         $this->registerCommand('plugin-install', 'OmekaCli\Command\Plugin\InstallCommand', array('plin'));
         $this->registerCommand('plugin-uninstall', 'OmekaCli\Command\Plugin\UninstallCommand', array('plun'));
+        $this->registerCommand('plugin-search', 'OmekaCli\Command\Plugin\SearchCommand', array('pls'));
         $this->registerCommand('plugin-download', 'OmekaCli\Command\Plugin\DownloadCommand', array('pldl'));
         $this->registerCommand('plugin-update', 'OmekaCli\Command\Plugin\UpdateCommand', array('plup'));
         $this->registerCommand('check-updates', 'OmekaCli\Command\CheckUpdatesCommand', array('chup'));

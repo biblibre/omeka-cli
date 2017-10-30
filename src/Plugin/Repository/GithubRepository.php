@@ -2,13 +2,18 @@
 
 namespace OmekaCli\Plugin\Repository;
 
-use Github\Client;
+use Github\Client as GithubClient;
+use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\TransferException;
 
-class GithubRepository implements RepositoryInterface
+class GithubRepository extends AbstractRepository
 {
     public function __construct()
     {
-        $this->client = new Client();
+        parent::__construct();
+
+        $this->client = new GithubClient();
+        $this->client->addCache(\OmekaCli\Cache::getCachePool());
     }
 
     public function getDisplayName()
@@ -16,126 +21,104 @@ class GithubRepository implements RepositoryInterface
         return 'github.com';
     }
 
-    public function find($pluginName)
+    public function find($id)
     {
-        $possibleRepos = $this->findRepo($pluginName);
-        if (!$possibleRepos) {
-            return null;
-        }
-        $infos = array();
-
-        foreach ($possibleRepos as $repo) {
-            $ini = $this->getPluginIni(
-                $repo['owner']['login'],
-                $repo['name']
-            );
+        $repository = $this->getGitRepository($id);
+        if ($repository) {
+            $ini = $this->getPluginIni($repository);
             if (isset($ini)) {
-                $infos[] = array(
-                    'name' => $pluginName,
+                return array(
+                    'id' => $id,
                     'displayName' => $ini['name'],
                     'version' => $ini['version'],
                     'omekaMinimumVersion' => $ini['omeka_minimum_version'],
-                    'url' => $repo['clone_url'],
-                    'owner' => $repo['owner']['login'],
+                );
+            }
+        }
+    }
+
+    public function search($query)
+    {
+        try {
+            $repositories = $this->client->api('search')->repositories(
+                $query . ' omeka in:name,description fork:true'
+            )['items'];
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+
+            return false;
+        }
+
+        $repositories = array_filter($repositories, function ($repository) use ($query) {
+            if (!preg_match("/$query/i", $repository['name'])) {
+                return false;
+            }
+
+            return true;
+        });
+
+        $plugins = array();
+        foreach ($repositories as $repository) {
+            $id = $repository['full_name'];
+            $ini = $this->getPluginIni($repository);
+            if (isset($ini)) {
+                $plugins[$id] = array(
+                    'id' => $id,
+                    'displayName' => $ini['name'],
+                    'version' => $ini['version'],
+                    'omekaMinimumVersion' => $ini['omeka_minimum_version'],
                 );
             }
         }
 
-        return (!empty($infos)) ? $infos : null;
+        return $plugins;
     }
 
-    public function download($plugin, $destDir)
+    public function download($id)
     {
-        $dest = $destDir . '/' . $plugin['name'];
-        if (file_exists($dest)) {
-            throw new \Exception("destination $dest already exists");
-        }
         $exitCode = null;
-        $url = $plugin['url'];
-        system("git clone -q $url $dest", $exitCode);
+        $url = 'https://github.com/' . $id . '.git';
+        $tempdir = rtrim(`mktemp -d --tmpdir omeka-cli.XXXXXX`);
+
+        system("git clone -q $url $tempdir", $exitCode);
 
         if ($exitCode !== 0) {
             throw new \Exception('git clone failed');
         }
 
-        return $dest;
+        return $tempdir;
     }
 
-    protected function findRepo($pluginName)
+    protected function getGitRepository($id)
     {
+        if (false === strpos($id, '/')) {
+            return null;
+        }
+
+        list($owner, $name) = explode('/', $id);
+
         try {
-            $reposToFilter = $this->client->api('search')->repositories(
-                $pluginName . ' omeka in:name,description fork:true'
-            )['items'];
+            $repository = $this->client->api('repo')->show($owner, $name);
         } catch (\Exception $e) {
-            echo "Warning: something bad occured during GitHub searching.\n"; // TODO: log or not log?
-            return;
+            $this->logger->error($e->getMessage());
+
+            return null;
         }
 
-        $repos = array();
-        for ($i = 0; $i < count($reposToFilter); ++$i) {
-            if (preg_match("/$pluginName/i", $reposToFilter[$i]['name'])) {
-                $repos[] = $reposToFilter[$i];
-            }
-        }
-
-        return $this->filterPlugins($repos);
+        return $repository;
     }
 
-    protected function getPluginIni($repoOwner, $repoName)
+    protected function getPluginIni($repository)
     {
+        $branch = $repository['default_branch'];
+        $httpClient = new HttpClient();
+        $repo_url = 'https://raw.githubusercontent.com/' . $repository['full_name'];
         try {
-            $fileInfo = $this->client->api('repo')->contents()->show(
-                "$repoOwner",
-                "$repoName",
-                'plugin.ini'
-            );
-        } catch (\RuntimeException $e) {
+            $res = $httpClient->request('GET', $repo_url . "/$branch/plugin.ini");
+        } catch (TransferException $e) {
+            return null;
         }
 
-        return (isset($fileInfo))
-             ? parse_ini_string(base64_decode($fileInfo['content']))
-             : null;
-    }
-
-    protected function filterPlugins($repos)
-    {
-        $ans = array();
-
-        foreach ($repos as $repo) {
-            try {
-                $files = $this->client->api('repo')->contents()->show(
-                    $repo['owner']['login'],
-                    $repo['name']
-                );
-            } catch (\Exception $e) {
-                echo 'Warning: ' . $e->getMessage() . PHP_EOL;
-
-                return null;
-            }
-
-            // Search <name>Plugin.php file.
-            $phpFileFound = false;
-            foreach ($files as $file) {
-                if (preg_match('/.+Plugin\.php/i', $file['name'])) {
-                    $phpFileFound = true;
-                }
-            }
-
-            // Search plugin.ini file.
-            $iniFileFound = false;
-            foreach ($files as $file) {
-                if (preg_match('/plugin\.ini/i', $file['name'])) {
-                    $iniFileFound = true;
-                }
-            }
-
-            // Check if both have been found.
-            if ($iniFileFound && $phpFileFound) {
-                $ans[] = $repo;
-            }
-        }
-
-        return $ans;
+        return parse_ini_string($res->getBody()->getContents());
     }
 }

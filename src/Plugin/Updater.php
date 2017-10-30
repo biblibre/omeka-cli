@@ -32,7 +32,7 @@ class Updater implements LoggerAwareInterface, ContextAwareInterface
             $repository = new OmekaDotOrgRepository();
             $pluginInfo = $repository->find($pluginName);
             if (!empty($pluginInfo)) {
-                return $pluginInfo[0]['version'];
+                return $pluginInfo['version'];
             }
         }
     }
@@ -84,7 +84,7 @@ class Updater implements LoggerAwareInterface, ContextAwareInterface
             try {
                 $repo = new OmekaDotOrgRepository();
                 $pluginInfo = $repo->find($pluginName);
-                $tmpDir = $repo->download($pluginInfo[0], null);
+                $tmpDir = $repo->download($pluginInfo['id'], null);
 
                 if (false === rename($pluginDir, sprintf('%s/%s_%s', $backupDir, $pluginName, date('YmdHis')))) {
                     throw new \Exception('Cannot backup plugin directory');

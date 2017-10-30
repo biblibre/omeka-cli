@@ -11,7 +11,7 @@ class PluginDownloadCommandTest extends TestCase
         $pluginName = 'SolrSearch';
         $pluginFile = getenv('OMEKA_PATH') . "/plugins/$pluginName/{$pluginName}Plugin.php";
         $this->assertFileNotExists($pluginFile);
-        $status = $this->command->run(array('exclude-github' => true), array($pluginName));
+        $status = $this->command->run(array(), array($pluginName));
 
         $this->assertEquals(0, $status);
         $this->assertFileExists($pluginFile);

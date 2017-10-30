@@ -2,11 +2,15 @@
 
 namespace OmekaCli\Plugin\Repository;
 
-interface RepositoryInterface
+use Psr\Log\LoggerAwareInterface;
+
+interface RepositoryInterface extends LoggerAwareInterface
 {
     public function getDisplayName();
 
-    public function find($pluginName);
+    public function search($query);
 
-    public function download($pluginName, $destDir);
+    public function find($id);
+
+    public function download($id);
 }
