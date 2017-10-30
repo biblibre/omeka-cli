@@ -33,6 +33,7 @@ commands.
     plugin-install     install a plugin
     plugin-uninstall   uninstall a plugin
     plugin-download    downloads a plugin
+    plugin-search      search a plugin
     plugin-update      update a plugin
 
 ## Requirements
