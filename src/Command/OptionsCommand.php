@@ -6,24 +6,19 @@ class OptionsCommand extends AbstractCommand
 {
     public function getDescription()
     {
-        return 'edit and see the "omeka_options" table';
+        return 'list, get and set Omeka options';
     }
 
     public function getUsage()
     {
-        return 'Usage:' . PHP_EOL
-             . '    options [OPTION_NAME [VALUE]]' . PHP_EOL
-             . PHP_EOL
-             . 'Edit and see the "omeka_options" table.' . PHP_EOL
-             . PHP_EOL
-             . 'OPTION_NAME' . PHP_EOL
-             . '    the name of the option to retrieve.' . PHP_EOL
-             . 'VALUE' . PHP_EOL
-             . '    if set, the new value of the option.' . PHP_EOL
-             . PHP_EOL
-             . 'This command return an empty line in those cases:' . PHP_EOL
-             . '- the option does not exists ;' . PHP_EOL
-             . '- the option has no value.' . PHP_EOL;
+        return "Usage:\n"
+             . "    options\n"
+             . "    options <name>\n"
+             . "    options <name> <value>\n"
+             . "\n"
+             . "The first form lists all options and their value.\n"
+             . "The second form prints the value of option <name>.\n"
+             . "The third form sets the value of option <name> to <value>.\n";
     }
 
     public function run($options, $args)
@@ -48,18 +43,14 @@ class OptionsCommand extends AbstractCommand
             return 1;
         }
 
+        $omeka = $this->getOmeka();
+
         $sandbox = $this->getSandbox();
         if (isset($optionValue)) {
-            $sandbox->execute(function () use ($optionName, $optionValue) {
-                set_option($optionName, $optionValue);
-            });
+            $omeka->set_option($optionName, $optionValue);
+        } else {
+            echo $omeka->get_option($optionName) . "\n";
         }
-
-        $optionValue = $sandbox->execute(function () use ($optionName) {
-            return get_option($optionName);
-        });
-
-        echo "$optionValue\n";
 
         return 0;
     }
