@@ -2,16 +2,29 @@
 
 namespace OmekaCli\Test\Command\Plugin;
 
+use OmekaCli\Context\Context;
+use OmekaCli\Omeka\PluginInstaller;
 use OmekaCli\Test\Command\TestCase;
 use OmekaCli\Sandbox\SandboxFactory;
 
 class PluginUninstallCommandTest extends TestCase
 {
+    public function setUp()
+    {
+        parent::setUp();
+
+        $pluginInstaller = new PluginInstaller();
+        $pluginInstaller->setContext(new Context(getenv('OMEKA_PATH')));
+        try {
+            $pluginInstaller->enable('Foo');
+        } catch (\Exception $e) {
+        }
+
+        SandboxFactory::flush();
+    }
+
     public function testPluginUninstall()
     {
-        $pluginInstallCommand = $this->getCommand('plugin-install');
-        $pluginInstallCommand->run(array(), array('Foo'));
-
         $foo_bar = $this->getSandbox()->execute(function () {
             return get_option('foo_bar');
         });

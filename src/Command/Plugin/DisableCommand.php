@@ -5,18 +5,18 @@ namespace OmekaCli\Command\Plugin;
 use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Omeka\PluginInstaller;
 
-class UninstallCommand extends AbstractCommand
+class DisableCommand extends AbstractCommand
 {
     public function getDescription()
     {
-        return 'uninstall a plugin';
+        return 'disable a plugin';
     }
 
     public function getUsage()
     {
         return "Usage:\n"
-             . "\tplugin-uninstall PLUGIN_NAME\n"
-             . "\tplun PLUGIN_NAME\n";
+             . "    plugin-disable <plugin>\n"
+             . "    pldis <plugin>\n";
     }
 
     public function run($options, $args)
@@ -41,14 +41,14 @@ class UninstallCommand extends AbstractCommand
         $pluginInstaller->setContext($this->getContext());
 
         try {
-            $pluginInstaller->uninstall($pluginName);
+            $pluginInstaller->disable($pluginName);
         } catch (\Exception $e) {
             $this->logger->error($e->getMessage());
 
             return 1;
         }
 
-        $this->logger->info('{plugin} uninstalled', array('plugin' => $pluginName));
+        $this->logger->notice('{plugin} disabled', array('plugin' => $pluginName));
 
         return 0;
     }

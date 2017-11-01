@@ -28,9 +28,8 @@ commands.
 
 ### Plugin related commands
 
-    plugin-activate    activate a plugin
-    plugin-deactivate  deactivate a plugin
-    plugin-install     install a plugin
+    plugin-enable      enable a plugin (install & activate)
+    plugin-disable     disable a plugin
     plugin-uninstall   uninstall a plugin
     plugin-download    downloads a plugin
     plugin-search      search a plugin
