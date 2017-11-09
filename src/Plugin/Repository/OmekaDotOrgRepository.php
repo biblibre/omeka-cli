@@ -8,7 +8,7 @@ use OmekaCli\Cache;
 
 class OmekaDotOrgRepository extends AbstractRepository
 {
-    const PLUGINS_URL = 'https://raw.githubusercontent.com/jajm/omeka-addons-index/master/data/plugins.json';
+    const PLUGINS_URL = 'https://raw.githubusercontent.com/biblibre/omeka-addons-index/master/data/plugins.json';
 
     public function getDisplayName()
     {
