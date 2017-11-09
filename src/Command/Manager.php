@@ -86,13 +86,13 @@ class Manager implements ContextAwareInterface, LoggerAwareInterface
         $this->registerCommand('upgrade', 'OmekaCli\Command\UpgradeCommand');
         $this->registerCommand('options', 'OmekaCli\Command\OptionsCommand');
 
-        $this->registerCommand('plugin-enable', 'OmekaCli\Command\Plugin\EnableCommand', array('plen'));
-        $this->registerCommand('plugin-disable', 'OmekaCli\Command\Plugin\DisableCommand', array('pldis'));
-        $this->registerCommand('plugin-uninstall', 'OmekaCli\Command\Plugin\UninstallCommand', array('plun'));
-        $this->registerCommand('plugin-search', 'OmekaCli\Command\Plugin\SearchCommand', array('pls'));
-        $this->registerCommand('plugin-download', 'OmekaCli\Command\Plugin\DownloadCommand', array('pldl'));
-        $this->registerCommand('plugin-update', 'OmekaCli\Command\Plugin\UpdateCommand', array('plup'));
-        $this->registerCommand('check-updates', 'OmekaCli\Command\CheckUpdatesCommand', array('chup'));
+        $this->registerCommand('plugin-enable', 'OmekaCli\Command\Plugin\EnableCommand', array('en'));
+        $this->registerCommand('plugin-disable', 'OmekaCli\Command\Plugin\DisableCommand', array('dis'));
+        $this->registerCommand('plugin-uninstall', 'OmekaCli\Command\Plugin\UninstallCommand');
+        $this->registerCommand('plugin-search', 'OmekaCli\Command\Plugin\SearchCommand', array('search'));
+        $this->registerCommand('plugin-download', 'OmekaCli\Command\Plugin\DownloadCommand', array('dl'));
+        $this->registerCommand('plugin-update', 'OmekaCli\Command\Plugin\UpdateCommand', array('up'));
+        $this->registerCommand('check-updates', 'OmekaCli\Command\CheckUpdatesCommand', array('chkup'));
         $this->registerCommand('snapshot', 'OmekaCli\Command\SnapshotCommand', array('snap'));
         $this->registerCommand('snapshot-restore', 'OmekaCli\Command\SnapshotRestoreCommand', array('restore'));
 
