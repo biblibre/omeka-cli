@@ -13,7 +13,7 @@ class ListCommandTest extends TestCase
         $this->assertEquals(0, $status);
         $this->assertRegExp('/version -- print version of omeka-cli/', $output);
         $this->assertRegExp('/list -- list available commands/', $output);
-        $this->assertRegExp('/plugin-download -- download a plugin \(aliases: pldl\)/', $output);
+        $this->assertRegExp('/plugin-download -- download a plugin \(aliases: dl\)/', $output);
     }
 
     protected function getCommandName()
