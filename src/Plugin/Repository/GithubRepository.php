@@ -44,7 +44,7 @@ class GithubRepository extends AbstractRepository
                 $query . ' omeka in:name,description fork:true'
             )['items'];
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            $this->output->writeln(sprintf('Error : %s', $e->getMessage()));
 
             return false;
         }
@@ -100,7 +100,7 @@ class GithubRepository extends AbstractRepository
         try {
             $repository = $this->client->api('repo')->show($owner, $name);
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            $this->output->writeln(sprintf('Error: %s', $e->getMessage()));
 
             return null;
         }

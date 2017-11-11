@@ -2,46 +2,28 @@
 
 namespace OmekaCli\Command\Plugin;
 
-use GetOptionKit\OptionCollection;
-use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
+use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Plugin\Repository\GithubRepository;
+use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class DownloadCommand extends AbstractPluginCommand
+class DownloadCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'download a plugin';
+        $this->setName('plugin-download');
+        $this->setDescription('download a plugin');
+        $this->setAliases(array('dl'));
+        $this->addArgument('plugin-id', InputArgument::REQUIRED, 'the identifier of the plugin, as returned by plugin-search');
+        $this->addOption('force', 'f', InputOption::VALUE_NONE, 'force download, even if Omeka minimum version requirement is not met');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return "Usage:\n"
-             . "\tplugin-download [<options>] <plugin-id>\n"
-             . "\tpldl [<options>] <plugin-id>\n"
-             . "\n"
-             . "<plugin-id> is the identifier of the plugin, as returned by plugin-search\n"
-             . "\n"
-             . "Options:\n"
-             . "\t-f, --force    Force download, even if Omeka minimum version\n"
-             . "\t               requirement is not met\n";
-    }
-
-    public function getOptionsSpec()
-    {
-        $optionsSpec = new OptionCollection();
-        $optionsSpec->add('f|force', 'Force download');
-
-        return $optionsSpec;
-    }
-
-    public function run($options, $args)
-    {
-        if (count($args) != 1) {
-            $this->logger->error('Bad number of arguments');
-            fwrite(STDERR, $this->getUsage());
-
-            return 1;
-        }
+        $stderr = $this->getStderr();
 
         $repositories = array(
             new OmekaDotOrgRepository(),
@@ -49,10 +31,10 @@ class DownloadCommand extends AbstractPluginCommand
         );
 
         foreach ($repositories as $repository) {
-            $repository->setLogger($this->logger);
+            $repository->setOutput($stderr);
         }
 
-        $id = reset($args);
+        $id = $input->getArgument('plugin-id');
 
         $plugin = null;
         foreach ($repositories as $repository) {
@@ -68,7 +50,7 @@ class DownloadCommand extends AbstractPluginCommand
         }
 
         if (!isset($plugin)) {
-            $this->logger->error('Plugin not found');
+            $stderr->writeln('Error: Plugin not found');
 
             return 1;
         }
@@ -80,7 +62,7 @@ class DownloadCommand extends AbstractPluginCommand
             $omekaMinimumVersion = $plugin['info']['omekaMinimumVersion'];
             $force = isset($options['force']) && $options['force'];
             if (version_compare($omeka->OMEKA_VERSION, $omekaMinimumVersion) < 0 && !$force) {
-                $this->logger->error('The current Omeka version is too low to install this plugin. Use --force if you really want to download it.');
+                $stderr->writeln('The current Omeka version is too low to install this plugin. Use --force if you really want to download it.');
 
                 return 1;
             }
@@ -88,7 +70,10 @@ class DownloadCommand extends AbstractPluginCommand
             $destDir = $omeka->PLUGIN_DIR;
         }
 
-        $this->logger->info('Downloading plugin');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Downloading plugin');
+        }
+
         try {
             $repository = $plugin['repository'];
             $tempdir = $repository->download($id);
@@ -109,24 +94,21 @@ class DownloadCommand extends AbstractPluginCommand
 
             $dest = $destDir . '/' . $pluginName;
             if (file_exists($dest)) {
-                $this->logger->error('Destination already exists : {dest}', array('dest' => $dest));
+                $stderr->writeln(sprintf('Destination already exists : %s', $dest));
 
                 return 1;
             }
 
             if (false == rename($tempdir, $dest)) {
-                $this->logger->error('Cannot move {tempdir} to {dest}', array(
-                    'tempdir' => $tempdir,
-                    'dest' => $dest,
-                ));
+                $stderr->writeln(sprintf('Cannot move %1$s to %2$s', $tempdir, $dest));
 
                 return 1;
             }
 
             chmod($dest, 0755);
-            $this->logger->notice('Plugin downloaded into {path}', array('path' => $dest));
+            $stderr->writeln(sprintf('Plugin downloaded into %s', $dest));
         } catch (\Exception $e) {
-            $this->logger->error('Download failed: {message}', array('message' => $e->getMessage()));
+            $stderr->writeln(sprintf('Download failed: %s', $e->getMessage()));
 
             return 1;
         }

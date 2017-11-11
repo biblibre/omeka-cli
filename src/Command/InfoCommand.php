@@ -2,44 +2,26 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Omeka;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class InfoCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'print informations about the Omeka installation';
+        $this->setName('info');
+        $this->setDescription('print informations about the Omeka installation');
+        $this->setHelp('This command shows several informations like Omeka base directory, Omeka version, database version and installed themes and plugins');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $usage = 'Usage:' . PHP_EOL
-               . '    info' . PHP_EOL
-               . PHP_EOL
-               . 'Print informations about the Omeka installation.' . PHP_EOL
-               . 'This command shows :'
-               . '- Omeka base directory,' . PHP_EOL
-               . '- version Omeka version,' . PHP_EOL
-               . '- database verison,' . PHP_EOL
-               . '- current admin theme,' . PHP_EOL
-               . '- current public theme,' . PHP_EOL
-               . '- list of active plugins,' . PHP_EOL
-               . '- list of inactive plugins.' . PHP_EOL;
-
-        return $usage;
-    }
-
-    public function run($options, $args)
-    {
-        echo 'omeka-cli:            ' . OMEKACLI_VERSION . PHP_EOL;
-
         $omekaPath = $this->getContext()->getOmekaPath();
         if (!$omekaPath) {
             return 0;
         }
 
-        $omeka = new Omeka();
-        $omeka->setContext($this->getContext());
+        $omeka = $this->getOmeka();
 
         $plugins = $this->getSandbox()->execute(function () {
             $db = get_db();
@@ -61,23 +43,23 @@ class InfoCommand extends AbstractCommand
         $version = $omeka->OMEKA_VERSION;
         $dbVersion = $omeka->get_option('omeka_version');
 
-        echo 'Omeka base directory: ' . $omeka->BASE_DIR . "\n";
-        echo 'Omeka version:        ' . $version . "\n";
-        echo 'Database version:     ' . $dbVersion . "\n";
+        $output->writeln('Omeka base directory: ' . $omeka->BASE_DIR);
+        $output->writeln('Omeka version:        ' . $version);
+        $output->writeln('Database version:     ' . $dbVersion);
 
         if (0 !== version_compare($version, $dbVersion)) {
-            echo "Warning: Omeka version and database version are not the same!\n";
+            $output->writeln('<comment>Warning: Omeka version and database version are not the same!</comment>');
         }
 
-        echo 'Admin theme:          ' . $omeka->get_option('admin_theme') . "\n";
-        echo 'Public theme:         ' . $omeka->get_option('public_theme') . "\n";
-        echo 'Plugins (actives):' . "\n";
+        $output->writeln('Admin theme:          ' . $omeka->get_option('admin_theme'));
+        $output->writeln('Public theme:         ' . $omeka->get_option('public_theme'));
+        $output->writeln('Plugins (actives):');
         foreach ($activePlugins as $plugin) {
-            echo "\t" . sprintf('%s - %s', $plugin['name'], $plugin['version']) . "\n";
+            $output->writeln("\t" . sprintf('%s - %s', $plugin['name'], $plugin['version']));
         }
-        echo 'Plugins (inactives):' . "\n";
+        $output->writeln('Plugins (inactives):');
         foreach ($inactivePlugins as $plugin) {
-            echo "\t" . sprintf('%s - %s', $plugin['name'], $plugin['version']) . "\n";
+            $output->writeln("\t" . sprintf('%s - %s', $plugin['name'], $plugin['version']));
         }
 
         return 0;

@@ -16,5 +16,6 @@ return PhpCsFixer\Config::create()
             'identical' => null,
             'less_and_greater' => null,
         ),
+        'ordered_imports' => true,
     ))
     ->setFinder($finder);

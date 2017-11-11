@@ -2,182 +2,79 @@
 
 namespace OmekaCli;
 
-use GetOptionKit\OptionCollection;
-use GetOptionKit\ContinuousOptionParser;
-use GetOptionKit\Exception\InvalidOptionException;
-use OmekaCli\Command\Manager;
+use OmekaCli\Command\Proxy;
+use OmekaCli\Console\Helper\ContextHelper;
 use OmekaCli\Context\Context;
-use OmekaCli\Exception\BadUsageException;
 use OmekaCli\Sandbox\OmekaSandbox;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class Application
+class Application extends \Symfony\Component\Console\Application
 {
-    protected $logger;
-    protected $commands;
+    const EVENT_ID = 'OmekaCli';
+    const COMMANDS_EVENT_NAME = 'commands';
+
     protected $omekaPath;
 
-    protected $options;
-    protected $args;
-
-    /**
-     * Create a new Application from global $argv.
-     *
-     * @return self
-     */
-    public static function fromArgv()
+    public function __construct()
     {
-        global $argv;
-
-        $appSpec = new OptionCollection();
-        $appSpec->add('h|help', 'show help');
-        $appSpec->add('C|omeka-path:', 'path to Omeka')
-                ->isa('String');
-        $appSpec->add('v|verbose', 'verbose mode')
-            ->isa('Number')
-            ->incremental();
-        $appSpec->add('q|quiet', 'quiet mode')
-            ->isa('Number')
-            ->incremental();
-
-        $args = array();
-        $options = array();
-        $parser = new ContinuousOptionParser($appSpec);
-        try {
-            $result = $parser->parse($argv);
-        } catch (InvalidOptionException $e) {
-            throw new BadUsageException($e->getMessage(), 0, $e);
-        }
-
-        $options = $result->toArray();
-        $args = array();
-        while (!$parser->isEnd()) {
-            $args[] = $parser->advance();
-        }
-
-        return new self($options, $args);
+        parent::__construct('omeka-cli', OMEKACLI_VERSION);
     }
 
-    public static function usage()
+    public function doRun(InputInterface $input, OutputInterface $output)
     {
-        $usage = "Usage:\n"
-            . "\tomeka-cli [-h | --help]\n"
-            . "\tomeka-cli [-C <omeka-path>] [-v | --verbose] [-q | --quiet]\n"
-            . "\t          <command> [<args>]\n"
-            . "\n"
-            . "Options:\n"
-            . "\t-h, --help       Print this help and exit\n"
-            . "\t-C <omeka-path>  Tells where Omeka is installed. If omitted,\n"
-            . "\t                 Omeka will be searched in current directory\n"
-            . "\t                 and parent directories\n"
-            . "\t-v, --verbose    Repeatable. Increase verbosity\n"
-            . "\t-q, --quiet      Repeatable. Decrease verbosity\n";
+        $input->setStream(STDIN);
 
-        return $usage;
-    }
-
-    public function __construct($options = array(), $args = array())
-    {
-        $this->options = $options;
-        $this->args = $args;
-    }
-
-    public function initialize()
-    {
-        $omekaPath = $this->getOption('omeka-path');
-        if ($omekaPath) {
+        if ($omekaPath = $input->getParameterOption(array('--omeka-path', '-C'))) {
             if (!$this->isOmekaDir($omekaPath)) {
                 throw new \Exception("$omekaPath is not an Omeka directory");
             }
         } else {
             $omekaPath = $this->searchOmekaDir();
         }
+        $this->getHelperSet()->get('context')->setContext(new Context($omekaPath));
 
-        $this->omekaPath = $omekaPath;
+        $this->addPluginCommands();
+
+        return parent::doRun($input, $output);
     }
 
-    public function run()
+    protected function getDefaultCommands()
     {
-        $commandName = $this->getCommandName();
+        $commands = array_merge(parent::getDefaultCommands(), array(
+            new \OmekaCli\Command\InfoCommand(),
+            new \OmekaCli\Command\InstallCommand(),
+            new \OmekaCli\Command\CheckUpdatesCommand(),
+            new \OmekaCli\Command\OptionsCommand(),
+            new \OmekaCli\Command\SnapshotCommand(),
+            new \OmekaCli\Command\SnapshotRestoreCommand(),
+            new \OmekaCli\Command\UpgradeCommand(),
+            new \OmekaCli\Command\Plugin\SearchCommand(),
+            new \OmekaCli\Command\Plugin\DownloadCommand(),
+            new \OmekaCli\Command\Plugin\EnableCommand(),
+            new \OmekaCli\Command\Plugin\DisableCommand(),
+            new \OmekaCli\Command\Plugin\UninstallCommand(),
+            new \OmekaCli\Command\Plugin\UpdateCommand(),
+        ));
 
-        if ($this->getOption('help') || !$commandName) {
-            echo $this->longUsage();
-
-            return 0;
-        }
-
-        return $this->runCommand($commandName);
+        return $commands;
     }
 
-    public function getLogger()
+    protected function getDefaultInputDefinition()
     {
-        if (!isset($this->logger)) {
-            $this->logger = new Logger();
-            $verbose = $this->getOption('verbose', 0);
-            $quiet = $this->getOption('quiet', 0);
-            $verbosity = Logger::DEFAULT_VERBOSITY + $verbose - $quiet;
-            $this->logger->setVerbosity($verbosity);
-        }
+        $definition = parent::getDefaultInputDefinition();
+        $definition->addOption(new InputOption('omeka-path', 'C', InputOption::VALUE_REQUIRED, 'Tells where Omeka is installed. If omitted, Omeka will be searched in current directory and parent directories'));
 
-        return $this->logger;
+        return $definition;
     }
 
-    public function getCommandManager()
+    protected function getDefaultHelperSet()
     {
-        if (!isset($this->commands)) {
-            $omekaPath = $this->omekaPath;
-            $commands = new Manager();
-            $commands->setLogger($this->getLogger());
-            $commands->setContext(new Context($omekaPath));
-            $commands->initialize();
+        $helperSet = parent::getDefaultHelperSet();
+        $helperSet->set(new ContextHelper());
 
-            $this->commands = $commands;
-        }
-
-        return $this->commands;
-    }
-
-    protected function getCommandName()
-    {
-        return reset($this->args);
-    }
-
-    protected function getOption($name, $default = null)
-    {
-        if (isset($this->options[$name])) {
-            return $this->options[$name];
-        }
-    }
-
-    protected function longUsage()
-    {
-        $usage = self::usage();
-
-        $commands = $this->getCommandManager();
-        $usage .= "\nAvailable commands:\n\n";
-        foreach ($commands->getCommandsNames() as $name) {
-            $usage .= "\t$name";
-            $command = $commands->getCommand($name);
-            $description = $command->getDescription();
-            if ($description) {
-                $usage .= " -- $description";
-            }
-            $usage .= "\n";
-        }
-
-        $usage .= "\n";
-
-        return $usage;
-    }
-
-    protected function runCommand($commandName)
-    {
-        $commands = $this->getCommandManager();
-
-        try {
-            return $commands->run($commandName, $this->args);
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-        }
+        return $helperSet;
     }
 
     protected function isOmekaDir($dir)
@@ -190,7 +87,7 @@ class Application
             }
 
             return false;
-        });
+        }, OmekaSandbox::ENV_SHORTLIVED);
 
         return $result;
     }
@@ -205,5 +102,39 @@ class Application
         if ($dir !== false && $dir !== '/') {
             return $dir;
         }
+    }
+
+    protected function addPluginCommands()
+    {
+        $sandbox = $this->getSandbox();
+        $eventId = self::EVENT_ID;
+        $eventName = self::COMMANDS_EVENT_NAME;
+        $commands = $sandbox->execute(function () use ($eventId, $eventName) {
+            $items = array();
+
+            if (class_exists('Zend_EventManager_StaticEventManager')) {
+                $events = \Zend_EventManager_StaticEventManager::getInstance();
+                $listeners = $events->getListeners($eventId, $eventName);
+
+                if (false !== $listeners) {
+                    foreach ($listeners as $listener) {
+                        $items = array_merge($items, $listener->call());
+                    }
+                }
+            }
+
+            return $items;
+        });
+
+        $context = $this->getHelperSet()->get('context')->getContext();
+        foreach ($commands as $class) {
+            $command = new Proxy(null, $class, $context);
+            $this->add($command);
+        }
+    }
+
+    protected function getSandbox()
+    {
+        return $this->getHelperSet()->get('context')->getSandbox();
     }
 }

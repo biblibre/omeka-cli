@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+## Changed
+- Use Symfony's console component
+
 ## [1.0.0-alpha.5] - 2017-11-09
 ## Changed
 - Commands plugin-activate and plugin-install are merged into plugin-enable
@@ -267,6 +271,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 0.1.0 - 2016-12-11
 
+[Unreleased]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.5...HEAD
 [1.0.0-alpha.5]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.4...v1.0.0-alpha.5
 [1.0.0-alpha.4]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.3...v1.0.0-alpha.4
 [1.0.0-alpha.3]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.2...v1.0.0-alpha.3

@@ -2,39 +2,35 @@
 
 namespace OmekaCli\Command\Plugin;
 
+use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Plugin\Updater;
 use OmekaCli\Sandbox\OmekaSandbox;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class UpdateCommand extends AbstractPluginCommand
+class UpdateCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'update plugins';
+        $this->setName('plugin-update');
+        $this->setDescription('update plugins');
+        $this->setAliases(array('up'));
+        $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to update');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return "Usage:\n"
-             . "\tplugin-update <plugin-name>\n";
-    }
+        $stderr = $this->getStderr();
 
-    public function run($options, $args)
-    {
         $omekaPath = $this->getContext()->getOmekaPath();
         if (!$omekaPath) {
-            $this->logger->error('Not in an Omeka directory');
+            $stderr->writeln('Error: Not in an Omeka directory');
 
             return 1;
         }
 
-        if (count($args) != 1) {
-            $this->logger->error('Bad number of arguments');
-            error_log($this->getUsage());
-
-            return 1;
-        }
-
-        $pluginName = reset($args);
+        $pluginName = $input->getArgument('name');
 
         try {
             $iniVersion = $this->getSandbox()->execute(function () use ($pluginName) {
@@ -48,19 +44,22 @@ class UpdateCommand extends AbstractPluginCommand
             });
 
             $updater = new Updater();
-            $updater->setLogger($this->logger);
+            $updater->setOutput($stderr);
             $updater->setContext($this->getContext());
 
             $latestVersion = $updater->getPluginLatestVersion($pluginName);
             if (version_compare($latestVersion, $iniVersion) <= 0) {
-                $this->logger->error('{plugin} is up-to-date ({version})', array('plugin' => $pluginName, 'version' => $iniVersion));
+                $stderr->writeln(sprintf('Error: %1$s is up-to-date (%2$s)', $pluginName, $iniVersion));
 
                 return 1;
             }
 
-            $this->logger->info('Updating {plugin}', array('plugin' => $pluginName));
+            if ($stderr->isVerbose()) {
+                $stderr->writeln(sprintf('Updating %s', $pluginName));
+            }
+
             if (!$updater->update($pluginName)) {
-                $this->logger->error('Plugin update failed');
+                $stderr->writeln('Error: Plugin update failed');
 
                 return 1;
             }
@@ -81,10 +80,10 @@ class UpdateCommand extends AbstractPluginCommand
 
                 $iniVersion = $plugin->getIniVersion();
                 $pluginInstaller->upgrade($plugin);
-                $this->logger->info('Plugin {plugin} upgraded successfully to {version}', array('plugin' => $pluginName, 'version' => $iniVersion));
-            });
+            }, OmekaSandbox::ENV_SHORTLIVED);
+            $stderr->writeln(sprintf('Plugin %1$s upgraded successfully to %2$s', $pluginName, $iniVersion));
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            $stderr->writeln('Error: ' . $e->getMessage());
 
             return 1;
         }

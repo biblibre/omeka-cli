@@ -2,34 +2,25 @@
 
 namespace OmekaCli\Command;
 
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
 class SnapshotCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'create a snapshot of the current Omeka installation';
+        $this->setName('snapshot');
+        $this->setAliases(array('snap'));
+        $this->setDescription('create a snapshot of the current Omeka installation');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $usage = "Usage:\n"
-               . "\tsnapshot\n"
-               . "\tsnap\n";
-
-        return $usage;
-    }
-
-    public function run($options, $args)
-    {
-        if (!empty($args)) {
-            $this->logger->error('Bad number of arguments');
-            error_log($this->getUsage());
-
-            return 1;
-        }
+        $stderr = $this->getStderr();
 
         $omekaPath = $this->getContext()->getOmekaPath();
         if (!$omekaPath) {
-            $this->logger->error('Not in an Omeka directory');
+            $stderr->writeln('Error: Not in an Omeka directory');
 
             return 1;
         }
@@ -47,7 +38,10 @@ class SnapshotCommand extends AbstractCommand
 
         $db = parse_ini_file($this->getOmeka()->BASE_DIR . '/db.ini');
 
-        $this->logger->info('Saving database');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Saving database');
+        }
+
         $dbDumpFile = $snapPath . '/omeka.sql.gz';
         $passwordFile = tempnam(sys_get_temp_dir(), 'omeka.cnf.');
         file_put_contents($passwordFile, '[client]' . PHP_EOL . "password = {$db['password']}");
@@ -61,41 +55,47 @@ class SnapshotCommand extends AbstractCommand
         unlink($passwordFile);
 
         if ($exitCode) {
-            $this->logger->error('database dump failed');
+            $stderr->writeln('Error: Database dump failed');
 
             return 1;
         }
 
-        $this->logger->info('saving Omeka');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Saving Omeka');
+        }
+
         $omekaTarFile = $snapPath . '/Omeka.tar.gz';
         exec('tar czf ' . escapeshellarg($omekaTarFile)
             . ' -C ' . escapeshellarg($this->getOmeka()->BASE_DIR) . ' .', $out, $exitCode);
 
         if ($exitCode) {
-            $this->logger->error('Omeka compression failed');
+            $stderr->writeln('Error: Omeka compression failed');
 
             return 1;
         }
 
-        $this->logger->info('archiving');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Archiving');
+        }
+
         $tarFile = "$snapPath.tar";
         exec('tar cvf ' . escapeshellarg($tarFile)
             . ' -C ' . escapeshellarg($snapPath) . ' .', $out, $exitCode);
 
         if ($exitCode) {
-            $this->logger->error('snapshot archiving failed');
+            $stderr->writeln('Error: Snapshot archiving failed');
 
             return 1;
         }
 
         exec('rm -rf ' . escapeshellarg($snapPath), $out, $exitCode);
         if ($exitCode) {
-            $this->logger->warning('cannot remove non-archived directory');
+            $stderr->writeln('Error: Cannot remove non-archived directory');
 
             return 1;
         }
 
-        $this->logger->notice('Snapshot created at {file}', array('file' => $tarFile));
+        $stderr->writeln(sprintf('Snapshot created at %s', $tarFile));
 
         return 0;
     }

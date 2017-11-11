@@ -4,38 +4,32 @@ namespace OmekaCli\Command\Plugin;
 
 use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Omeka\PluginInstaller;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class DisableCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'disable a plugin';
+        $this->setName('plugin-disable');
+        $this->setDescription('disable a plugin');
+        $this->setAliases(array('dis'));
+        $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to disable');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return "Usage:\n"
-             . "    plugin-disable <plugin>\n"
-             . "    pldis <plugin>\n";
-    }
+        $stderr = $this->getStderr();
 
-    public function run($options, $args)
-    {
         $omekaPath = $this->getContext()->getOmekaPath();
         if (!$omekaPath) {
-            $this->logger->error('Not in an Omeka directory');
+            $stderr->writeln('Error: Not in an Omeka directory');
 
             return 1;
         }
 
-        if (count($args) != 1) {
-            $this->logger->error('Bad number of arguments');
-            error_log($this->getUsage());
-
-            return 1;
-        }
-
-        $pluginName = reset($args);
+        $pluginName = $input->getArgument('name');
 
         $pluginInstaller = new PluginInstaller();
         $pluginInstaller->setContext($this->getContext());
@@ -43,12 +37,12 @@ class DisableCommand extends AbstractCommand
         try {
             $pluginInstaller->disable($pluginName);
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            $stderr->writeln('Error: ' . $e->getMessage());
 
             return 1;
         }
 
-        $this->logger->notice('{plugin} disabled', array('plugin' => $pluginName));
+        $stderr->writeln(sprintf('%s disabled', $pluginName));
 
         return 0;
     }

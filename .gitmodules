@@ -1,0 +1,3 @@
+[submodule "tests/plugins/Foo"]
+	path = tests/plugins/Foo
+	url = https://github.com/biblibre/omeka-plugin-Foo.git

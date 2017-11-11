@@ -4,38 +4,32 @@ namespace OmekaCli\Command\Plugin;
 
 use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Omeka\PluginInstaller;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class EnableCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'enable a plugin';
+        $this->setName('plugin-enable');
+        $this->setDescription('enable a plugin');
+        $this->setAliases(array('en'));
+        $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to enable');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return "Usage:\n"
-             . "\tplugin-enable PLUGIN_NAME\n"
-             . "\tplen PLUGIN_NAME\n";
-    }
+        $stderr = $this->getStderr();
 
-    public function run($options, $args)
-    {
         $omekaPath = $this->getContext()->getOmekaPath();
         if (!$omekaPath) {
-            $this->logger->error('Not in an Omeka directory');
+            $stderr->writeln('Error: Not in an Omeka directory');
 
             return 1;
         }
 
-        if (count($args) != 1) {
-            $this->logger->error('Bad number of arguments');
-            error_log($this->getUsage());
-
-            return 1;
-        }
-
-        $pluginName = reset($args);
+        $pluginName = $input->getArgument('name');
 
         $pluginInstaller = new PluginInstaller();
         $pluginInstaller->setContext($this->getContext());
@@ -43,12 +37,12 @@ class EnableCommand extends AbstractCommand
         try {
             $pluginInstaller->enable($pluginName);
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            $stderr->writeln('Error: ' . $e->getMessage());
 
             return 1;
         }
 
-        $this->logger->notice('{plugin} enabled', array('plugin' => $pluginName));
+        $stderr->writeln(sprintf('%s enabled', $pluginName));
 
         return 0;
     }

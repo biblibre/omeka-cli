@@ -2,84 +2,74 @@
 
 namespace OmekaCli\Command;
 
-use GetOptionKit\OptionCollection;
 use OmekaCli\IniWriter;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class SnapshotRestoreCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'restore a snapshot previously made with command snapshot';
+        $this->setName('snapshot-restore');
+        $this->setDescription('restore a snapshot previously made with command snapshot');
+
+        $this->addOption('db-host', null, InputOption::VALUE_OPTIONAL, 'database host');
+        $this->addOption('db-user', null, InputOption::VALUE_OPTIONAL, 'database user');
+        $this->addOption('db-pass', null, InputOption::VALUE_OPTIONAL, 'database pass');
+        $this->addOption('db-name', null, InputOption::VALUE_OPTIONAL, 'database name');
+
+        $this->addArgument('snapshot', InputArgument::REQUIRED, 'snapshot file created by snapshot command');
+        $this->addArgument('target', InputArgument::REQUIRED, 'destination directory');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $usage = "Usage:\n"
-            . "\tsnapshot-restore [--db-host <hostname>] [--db-user <user>]\n"
-            . "\t                 [--db-pass <password>] [--db-name <name>]\n"
-            . "\t                 <snapshot> <target>\n";
-
-        return $usage;
-    }
-
-    public function getOptionsSpec()
-    {
-        $optionsSpec = new OptionCollection();
-        $optionsSpec->add('h|db-host:', 'database host')
-                ->isa('String');
-        $optionsSpec->add('u|db-user:', 'database user name')
-                ->isa('String');
-        $optionsSpec->add('p|db-pass:', 'database user password')
-                ->isa('String');
-        $optionsSpec->add('n|db-name:', 'database name')
-                ->isa('String');
-
-        return $optionsSpec;
-    }
-
-    public function run($options, $args)
-    {
-        if (count($args) != 2) {
-            $this->logger->error('Bad number of arguments');
-            error_log($this->getUsage());
-
-            return 1;
-        }
-
-        $snapshot = $args[0];
-        $target = $args[1];
+        $snapshot = $input->getArgument('snapshot');
+        $target = $input->getArgument('target');
+        $stderr = $this->getStderr();
 
         if (!file_exists($snapshot)) {
-            $this->logger->error('{snapshot} does not exist', array('snapshot' => $snapshot));
+            $stderr->writeln(sprintf('Error: %s does not exist', $snapshot));
 
             return 1;
         }
 
-        $this->logger->info('checking destination');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Checking destination');
+        }
+
         if (!is_dir($target)) {
             if (file_exists($target)) {
-                $this->logger->error('{target} already exists and is not a directory', array('target' => $target));
+                $stderr->writeln(sprintf('Error: %s already exists and is not a directory', $target));
 
                 return 1;
             }
 
             if (!mkdir($target, 0777, true)) {
-                $this->logger->error('cannot create {target} directory', array('target' => $target));
+                $stderr->writeln(sprintf('Error: Cannot create %s directory', $target));
 
                 return 1;
             }
         }
 
-        $this->logger->info('restoring Omeka');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Restoring Omeka');
+        }
+
         exec('tar xf ' . escapeshellarg($snapshot) . ' -O ./Omeka.tar.gz | '
            . 'tar xzf - -C ' . escapeshellarg($target), $out, $exitCode);
         if ($exitCode) {
-            $this->logger->error('Omeka restoration failed');
+            $stderr->writeln('Error: Omeka restoration failed');
 
             return 1;
         }
 
-        $this->logger->info('looking for infos in db.ini');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Looking for infos in db.ini');
+        }
+
         $dbIniFile = "$target/db.ini";
         $db = parse_ini_file($dbIniFile, true);
 
@@ -103,7 +93,10 @@ class SnapshotRestoreCommand extends AbstractCommand
             $iniWriter->writeArray($db);
         }
 
-        $this->logger->info('Restoring database');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Restoring database');
+        }
+
         $passwordFile = tempnam(sys_get_temp_dir(), 'omeka.cnf.');
         file_put_contents($passwordFile, '[client]' . PHP_EOL . "password = {$db['database']['password']}");
 
@@ -118,12 +111,12 @@ class SnapshotRestoreCommand extends AbstractCommand
         unlink($passwordFile);
 
         if ($exitCode) {
-            $this->logger->error('database recovering failed');
+            $stderr->writeln('Error: Database recovering failed');
 
             return 1;
         }
 
-        $this->logger->notice('Snapshot restored successfully');
+        $stderr->writeln('Snapshot restored successfully');
 
         return 0;
     }

@@ -2,51 +2,53 @@
 
 namespace OmekaCli\Command;
 
-use GetOptionKit\OptionCollection;
-use Psr\Log\LoggerAwareTrait;
-use Psr\Log\NullLogger;
-use OmekaCli\Sandbox\SandboxFactory;
 use OmekaCli\Context\Context;
-use OmekaCli\Context\ContextAwareTrait;
 use OmekaCli\Omeka;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\ConsoleOutputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-abstract class AbstractCommand implements CommandInterface
+abstract class AbstractCommand extends Command
 {
-    use LoggerAwareTrait;
-    use ContextAwareTrait;
-
-    protected $commandManager;
     protected $omeka;
 
-    public function __construct()
+    protected $input;
+    protected $output;
+
+    protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $this->setLogger(new NullLogger());
-        $this->setContext(new Context());
+        $this->input = $input;
+        $this->output = $output;
     }
 
-    public function setCommandManager($commandManager)
+    protected function getInput()
     {
-        $this->commandManager = $commandManager;
+        return $this->input;
     }
 
-    public function getOptionsSpec()
+    protected function getOutput()
     {
-        return new OptionCollection();
+        return $this->output;
     }
 
-    public function getDescription()
+    protected function getStderr()
     {
-        return null;
+        if ($this->output instanceof ConsoleOutputInterface) {
+            return $this->output->getErrorOutput();
+        }
+
+        return $this->output;
     }
 
-    public function getUsage()
+    protected function getContext()
     {
-        return null;
+        return $this->getHelper('context')->getContext();
     }
 
-    protected function getSandbox()
+    protected function getSandbox(Context $context = null)
     {
-        return SandboxFactory::getSandbox($this->getContext());
+        return $this->getHelper('context')->getSandbox($context);
     }
 
     protected function getOmeka()

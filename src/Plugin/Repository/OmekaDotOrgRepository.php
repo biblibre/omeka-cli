@@ -2,9 +2,9 @@
 
 namespace OmekaCli\Plugin\Repository;
 
-use ZipArchive;
 use DateInterval;
 use OmekaCli\Cache;
+use ZipArchive;
 
 class OmekaDotOrgRepository extends AbstractRepository
 {
@@ -78,7 +78,12 @@ class OmekaDotOrgRepository extends AbstractRepository
         }
 
         $tmpZip = "$tmpDir/$id.zip";
-        file_put_contents($tmpZip, fopen($url, 'r'));
+        $fh = @fopen($url, 'r');
+        if ($fh === false) {
+            throw new \Exception("Failed to download ZIP file at $url");
+        }
+
+        file_put_contents($tmpZip, $fh);
 
         $zip = new ZipArchive();
         if (true !== $zip->open($tmpZip)) {

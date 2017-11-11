@@ -4,46 +4,39 @@ namespace OmekaCli\Test\Command;
 
 class OptionsCommandTest extends TestCase
 {
+    protected $commandName = 'options';
+
     public function testShowAllOptionsWhenRunWithoutArgument()
     {
-        ob_start();
-        $this->command->run(array(), array());
-        $output = ob_get_clean();
+        $this->commandTester->execute(array());
 
-        $this->assertRegExp('/\A(.+=.*\n)*\Z/', $output);
+        $this->assertRegExp('/\A(.+=.*\n)*\Z/', $this->commandTester->getDisplay());
     }
 
     public function testCanRetrieveExistingTableEntries()
     {
-        ob_start();
-        $this->command->run(array(), array('omeka_version'));
-        $output = ob_get_clean();
+        $this->commandTester->execute(array('name' => 'omeka_version'));
+
+        $output = $this->commandTester->getDisplay();
         $this->assertRegexp('/\A[0-9a-zA-Z]+([\.-][0-9a-zA-Z]+)*\n\z/', $output);
     }
 
     public function testShowErrorOnNonExistingTableEntries()
     {
-        $retCode = $this->command->run(array(), array('NonExistingOption'));
+        $retCode = $this->commandTester->execute(array('name' => 'NonExistingOption'));
 
         $this->assertEquals(1, $retCode);
-        $this->assertRegExp('/\AError: option not found\Z/', $this->logger->getOutput());
+        $this->assertRegExp('/\AError: Option not found\Z/', $this->commandTester->getDisplay());
     }
 
     public function testCanEditExistingTableEntries()
     {
-        ob_start();
-        $this->command->run(array(), array('site_title', 'yee'));
-        $output = ob_get_clean();
+        $this->commandTester->execute(array('name' => 'site_title', 'value' => 'yee'));
 
         $sandbox = $this->getSandbox();
         $siteTitle = $sandbox->execute(function () {
             return get_option('site_title');
         });
         $this->assertEquals('yee', $siteTitle);
-    }
-
-    protected function getCommandName()
-    {
-        return 'options';
     }
 }

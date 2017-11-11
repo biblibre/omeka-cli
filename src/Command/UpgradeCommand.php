@@ -4,72 +4,77 @@ namespace OmekaCli\Command;
 
 use Omeka_Db_Migration_Manager;
 use OmekaCli\Omeka;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class UpgradeCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'upgrade Omeka';
+        $this->setName('upgrade');
+        $this->setDescription('upgrade Omeka');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $usage = 'Usage:' . PHP_EOL
-               . '    upgrade' . PHP_EOL
-               . PHP_EOL
-               . 'All saves are put in the ~/.omeka-cli/backups directory.'
-               . PHP_EOL;
+        $stderr = $this->getStderr();
 
-        return $usage;
-    }
-
-    public function run($options, $args)
-    {
         $omekaPath = $this->getContext()->getOmekaPath();
-
         if (!$omekaPath) {
-            $this->logger->error('not in an Omeka directory');
+            $stderr->writeln('Error: Not in an Omeka directory');
 
             return 1;
         }
 
         $omeka = $this->getOmeka();
         if (!file_exists($omeka->BASE_DIR . '/.git')) {
-            $this->logger->error('omeka-cli needs a git repo to upgrade Omeka');
+            $stderr->writeln('Error: omeka-cli needs a git repo to upgrade Omeka');
 
             return 1;
         }
 
-        $this->logger->info('checking for updates');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Checking for updates');
+        }
+
         $latestVersion = $this->getLatestVersion();
         if (version_compare($omeka->OMEKA_VERSION, $latestVersion) >= 0) {
-            $this->logger->notice('Omeka is already up-to-date');
+            $stderr->writeln('Omeka is already up-to-date');
 
             return 0;
         }
 
-        $this->logger->info('saving database');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Saving database');
+        }
+
         if (false === $this->saveDb()) {
-            $this->logger->error('database dumping failed');
+            $stderr->writeln('Error: Failed to dump database');
 
             return 1;
         }
 
-        $this->logger->info('upgrading Omeka');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Upgrading Omeka');
+        }
+
         if (false === $this->upgradeOmeka($latestVersion)) {
-            $this->logger->error('cannot upgrade Omeka');
+            $stderr->writeln('Error: Cannot upgrade Omeka');
 
             return 1;
         }
 
-        $this->logger->info('upgrading database');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Upgrading database');
+        }
+
         if (false === $this->upgradeDb($latestVersion)) {
-            $this->logger->error('Failed to upgrade database');
+            $stderr->writeln('Error: Failed to upgrade database');
 
             return 1;
         }
 
-        $this->logger->notice('Upgrade successful');
+        $stderr->writeln('Upgrade successful');
 
         return 0;
     }
@@ -84,6 +89,8 @@ class UpgradeCommand extends AbstractCommand
 
     protected function saveDb()
     {
+        $stderr = $this->getStderr();
+
         $backupsDir = getenv('HOME') . '/.omeka-cli/backups';
         if (!is_dir($backupsDir)) {
             mkdir($backupsDir, 0777, true);
@@ -109,12 +116,12 @@ class UpgradeCommand extends AbstractCommand
         unlink($passwordFile);
 
         if ($exitCode !== 0) {
-            $this->logger->error('mysqldump failed');
+            $stderr->writeln('Error: mysqldump failed');
 
             return false;
         }
 
-        $this->logger->notice('database saved in {dest}', array('dest' => $dest));
+        $stderr->writeln(sprintf('Database saved in %s', $dest));
 
         return true;
     }
@@ -131,6 +138,8 @@ class UpgradeCommand extends AbstractCommand
 
     protected function upgradeDb($version)
     {
+        $stderr = $this->getStderr();
+
         try {
             $this->getSandbox()->execute(function () use ($version) {
                 $migrationMgr = Omeka_Db_Migration_Manager::getDefault();
@@ -140,7 +149,7 @@ class UpgradeCommand extends AbstractCommand
                 }
             });
         } catch (\Exception $e) {
-            $this->logger->error('Database migration failed: {message}', array('message' => $e->getMessage()));
+            $stderr->writeln(sprintf('Error: Database migration failed: %s', $e->getMessage()));
 
             return false;
         }

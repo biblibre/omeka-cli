@@ -4,38 +4,31 @@ namespace OmekaCli\Command\Plugin;
 
 use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Omeka\PluginInstaller;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class UninstallCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'uninstall a plugin';
+        $this->setName('plugin-uninstall');
+        $this->setDescription('uninstall a plugin');
+        $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to uninstall');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return "Usage:\n"
-             . "\tplugin-uninstall PLUGIN_NAME\n"
-             . "\tplun PLUGIN_NAME\n";
-    }
+        $stderr = $this->getStderr();
 
-    public function run($options, $args)
-    {
         $omekaPath = $this->getContext()->getOmekaPath();
         if (!$omekaPath) {
-            $this->logger->error('Not in an Omeka directory');
+            $stderr->writeln('Error: Not in an Omeka directory');
 
             return 1;
         }
 
-        if (count($args) != 1) {
-            $this->logger->error('Bad number of arguments');
-            error_log($this->getUsage());
-
-            return 1;
-        }
-
-        $pluginName = reset($args);
+        $pluginName = $input->getArgument('name');
 
         $pluginInstaller = new PluginInstaller();
         $pluginInstaller->setContext($this->getContext());
@@ -43,12 +36,12 @@ class UninstallCommand extends AbstractCommand
         try {
             $pluginInstaller->uninstall($pluginName);
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            $stderr->writeln('Error: ' . $e->getMessage());
 
             return 1;
         }
 
-        $this->logger->info('{plugin} uninstalled', array('plugin' => $pluginName));
+        $stderr->writeln(sprintf('%s uninstalled', $pluginName));
 
         return 0;
     }

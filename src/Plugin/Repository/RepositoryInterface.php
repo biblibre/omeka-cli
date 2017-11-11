@@ -2,10 +2,12 @@
 
 namespace OmekaCli\Plugin\Repository;
 
-use Psr\Log\LoggerAwareInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-interface RepositoryInterface extends LoggerAwareInterface
+interface RepositoryInterface
 {
+    public function setOutput(OutputInterface $output);
+
     public function getDisplayName();
 
     public function search($query);

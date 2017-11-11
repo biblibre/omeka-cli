@@ -2,15 +2,20 @@
 
 namespace OmekaCli\Plugin\Repository;
 
-use Psr\Log\LoggerAwareTrait;
-use Psr\Log\NullLogger;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class AbstractRepository implements RepositoryInterface
 {
-    use LoggerAwareTrait;
+    protected $output;
 
     public function __construct()
     {
-        $this->setLogger(new NullLogger());
+        $this->output = new NullOutput();
+    }
+
+    public function setOutput(OutputInterface $output)
+    {
+        $this->output = $output;
     }
 }

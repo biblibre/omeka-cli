@@ -2,16 +2,20 @@
 
 namespace OmekaCli\Test\Command;
 
-use OmekaCli\Omeka;
 use OmekaCli\Context\Context;
+use OmekaCli\Omeka;
+use Symfony\Component\Console\Tester\CommandTester;
 
 class SnapshotRestoreCommandTest extends TestCase
 {
+    protected $commandName = 'snapshot-restore';
+
     public function testSnapshotRestore()
     {
         $snapshotCommand = $this->getCommand('snapshot');
-        $snapshotCommand->run(array(), array());
-        $output = $this->logger->getOutput();
+        $snapshotCommandTester = new CommandTester($snapshotCommand);
+        $snapshotCommandTester->execute(array());
+        $output = $snapshotCommandTester->getDisplay();
         preg_match('/Snapshot created at (.*)/', $output, $matches);
         $snapshot = $matches[1];
 
@@ -23,16 +27,11 @@ class SnapshotRestoreCommandTest extends TestCase
         });
 
         $tempdir = rtrim(`mktemp -d --tmpdir omeka-snapshot-test.XXXXXX`);
-        $this->command->run(array(), array($snapshot, $tempdir));
+        $this->commandTester->execute(array('snapshot' => $snapshot, 'target' => $tempdir));
 
         $omeka = new Omeka();
         $omeka->setContext(new Context($tempdir));
         $siteTitle = $omeka->get_option('site_title');
         $this->assertEquals($originalSiteTitle, $siteTitle);
-    }
-
-    protected function getCommandName()
-    {
-        return 'snapshot-restore';
     }
 }

@@ -6,19 +6,16 @@ use OmekaCli\Test\Command\TestCase;
 
 class PluginDownloadCommandTest extends TestCase
 {
+    protected $commandName = 'plugin-download';
+
     public function testPluginDownload()
     {
-        $pluginName = 'SolrSearch';
+        $pluginName = 'CollectionTree';
         $pluginFile = getenv('OMEKA_PATH') . "/plugins/$pluginName/{$pluginName}Plugin.php";
         $this->assertFileNotExists($pluginFile);
-        $status = $this->command->run(array(), array($pluginName));
+        $status = $this->commandTester->execute(array('plugin-id' => $pluginName));
 
         $this->assertEquals(0, $status);
         $this->assertFileExists($pluginFile);
-    }
-
-    protected function getCommandName()
-    {
-        return 'plugin-download';
     }
 }

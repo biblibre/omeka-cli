@@ -2,12 +2,11 @@
 
 namespace OmekaCli\Omeka;
 
+use Omeka_Plugin_Installer;
 use OmekaCli\Context\ContextAwareInterface;
 use OmekaCli\Context\ContextAwareTrait;
-use OmekaCli\Sandbox\SandboxFactory;
-use Zend_Registry;
 use Plugin;
-use Omeka_Plugin_Installer;
+use Zend_Registry;
 
 class PluginInstaller implements ContextAwareInterface
 {
@@ -91,11 +90,6 @@ class PluginInstaller implements ContextAwareInterface
         }
 
         $this->getPluginInstaller()->uninstall($plugin);
-    }
-
-    protected function getSandbox()
-    {
-        return SandboxFactory::getSandbox($this->getContext());
     }
 
     protected function getPluginLoader()

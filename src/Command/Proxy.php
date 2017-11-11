@@ -2,86 +2,112 @@
 
 namespace OmekaCli\Command;
 
-use Psr\Log\LoggerAwareTrait;
+use OmekaCli\Context\Context;
 use OmekaCli\Context\ContextAwareTrait;
-use OmekaCli\Sandbox\SandboxFactory;
+use OmekaCli\Sandbox\OmekaSandbox;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class Proxy implements CommandInterface
+class Proxy extends AbstractCommand
 {
-    use LoggerAwareTrait;
     use ContextAwareTrait;
 
-    protected $commandInfo;
-    protected $command;
-    protected $commandManager;
+    protected static $commands = array();
 
-    public function __construct($commandInfo)
+    protected $class;
+
+    public function __construct($name = null, $class, Context $context)
     {
-        $this->commandInfo = $commandInfo;
+        $this->class = $class;
+        $this->setContext($context);
+
+        parent::__construct($name);
     }
 
-    public function setCommandManager($commandManager)
+    protected function configure()
     {
-        $this->commandManager = $commandManager;
+        $this->setName($this->call('getName'));
+        $this->setDescription($this->call('getDescription'));
+        $this->setHelp($this->call('getHelp'));
+        $this->setAliases($this->call('getAliases'));
+        foreach ($this->call('getUsages') as $usage) {
+            $this->addUsage($usage);
+        }
     }
 
-    public function getOptionsSpec()
+    public function setApplication(\Symfony\Component\Console\Application $application = null)
+    {
+        parent::setApplication($application);
+        $this->call(__FUNCTION__, array($application));
+    }
+
+    public function setHelperSet(\Symfony\Component\Console\Helper\HelperSet $helperSet)
+    {
+        parent::setHelperSet($helperSet);
+        $this->call(__FUNCTION__, array($helperSet));
+    }
+
+    public function setDefinition($definition)
+    {
+        parent::setDefinition($definition);
+        $this->call(__FUNCTION__, array($definition));
+    }
+
+    public function isEnabled()
     {
         return $this->call(__FUNCTION__);
     }
 
-    public function getDescription()
+    public function run(InputInterface $input, OutputInterface $output)
     {
-        return $this->call(__FUNCTION__);
+        $sandbox = new OmekaSandbox();
+        $sandbox->setContext($this->getContext());
+        $status = $sandbox->execute(function () use ($input, $output) {
+            $command = $this->getCommand();
+            $command->setApplication($this->getApplication());
+
+            return $command->run($input, $output);
+        }, OmekaSandbox::ENV_SHORTLIVED);
+
+        return $status;
     }
 
-    public function getUsage()
+    public function mergeApplicationDefinition($mergeArgs = true)
     {
-        return $this->call(__FUNCTION__);
+        parent::mergeApplicationDefinition($mergeArgs);
+        $this->call(__FUNCTION__, array($mergeArgs));
     }
 
-    public function run($options, $args)
+    public function getSynopsis($short = false)
     {
-        return $this->call(__FUNCTION__, array($options, $args));
+        return $this->call(__FUNCTION__, array($short));
     }
 
-    public function __call($name, $args)
+    protected function getCommand()
     {
-        return $this->call($name, $args);
+        if (!isset(self::$commands[$this->class])) {
+            $class = $this->class;
+            $command = new $class();
+
+            self::$commands[$this->class] = $command;
+        }
+
+        return self::$commands[$this->class];
     }
 
     protected function call($name, $args = array())
     {
         $c = function () use ($name, $args) {
-            if (!isset($this->command)) {
-                $command = new $this->commandInfo['class']();
-                $command->setLogger($this->logger);
-                $command->setContext($this->getContext());
-                $command->setCommandManager($this->commandManager);
+            $command = $this->getCommand();
 
-                $this->command = $command;
-            }
-
-            $callback = array($this->command, $name);
+            $callback = array($command, $name);
             if (!is_callable($callback)) {
-                throw new \Exception(sprintf('Method %s does not exist', $this->commandInfo['class'] . '::' . $name));
+                throw new \Exception(sprintf('Method %s does not exist', $this->class . '::' . $name));
             }
 
             return call_user_func_array($callback, $args);
         };
 
-        if ($this->commandInfo['is_plugin']) {
-            $sandbox = $this->getSandbox();
-            $return = $sandbox->execute($c);
-        } else {
-            $return = call_user_func($c);
-        }
-
-        return $return;
-    }
-
-    protected function getSandbox()
-    {
-        return SandboxFactory::getSandbox($this->getContext());
+        return $this->getSandbox()->execute($c);
     }
 }

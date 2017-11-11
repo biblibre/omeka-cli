@@ -3,16 +3,7 @@
 
 require_once __DIR__ . '/../bootstrap.php';
 
-use OmekaCli\Application;
-use OmekaCli\Exception\BadUsageException;
+$app = new OmekaCli\Application();
+$exitCode = $app->run();
 
-try {
-    $application = Application::fromArgv();
-    $application->initialize();
-    $exitCode = $application->run();
-    exit($exitCode);
-} catch (BadUsageException $e) {
-    error_log('Error: ' . $e->getMessage());
-    fwrite(STDERR, Application::usage());
-    exit(1);
-}
+exit($exitCode);

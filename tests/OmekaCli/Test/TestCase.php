@@ -5,38 +5,23 @@ namespace OmekaCli\Test;
 use OmekaCli\Application;
 use OmekaCli\Context\Context;
 use OmekaCli\Sandbox\OmekaSandbox;
-use OmekaCli\Sandbox\SandboxFactory;
-use OmekaCli\Test\Mock\LoggerMock;
+use OmekaCli\Sandbox\OmekaSandboxPool;
 
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected $application;
-    protected $logger;
 
     public function setUp()
     {
-        $this->application = $this->createApplication();
-        $this->application->initialize();
-    }
+        $this->application = new Application();
 
-    protected function createApplication()
-    {
-        return new Application(array('omeka-path' => getenv('OMEKA_PATH')));
-    }
-
-    protected function getCommand($name)
-    {
-        $this->logger = new LoggerMock();
-        $commands = $this->application->getCommandManager();
-        $command = $commands->getCommand($name);
-        $command->setLogger($this->logger);
-
-        return $command;
+        $context = new Context(getenv('OMEKA_PATH'));
+        $this->application->getHelperSet()->get('context')->setContext($context);
     }
 
     protected function getSandbox()
     {
-        return SandboxFactory::getSandbox(new Context(getenv('OMEKA_PATH')));
+        return $this->application->getHelperSet()->get('context')->getSandbox();
     }
 
     protected function getNewSandbox()
@@ -47,16 +32,25 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         return $sandbox;
     }
 
+    protected function flushSandboxes()
+    {
+        OmekaSandboxPool::flush();
+    }
+
     protected function installPlugin($name)
     {
         $this->getNewSandbox()->execute(function () use ($name) {
-            $plugin = new \Plugin();
-            $plugin->name = $name;
-            \Zend_Registry::get('plugin_ini_reader')->load($plugin);
-            (new \Omeka_Plugin_Installer(
-                \Zend_Registry::get('pluginbroker'),
-                \Zend_Registry::get('plugin_loader')
-            ))->install($plugin);
+            $pluginLoader = \Zend_Registry::get('plugin_loader');
+            $plugin = $pluginLoader->getPlugin($name);
+            if (!$plugin) {
+                $plugin = new \Plugin();
+                $plugin->name = $name;
+                \Zend_Registry::get('plugin_ini_reader')->load($plugin);
+                (new \Omeka_Plugin_Installer(
+                    \Zend_Registry::get('pluginbroker'),
+                    $pluginLoader
+                ))->install($plugin);
+            }
         });
     }
 

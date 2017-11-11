@@ -109,7 +109,7 @@ putenv("OMEKA_PATH=$omekaPath");
 $pid = getmypid();
 register_shutdown_function(function () use ($tempdir, $pid) {
     if ($pid === getmypid()) {
-        OmekaCli\Sandbox\SandboxFactory::flush();
+        OmekaCli\Sandbox\OmekaSandboxPool::flush();
         rrmdir($tempdir);
     }
 });

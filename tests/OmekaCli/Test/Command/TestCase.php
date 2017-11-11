@@ -2,16 +2,26 @@
 
 namespace OmekaCli\Test\Command;
 
+use Symfony\Component\Console\Tester\CommandTester;
+
 abstract class TestCase extends \OmekaCli\Test\TestCase
 {
-    protected $command;
+    protected $commandName;
+    protected $commandTester;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->command = $this->getCommand($this->getCommandName());
+        $command = $this->getCommand($this->commandName);
+        $this->commandTester = new CommandTester($command);
     }
 
-    abstract protected function getCommandName();
+    protected function getCommand($name)
+    {
+        $command = $this->application->get($name);
+        $command->setHelperSet($this->application->getHelperSet());
+
+        return $command;
+    }
 }

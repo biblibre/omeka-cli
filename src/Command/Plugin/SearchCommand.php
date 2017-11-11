@@ -2,42 +2,28 @@
 
 namespace OmekaCli\Command\Plugin;
 
-use GetOptionKit\OptionCollection;
-use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
+use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Plugin\Repository\GithubRepository;
+use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class SearchCommand extends AbstractPluginCommand
+class SearchCommand extends AbstractCommand
 {
-    public function getDescription()
+    protected function configure()
     {
-        return 'search plugins';
+        $this->setName('plugin-search');
+        $this->setDescription('search plugins');
+        $this->setAliases(array('search'));
+        $this->addArgument('query', InputArgument::REQUIRED);
+        $this->addOption('exclude-github', 'G', InputOption::VALUE_NONE, 'do not search plugins on Github');
     }
 
-    public function getUsage()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return "Usage:\n"
-             . "\tplugin-search [<options>] <query>\n"
-             . "\tpls [<options>] <query>\n"
-             . "\n"
-             . "Options:\n"
-             . "\t-G, --exclude-github    Do not search plugins in Github\n";
-    }
-
-    public function getOptionsSpec()
-    {
-        $optionsSpec = new OptionCollection();
-        $optionsSpec->add('G|exclude-github', 'Do not search plugins in Github');
-
-        return $optionsSpec;
-    }
-
-    public function run($options, $args)
-    {
-        if (count($args) != 1) {
-            $this->logger->error($this->getUsage());
-
-            return 1;
-        }
+        $stderr = $this->getStderr();
 
         $repositories = array();
         $repositories[] = new OmekaDotOrgRepository();
@@ -45,7 +31,7 @@ class SearchCommand extends AbstractPluginCommand
             $repositories[] = new GithubRepository();
         }
 
-        $query = reset($args);
+        $query = $input->getArgument('query');
 
         $plugins = array();
         foreach ($repositories as $repository) {
@@ -59,11 +45,11 @@ class SearchCommand extends AbstractPluginCommand
         }
 
         foreach ($plugins as $plugin) {
-            echo sprintf("%s (%s) - %s\n",
+            $output->writeln(sprintf('%1$s (%2$s) - %3$s',
                 $plugin['info']['id'],
                 $plugin['info']['version'],
                 $plugin['repository']->getDisplayName()
-            );
+            ));
         }
 
         return 0;

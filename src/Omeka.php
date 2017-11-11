@@ -2,7 +2,6 @@
 
 namespace OmekaCli;
 
-use OmekaCli\Sandbox\SandboxFactory;
 use OmekaCli\Context\ContextAwareInterface;
 use OmekaCli\Context\ContextAwareTrait;
 
@@ -38,10 +37,5 @@ class Omeka implements ContextAwareInterface
 
             return call_user_func_array($name, $args);
         });
-    }
-
-    protected function getSandbox()
-    {
-        return SandboxFactory::getSandbox($this->getContext());
     }
 }

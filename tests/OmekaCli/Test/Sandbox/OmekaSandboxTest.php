@@ -2,9 +2,10 @@
 
 namespace OmekaCli\Test\Sandbox;
 
-use OmekaCli\Sandbox\OmekaSandbox;
 use OmekaCli\Context\Context;
+use OmekaCli\Sandbox\OmekaSandbox;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Output\StreamOutput;
 
 class OmekaSandboxTest extends TestCase
 {
@@ -25,13 +26,29 @@ class OmekaSandboxTest extends TestCase
 
     public function testSimpleCallback()
     {
+        $a = 'a';
         $b = 'b';
 
-        $return = $this->sandbox->execute(function ($a) use ($b) {
+        $return = $this->sandbox->execute(function () use ($a, $b) {
             define('SANDBOX_TEST', true);
 
             return array('foo' => $b . $a . 'r');
-        }, 'a');
+        });
+
+        $this->assertEquals($return['foo'], 'bar');
+        $this->assertFalse(defined('SANDBOX_TEST'));
+    }
+
+    public function testSimpleCallbackInShortLivedEnv()
+    {
+        $a = 'a';
+        $b = 'b';
+
+        $return = $this->sandbox->execute(function () use ($a, $b) {
+            define('SANDBOX_TEST', true);
+
+            return array('foo' => $b . $a . 'r');
+        }, OmekaSandbox::ENV_SHORTLIVED);
 
         $this->assertEquals($return['foo'], 'bar');
         $this->assertFalse(defined('SANDBOX_TEST'));
@@ -47,6 +64,16 @@ class OmekaSandboxTest extends TestCase
         $this->assertFalse(call_user_func($omekaVersionDefined));
     }
 
+    public function testOmekaEnvIsLoadedInShortLivedEnv()
+    {
+        $omekaVersionDefined = function () {
+            return defined('OMEKA_VERSION');
+        };
+
+        $this->assertTrue($this->sandbox->execute($omekaVersionDefined, OmekaSandbox::ENV_SHORTLIVED));
+        $this->assertFalse(call_user_func($omekaVersionDefined));
+    }
+
     /**
      * @expectedException \Exception
      * @expectedExceptionMessage Call to undefined function undefined_function()
@@ -54,11 +81,22 @@ class OmekaSandboxTest extends TestCase
     public function testFatalError()
     {
         $this->sandbox->execute(function () {
-            undefined_function();
+            \undefined_function();
         });
     }
 
-    public function testSandboxIsPersistent()
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Call to undefined function undefined_function()
+     */
+    public function testFatalErrorInShortLivedEnv()
+    {
+        $this->sandbox->execute(function () {
+            \undefined_function();
+        }, OmekaSandbox::ENV_SHORTLIVED);
+    }
+
+    public function testLongLivedSandboxIsPersistent()
     {
         $this->sandbox->execute(function () {
             $GLOBALS['foo'] = 'bar';
@@ -69,5 +107,30 @@ class OmekaSandboxTest extends TestCase
             return $GLOBALS['foo'];
         });
         $this->assertEquals('bar', $foo);
+    }
+
+    public function testShortLivedSandboxIsNotPersistent()
+    {
+        $this->sandbox->execute(function () {
+            $GLOBALS['foo'] = 'bar';
+        }, OmekaSandbox::ENV_SHORTLIVED);
+
+        $this->assertFalse(isset($GLOBALS['foo']));
+        $foo = $this->sandbox->execute(function () {
+            return @$GLOBALS['foo'];
+        }, OmekaSandbox::ENV_SHORTLIVED);
+        $this->assertNull($foo);
+    }
+
+    public function testResourcesCanBeUsedInShortLivedEnv()
+    {
+        $output = new StreamOutput(tmpfile());
+        $this->sandbox->execute(function () use ($output) {
+            $output->write('Test');
+        }, OmekaSandbox::ENV_SHORTLIVED);
+
+        $stream = $output->getStream();
+        rewind($stream);
+        $this->assertEquals('Test', stream_get_contents($stream));
     }
 }

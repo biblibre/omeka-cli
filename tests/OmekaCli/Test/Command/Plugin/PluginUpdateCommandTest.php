@@ -3,10 +3,11 @@
 namespace OmekaCli\Test\Command\Plugin;
 
 use OmekaCli\Test\Command\TestCase;
-use OmekaCli\Sandbox\SandboxFactory;
 
 class PluginUpdateCommandTest extends TestCase
 {
+    protected $commandName = 'plugin-update';
+
     public function setUp()
     {
         parent::setUp();
@@ -18,7 +19,7 @@ class PluginUpdateCommandTest extends TestCase
 
         $this->installPlugin('DublinCoreExtended');
 
-        SandboxFactory::flush();
+        $this->flushSandboxes();
     }
 
     public function tearDown()
@@ -36,7 +37,7 @@ class PluginUpdateCommandTest extends TestCase
         });
         $this->assertNull($dce_refines);
 
-        $status = $this->command->run(array(), array('DublinCoreExtended'));
+        $status = $this->commandTester->execute(array('name' => 'DublinCoreExtended'));
 
         $this->assertEquals(0, $status);
 
@@ -51,10 +52,5 @@ class PluginUpdateCommandTest extends TestCase
             return get_option('dublin_core_extended_refines');
         });
         $this->assertNotNull($dce_refines);
-    }
-
-    protected function getCommandName()
-    {
-        return 'plugin-update';
     }
 }

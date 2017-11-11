@@ -2,13 +2,14 @@
 
 namespace OmekaCli\Test\Command\Plugin;
 
-use OmekaCli\Sandbox\SandboxFactory;
-use OmekaCli\Omeka\PluginInstaller;
 use OmekaCli\Context\Context;
+use OmekaCli\Omeka\PluginInstaller;
 use OmekaCli\Test\Command\TestCase;
 
 class PluginEnableCommandTest extends TestCase
 {
+    protected $commandName = 'plugin-enable';
+
     public function setUp()
     {
         parent::setUp();
@@ -20,12 +21,12 @@ class PluginEnableCommandTest extends TestCase
         } catch (\Exception $e) {
         }
 
-        SandboxFactory::flush();
+        $this->flushSandboxes();
     }
 
     public function testPluginEnableWhenUninstalled()
     {
-        $status = $this->command->run(array(), array('Foo'));
+        $status = $this->commandTester->execute(array('name' => 'Foo'));
 
         $this->assertEquals(0, $status);
 
@@ -45,9 +46,9 @@ class PluginEnableCommandTest extends TestCase
         } catch (\Exception $e) {
         }
 
-        SandboxFactory::flush();
+        $this->flushSandboxes();
 
-        $status = $this->command->run(array(), array('Foo'));
+        $status = $this->commandTester->execute(array('name' => 'Foo'));
 
         $this->assertEquals(0, $status);
 
@@ -55,10 +56,5 @@ class PluginEnableCommandTest extends TestCase
             return plugin_is_active('Foo');
         });
         $this->assertTrue($is_active);
-    }
-
-    protected function getCommandName()
-    {
-        return 'plugin-enable';
     }
 }

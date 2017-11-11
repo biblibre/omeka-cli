@@ -2,34 +2,36 @@
 
 namespace OmekaCli\Command;
 
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
 class OptionsCommand extends AbstractCommand
 {
-    public function getDescription()
+    public function getSynopsis($short = false)
     {
-        return 'list, get and set Omeka options';
+        return sprintf('%s <name> <value>', $this->getName());
     }
 
-    public function getUsage()
+    protected function configure()
     {
-        return "Usage:\n"
-             . "    options\n"
-             . "    options <name>\n"
-             . "    options <name> <value>\n"
-             . "\n"
-             . "The first form lists all options and their value.\n"
-             . "The second form prints the value of option <name>.\n"
-             . "The third form sets the value of option <name> to <value>.\n";
+        $this->setName('options');
+        $this->setDescription('list, get and set Omeka options');
+
+        $this->addUsage('<name>');
+        $this->addUsage('');
+
+        $this->addArgument('name', InputArgument::OPTIONAL, 'Name of option to retrieve or modify');
+        $this->addArgument('value', InputArgument::OPTIONAL, 'New value of option');
     }
 
-    public function run($options, $args)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if (count($args) > 2) {
-            $this->logger->error($this->getUsage());
+        $args = $input->getArguments();
+        $stderr = $this->getStderr();
 
-            return 1;
-        }
-
-        list($optionName, $optionValue) = array_pad($args, 2, null);
+        $optionName = $input->getArgument('name');
+        $optionValue = $input->getArgument('value');
 
         if (!isset($optionName)) {
             $this->showAllOptions();
@@ -38,7 +40,7 @@ class OptionsCommand extends AbstractCommand
         }
 
         if (!$this->isOption($optionName)) {
-            $this->logger->error('option not found');
+            $stderr->writeln('Error: Option not found');
 
             return 1;
         }
@@ -49,7 +51,7 @@ class OptionsCommand extends AbstractCommand
         if (isset($optionValue)) {
             $omeka->set_option($optionName, $optionValue);
         } else {
-            echo $omeka->get_option($optionName) . "\n";
+            $output->writeln($omeka->get_option($optionName));
         }
 
         return 0;
@@ -83,8 +85,9 @@ class OptionsCommand extends AbstractCommand
             return $options;
         });
 
+        $output = $this->getOutput();
         foreach ($options as $name => $value) {
-            echo sprintf('%s = %s', $name, $value) . "\n";
+            $output->writeln(sprintf('%s = %s', $name, addcslashes($value, "\r\n")));
         }
     }
 }

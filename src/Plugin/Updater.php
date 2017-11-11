@@ -2,24 +2,29 @@
 
 namespace OmekaCli\Plugin;
 
-use Psr\Log\LoggerAwareInterface;
-use Psr\Log\LoggerAwareTrait;
-use Psr\Log\NullLogger;
-use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
 use OmekaCli\Context\Context;
 use OmekaCli\Context\ContextAwareInterface;
 use OmekaCli\Context\ContextAwareTrait;
 use OmekaCli\Omeka;
+use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
-class Updater implements LoggerAwareInterface, ContextAwareInterface
+class Updater implements ContextAwareInterface
 {
-    use LoggerAwareTrait;
     use ContextAwareTrait;
+
+    protected $output;
 
     public function __construct()
     {
-        $this->setLogger(new NullLogger());
         $this->setContext(new Context());
+        $this->output = new NullOutput();
+    }
+
+    public function setOutput(OutputInterface $output)
+    {
+        $this->output = $output;
     }
 
     public function getPluginLatestVersion($pluginName)
@@ -44,7 +49,7 @@ class Updater implements LoggerAwareInterface, ContextAwareInterface
         $currentBranch = rtrim(`git -C $pluginDir rev-parse --abbrev-ref HEAD`);
         $remoteName = rtrim(`git -C $pluginDir config branch.$currentBranch.remote`);
         if (empty($remoteName)) {
-            $this->logger->warning('{plugin} was downloaded using Git but the current branch ({branch}) has no upstream', array('plugin' => $pluginName, 'branch' => $currentBranch));
+            $this->output->writeln(sprintf('Warning: %1$s was downloaded using Git but the current branch (%2$s) has no upstream', $pluginName, $currentBranch));
 
             return null;
         }
@@ -52,7 +57,7 @@ class Updater implements LoggerAwareInterface, ContextAwareInterface
         $remoteTag = rtrim(`git -C $pluginDir fetch -q $remoteName && git -C $pluginDir describe --tags --abbrev=0 @{u} 2>/dev/null`);
         $remoteVersion = ltrim($remoteTag, 'v');
         if (empty($remoteVersion)) {
-            $this->logger->warning('{plugin}: remote {remote} has no tags', array('plugin' => $pluginName, 'remote' => $remoteName));
+            $this->output->writeln(sprintf('Warning: %1$s: remote %2$s has no tags', $pluginName, $remoteName));
 
             return null;
         }
@@ -69,14 +74,14 @@ class Updater implements LoggerAwareInterface, ContextAwareInterface
             $remoteTag = rtrim(`git -C $pluginDirQuoted describe --tags --abbrev=0 @{u}`);
             exec("git -C $pluginDirQuoted rebase $remoteTag", $output, $exitCode);
             if ($exitCode) {
-                $this->logger->error('Cannot update {plugin}', array('plugin' => $pluginName));
+                $this->output->writeln(sprintf('Error: Cannot update %s', $pluginName));
 
                 return false;
             }
         } else {
             $backupDir = getenv('HOME') . '/.omeka-cli/backups';
             if (!is_dir($backupDir) && !mkdir($backupDir, 0777, true)) {
-                $this->logger->error('Cannot create backup directory ({dir}). Plugin {plugin} will not be updated.', array('dir' => $backupDir, 'plugin' => $pluginName));
+                $this->output->writeln(sprintf('Error: Cannot create backup directory (%1$s). Plugin %2$s will not be updated.', $backupDir, $pluginName));
 
                 return false;
             }
@@ -93,7 +98,7 @@ class Updater implements LoggerAwareInterface, ContextAwareInterface
                     throw new \Exception('Cannot move the newly downloaded plugin to its destination');
                 }
             } catch (\Exception $e) {
-                $this->logger->error('cannot update plugin : {message}', array('message' => $e->getMessage()));
+                $this->output->writeln(sprintf('Error: Cannot update plugin : %s', $e->getMessage()));
 
                 return false;
             }

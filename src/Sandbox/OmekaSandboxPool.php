@@ -4,7 +4,7 @@ namespace OmekaCli\Sandbox;
 
 use OmekaCli\Context\Context;
 
-class SandboxFactory
+class OmekaSandboxPool
 {
     protected static $sandboxes = array();
 

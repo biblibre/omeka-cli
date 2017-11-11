@@ -2,170 +2,89 @@
 
 namespace OmekaCli\Command;
 
+use OmekaCli\Application;
+use OmekaCli\Context\Context;
+use OmekaCli\IniWriter;
 use PDO;
 use PDOException;
-use OmekaCli\Application;
-use OmekaCli\IniWriter;
-use OmekaCli\Sandbox\SandboxFactory;
-use OmekaCli\Context\Context;
-use GetOptionKit\OptionCollection;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class InstallCommand extends AbstractCommand
 {
-    protected $options = array();
-
-    protected static $defaultOptions = array(
-        'db-host' => 'localhost',
-        'db-user' => 'omeka',
-        'db-pass' => '',
-        'db-name' => 'omeka',
-        'db-prefix' => '',
-        'omeka-user-name' => 'admin',
-        'omeka-user-password' => 'CHANGEME',
-        'omeka-user-email' => 'admin@example.com',
-        'omeka-site-title' => 'Omeka',
-        'omeka-admin-email' => 'admin@example.com',
-    );
-
-    public function getOptionsSpec()
+    protected function configure()
     {
-        $cmdSpec = new OptionCollection();
-        $cmdSpec->add('v|version:', 'Omeka version')
-                ->isa('String');
-        $cmdSpec->add('h|db-host:', 'database host')
-                ->isa('String');
-        $cmdSpec->add('u|db-user:', 'database user name')
-                ->isa('String');
-        $cmdSpec->add('p|db-pass:', 'database user password')
-                ->isa('String');
-        $cmdSpec->add('n|db-name:', 'database name')
-                ->isa('String');
-        $cmdSpec->add('db-prefix:', 'database prefix')
-                ->isa('String');
-        $cmdSpec->add('U|omeka-user-name:', 'Omeka superuser name')
-                ->isa('String');
-        $cmdSpec->add('P|omeka-user-password:', 'Omeka superuser password')
-                ->isa('String');
-        $cmdSpec->add('E|omeka-user-email:', 'Omeka superuser email')
-                ->isa('String');
-        $cmdSpec->add('T|omeka-site-title:', 'Omeka site title')
-                ->isa('String');
-        $cmdSpec->add('A|omeka-admin-email:', 'Omeka admin email')
-                ->isa('String');
-
-        return $cmdSpec;
+        $this->setName('install');
+        $this->setDescription('install Omeka');
+        $this->addOption('branch', 'b', InputOption::VALUE_REQUIRED, 'Git branch or tag to use. If not given, the latest version will be installed');
+        $this->addOption('db-host', 'H', InputOption::VALUE_REQUIRED, 'database host', 'localhost');
+        $this->addOption('db-user', 'u', InputOption::VALUE_REQUIRED, 'database user name', 'omeka');
+        $this->addOption('db-pass', 'p', InputOption::VALUE_REQUIRED, 'database user password', '');
+        $this->addOption('db-name', 'N', InputOption::VALUE_REQUIRED, 'database name', 'omeka');
+        $this->addOption('db-prefix', null, InputOption::VALUE_REQUIRED, 'database prefix', '');
+        $this->addOption('omeka-user-name', 'U', InputOption::VALUE_REQUIRED, 'Omeka superuser name', 'admin');
+        $this->addOption('omeka-user-password', 'P', InputOption::VALUE_REQUIRED, 'Omeka superuser password', 'CHANGEME');
+        $this->addOption('omeka-user-email', 'E', InputOption::VALUE_REQUIRED, 'Omeka superuser email', 'admin@example.com');
+        $this->addOption('omeka-site-title', 'T', InputOption::VALUE_REQUIRED, 'Omeka site title', 'Omeka');
+        $this->addOption('omeka-admin-email', 'A', InputOption::VALUE_REQUIRED, 'Omeka admin email', 'admin@example.com');
+        $this->addArgument('omeka-path', InputArgument::REQUIRED, 'the Omeka installation directory');
     }
 
-    public function getDescription()
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        return 'install Omeka';
-    }
+        $omekaPath = $input->getArgument('omeka-path');
+        $branch = $input->getOption('branch');
 
-    public function getUsage()
-    {
-        return 'Usage:' . "\n"
-             . "\tinstall [OPTIONS] DIR\n"
-             . "\n"
-             . "Arguments\n"
-             . "\tDIR  the Omeka installation directory\n"
-             . "\n"
-             . "Install Omeka. This command needs all the requirements needed to install Omeka the classic way. See omeka.org for more informations.\n"
-             . "\n"
-             . "Options:\n"
-             . "\t-v, --version TAG\n"
-             . "\t\tgit tag refering to an Omeka version.\n"
-             . "\t\tIf not given, the latest version will be installed\n"
-             . "\n"
-             . "\t-h, --db-host DB_HOST\n"
-             . "\t\tdatabase host, default: '" . self::$defaultOptions['db-host'] . "'\n"
-             . "\n"
-             . "\t-u, --db-user DB_USER\n"
-             . "\t\tdatabase user name, default: '" . self::$defaultOptions['db-user'] . "'\n"
-             . "\n"
-             . "\t-p, --db-pass DB_PASS\n"
-             . "\t\tdatabase user password, default: '" . self::$defaultOptions['db-pass'] . "'\n"
-             . "\n"
-             . "\t-n, --db-name DB_NAME\n"
-             . "\t\tdatabase name, default: '" . self::$defaultOptions['db-name'] . "'\n"
-             . "\n"
-             . "\t-n, --db-prefix DB_PREFIX\n"
-             . "\t\tdatabase prefix, default: '" . self::$defaultOptions['db-prefix'] . "'\n"
-             . "\n"
-             . "\t-U, --omeka-user-name OMEKA_USER_NAME\n"
-             . "\t\tOmeka superuser name, default: '" . self::$defaultOptions['omeka-user-name'] . "'\n"
-             . "\n"
-             . "\t-P, --omeka-user-password OMEKA_USER_PASSWORD\n"
-             . "\t\tOmeka superuser password, default: '" . self::$defaultOptions['omeka-user-password'] . "'\n"
-             . "\n"
-             . "\t-E, --omeka-user-email OMEKA_USER_EMAIL\n"
-             . "\t\tOmeka superuser email, default: '" . self::$defaultOptions['omeka-user-email'] . "'\n"
-             . "\n"
-             . "\t-T, --omeka-site-title OMEKA_SITE_TITLE\n"
-             . "\t\tOmeka site title, default: '" . self::$defaultOptions['omeka-site-title'] . "'\n"
-             . "\n"
-             . "\t-A, --omeka-admin-email OMEKA_ADMIN_EMAIL\n"
-             . "\t\tOmeka admin email, default '" . self::$defaultOptions['omeka-admin-email'] . "'\n";
-    }
+        $stderr = $this->getStderr();
 
-    public function run($options, $args)
-    {
-        if (count($args) != 1) {
-            $this->logger->error('Bad number of arguments');
-            error_log($this->getUsage());
-
-            return 1;
-        }
-
-        $omekaPath = reset($args);
-        $version = null;
-        if (isset($options['version'])) {
-            $version = $options['version'];
-        }
-
-        $config = $options + self::$defaultOptions;
-
-        if ($this->downloadOmeka($omekaPath, $version)) {
-            $this->logger->error('Failed to download Omeka');
+        if ($this->downloadOmeka($omekaPath, $branch)) {
+            $stderr->writeln('Error: Failed to download Omeka');
 
             return 1;
         }
 
         if ($this->copyFiles($omekaPath)) {
-            $this->logger->error('Failed to copy .changeme files');
+            $stderr->writeln('Error: Failed to copy .changeme files');
 
             return 1;
         }
 
+        $config = $input->getOptions();
+
         $this->applyDbConfig($omekaPath, $config);
 
         if (false === $this->createDatabase($config)) {
-            $this->logger->error('Failed to create database');
+            $stderr->writeln('Error: Failed to create database');
 
             return 1;
         }
 
         if (!$this->isDatabaseEmpty($omekaPath)) {
-            $this->logger->error('Database is not empty');
+            $stderr->writeln('Error: Database is not empty');
 
             return 1;
         }
 
         if (false === $this->installOmeka($omekaPath, $config)) {
-            $this->logger->error('installation failed');
+            $stderr->writeln('Error: Installation failed');
 
             return 1;
         }
 
-        $this->logger->notice('Installation successful');
+        $stderr->writeln('Installation successful');
 
         return 0;
     }
 
-    protected function downloadOmeka($omekaPath, $version)
+    protected function downloadOmeka($omekaPath, $branch)
     {
+        $stderr = $this->getStderr();
+
         if (file_exists($omekaPath)) {
             if (!is_dir($omekaPath)) {
-                $this->logger->error('{dir} is not a directory', array('dir' => $omekaPath));
+                $stderr->writeln(sprintf('Error: %s is not a directory', $omekaPath));
 
                 return 1;
             }
@@ -173,13 +92,15 @@ class InstallCommand extends AbstractCommand
             if ((file_exists($omekaPath . '/.git')
               && file_exists($omekaPath . '/db.ini.changeme')
               && file_exists($omekaPath . '/bootstrap.php'))) {
-                $this->logger->info('Omeka already downloaded');
+                if ($stderr->isVerbose()) {
+                    $stderr->writeln('Omeka already downloaded');
+                }
 
                 return 0;
             }
 
             if (count(scandir($omekaPath)) > 2) {
-                $this->logger->error('{dir} is not empty', array('dir' => $omekaPath));
+                $stderr->writeln(sprintf('Error: %s is not empty', $omekaPath));
 
                 return 1;
             }
@@ -187,12 +108,15 @@ class InstallCommand extends AbstractCommand
 
         $repository = 'https://github.com/omeka/Omeka.git';
 
-        if (!isset($version)) {
-            $version = rtrim(`git ls-remote -q --tags --refs $repository | cut -f 2 | sed 's|refs/tags/||' | sort -rV | head -n1`);
+        if (!isset($branch)) {
+            $branch = rtrim(`git ls-remote -q --tags --refs $repository | cut -f 2 | sed 's|refs/tags/||' | sort -rV | head -n1`);
         }
 
-        $this->logger->info("Downloading Omeka from $repository...");
-        $cmd = 'git clone --recursive --branch ' . escapeshellarg($version) . " $repository " . escapeshellarg($omekaPath);
+        if ($stderr->isVerbose()) {
+            $stderr->writeln("Downloading Omeka from $repository...");
+        }
+
+        $cmd = 'git clone --recursive --branch ' . escapeshellarg($branch) . " $repository " . escapeshellarg($omekaPath);
         $descriptorspec = array(
             array('pipe', 'r'),
             array('pipe', 'w'),
@@ -211,9 +135,9 @@ class InstallCommand extends AbstractCommand
             if (false !== stream_select($read, $write, $except, 0, 200000)) {
                 foreach ($read as $stream) {
                     if (!feof($stream)) {
-                        $line = rtrim(fgets($stream));
-                        if ($line) {
-                            $this->logger->info($line);
+                        $line = fgets($stream);
+                        if ($stderr->isVerbose()) {
+                            $stderr->write($line);
                         }
                     }
                 }
@@ -224,7 +148,7 @@ class InstallCommand extends AbstractCommand
         fclose($pipes[2]);
         $exitCode = proc_close($proc);
         if ($exitCode) {
-            $this->logger->error('cannot clone Omeka repository');
+            $stderr->writeln('Error: Cannot clone Omeka repository');
 
             return 1;
         }
@@ -234,24 +158,29 @@ class InstallCommand extends AbstractCommand
 
     protected function copyFiles($omekaPath)
     {
+        $stderr = $this->getStderr();
+
         $files = array(
             'db.ini',
             '.htaccess',
             'application/config/config.ini',
         );
 
-        $this->logger->info('Copying .changeme files');
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Copying .changeme files');
+        }
+
         foreach ($files as $file) {
             $dest = "$omekaPath/$file";
             $src = "$dest.changeme";
             if (!file_exists($dest)) {
                 if (false === copy($src, $dest)) {
-                    $this->logger->error('cannot copy {src} to {dest}', array('src' => $src, 'dest' => $dest));
+                    $stderr->writeln(sprintf('Error: Cannot copy %1$s to %2$s', $src, $dest));
 
                     return 1;
                 }
             } else {
-                $this->logger->info('{file} already exists', array('file' => $dest));
+                $stderr->writeln(sprintf('Error: %s already exists', $dest));
             }
         }
 
@@ -260,7 +189,10 @@ class InstallCommand extends AbstractCommand
 
     protected function applyDbConfig($omekaPath, $config)
     {
-        $this->logger->info('Configuring database');
+        $stderr = $this->getStderr();
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Configuring database');
+        }
 
         $dbini = $omekaPath . '/db.ini';
         $db = parse_ini_file($dbini, true);
@@ -276,6 +208,8 @@ class InstallCommand extends AbstractCommand
 
     protected function createDatabase($config)
     {
+        $stderr = $this->getStderr();
+
         $host = $config['db-host'];
         $user = $config['db-user'];
         $pass = $config['db-pass'];
@@ -284,14 +218,14 @@ class InstallCommand extends AbstractCommand
         try {
             $pdo = new PDO("mysql:host=$host", $user, $pass);
         } catch (PDOException $e) {
-            $this->logger->error($e->getMessage());
+            $stderr->writeln(sprintf('Error: %s', $e->getMessage()));
 
             return false;
         }
 
         if (false === $pdo->query("CREATE DATABASE IF NOT EXISTS $name")) {
             $errorInfo = $pdo->errorInfo();
-            $this->logger->error($errorInfo[2]);
+            $stderr->writeln(sprintf('Error: %s', $errorInfo[2]));
 
             return false;
         }
@@ -301,8 +235,10 @@ class InstallCommand extends AbstractCommand
 
     protected function isDatabaseEmpty($omekaPath)
     {
+        $stderr = $this->getStderr();
+
         try {
-            $sandbox = SandboxFactory::getSandbox(new Context($omekaPath));
+            $sandbox = $this->getSandbox(new Context($omekaPath));
             $isEmpty = $sandbox->execute(function () {
                 $db = get_db();
                 $tables = $db->fetchAll("SHOW TABLES LIKE '{$db->prefix}options'");
@@ -313,7 +249,7 @@ class InstallCommand extends AbstractCommand
                 return false;
             });
         } catch (\Exception $e) {
-            $this->logger->warning($e->getMessage());
+            $stderr->writeln(sprintf('Warning: %s', $e->getMessage()));
             $isEmpty = null;
         }
 
@@ -322,7 +258,10 @@ class InstallCommand extends AbstractCommand
 
     protected function installOmeka($omekaPath, $config)
     {
-        $this->logger->info('Installing Omeka');
+        $stderr = $this->getStderr();
+        if ($stderr->isVerbose()) {
+            $stderr->writeln('Installing Omeka');
+        }
 
         $data = array(
             'username' => $config['omeka-user-name'],
@@ -339,7 +278,7 @@ class InstallCommand extends AbstractCommand
             'per_page_public' => '10',
         );
 
-        $sandbox = SandboxFactory::getSandbox(new Context($omekaPath));
+        $sandbox = $this->getSandbox(new Context($omekaPath));
         try {
             $sandbox->execute(function () use ($data) {
                 require_once FORM_DIR . '/Install.php';
@@ -362,7 +301,7 @@ class InstallCommand extends AbstractCommand
                 $installer->install();
             });
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            $stderr->writeln(sprintf('Error: %s', $e->getMessage()));
 
             return false;
         }

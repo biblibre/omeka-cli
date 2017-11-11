@@ -9,31 +9,26 @@ commands.
 ## Usage
 
     omeka-cli [-h | --help]
-    omeka-cli [-C <omeka-path>] [<options>...] COMMAND [ARGS...]
+    omeka-cli [-V | --version]
+    omeka-cli <command> [options] [arguments]
 
 ## Available commands
-
-### General commands
 
     check-updates     check for updates
     help              print help for a specific command
     info              print informations about current Omeka installation
     install           install Omeka
     list              list available commands
-    options           edit and see the "omeka_options" table
+    options           list, get and set Omeka options
+    plugin-enable     enable a plugin (install & activate)
+    plugin-disable    disable a plugin
+    plugin-uninstall  uninstall a plugin
+    plugin-download   downloads a plugin
+    plugin-search     search a plugin
+    plugin-update     update a plugin
     snapshot          create a snapshot
     snapshot-restore  restore a snapshot
     upgrade           upgrade Omeka
-    version           print version of omeka-cli
-
-### Plugin related commands
-
-    plugin-enable      enable a plugin (install & activate)
-    plugin-disable     disable a plugin
-    plugin-uninstall   uninstall a plugin
-    plugin-download    downloads a plugin
-    plugin-search      search a plugin
-    plugin-update      update a plugin
 
 ## Requirements
 
@@ -74,33 +69,57 @@ sudo mv omeka-cli.phar /usr/local/bin/omeka-cli
 git clone https://github.com/biblibre/omeka-cli.git
 cd omeka-cli
 composer install --no-dev
-bin/omeka-cli version
+bin/omeka-cli --version
 ```
 
 ## Creating custom commands
 
-To create a custom command named `bar` with the Foo plugin, put the
+To create a custom command named `foo:bar` with the Foo plugin, put the
 following code in the `initialize` hook of your plugin's main class:
 
 ```php
 $events = Zend_EventManager_StaticEventManager::getInstance();
 $events->attach('OmekaCli', 'commands', function() {
     return array(
-        'Foo:Bar' => array(
-            'class' => 'Foo_Bar',
-            'aliases' => array('bar'),
-        ),
+        'Foo_Bar',
     );
 });
 ```
 
-and define a class `Foo_Bar` which implements
-[OmekaCli\Command\CommandInterface](src/Command/CommandInterface.php)
+and define a class `Foo_Bar` which extends
+[OmekaCli\Command\AbstractCommand](src/Command/AbstractCommand.php)
+
+You will have to implements at least `configure` and `execute` methods.
+
+For instance:
+
+```php
+use OmekaCli\Command\AbstractCommand;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+
+class Foo_Bar extends AbstractCommand
+{
+    protected function configure()
+    {
+        $this->setName('foo:bar');
+        $this->setDescription('print something to stdout');
+        $this->setAliases(array('bar'));
+    }
+
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $output->writeln('Hello, omeka-cli!');
+
+        return 0;
+    }
+}
+```
 
 Then you will be able to run the command either this way:
 
 ```sh
-omeka-cli Foo:Bar [OPTION...] [ARG...]
+omeka-cli foo:bar [OPTION...] [ARG...]
 ```
 
 or using the alias:
