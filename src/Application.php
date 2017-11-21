@@ -2,7 +2,20 @@
 
 namespace OmekaCli;
 
+use OmekaCli\Command\CheckUpdatesCommand;
+use OmekaCli\Command\InfoCommand;
+use OmekaCli\Command\InstallCommand;
+use OmekaCli\Command\OptionsCommand;
+use OmekaCli\Command\PluginDisableCommand;
+use OmekaCli\Command\PluginDownloadCommand;
+use OmekaCli\Command\PluginEnableCommand;
+use OmekaCli\Command\PluginSearchCommand;
+use OmekaCli\Command\PluginUninstallCommand;
+use OmekaCli\Command\PluginUpdateCommand;
 use OmekaCli\Command\Proxy;
+use OmekaCli\Command\SnapshotCommand;
+use OmekaCli\Command\SnapshotRestoreCommand;
+use OmekaCli\Command\UpgradeCommand;
 use OmekaCli\Console\Helper\ContextHelper;
 use OmekaCli\Context\Context;
 use OmekaCli\Sandbox\OmekaSandbox;
@@ -43,19 +56,19 @@ class Application extends \Symfony\Component\Console\Application
     protected function getDefaultCommands()
     {
         $commands = array_merge(parent::getDefaultCommands(), array(
-            new \OmekaCli\Command\InfoCommand(),
-            new \OmekaCli\Command\InstallCommand(),
-            new \OmekaCli\Command\CheckUpdatesCommand(),
-            new \OmekaCli\Command\OptionsCommand(),
-            new \OmekaCli\Command\SnapshotCommand(),
-            new \OmekaCli\Command\SnapshotRestoreCommand(),
-            new \OmekaCli\Command\UpgradeCommand(),
-            new \OmekaCli\Command\Plugin\SearchCommand(),
-            new \OmekaCli\Command\Plugin\DownloadCommand(),
-            new \OmekaCli\Command\Plugin\EnableCommand(),
-            new \OmekaCli\Command\Plugin\DisableCommand(),
-            new \OmekaCli\Command\Plugin\UninstallCommand(),
-            new \OmekaCli\Command\Plugin\UpdateCommand(),
+            new InfoCommand(),
+            new InstallCommand(),
+            new CheckUpdatesCommand(),
+            new OptionsCommand(),
+            new SnapshotCommand(),
+            new SnapshotRestoreCommand(),
+            new UpgradeCommand(),
+            new PluginSearchCommand(),
+            new PluginDownloadCommand(),
+            new PluginEnableCommand(),
+            new PluginDisableCommand(),
+            new PluginUninstallCommand(),
+            new PluginUpdateCommand(),
         ));
 
         return $commands;

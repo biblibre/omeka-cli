@@ -1,8 +1,7 @@
 <?php
 
-namespace OmekaCli\Command\Plugin;
+namespace OmekaCli\Command;
 
-use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Plugin\Repository\GithubRepository;
 use OmekaCli\Plugin\Repository\OmekaDotOrgRepository;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class DownloadCommand extends AbstractCommand
+class PluginDownloadCommand extends AbstractCommand
 {
     protected function configure()
     {

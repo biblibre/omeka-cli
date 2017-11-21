@@ -1,15 +1,14 @@
 <?php
 
-namespace OmekaCli\Command\Plugin;
+namespace OmekaCli\Command;
 
-use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Plugin\Updater;
 use OmekaCli\Sandbox\OmekaSandbox;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class UpdateCommand extends AbstractCommand
+class PluginUpdateCommand extends AbstractCommand
 {
     protected function configure()
     {

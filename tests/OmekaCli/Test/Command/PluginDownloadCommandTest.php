@@ -1,8 +1,6 @@
 <?php
 
-namespace OmekaCli\Test\Command\Plugin;
-
-use OmekaCli\Test\Command\TestCase;
+namespace OmekaCli\Test\Command;
 
 class PluginDownloadCommandTest extends TestCase
 {

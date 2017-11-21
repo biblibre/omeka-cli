@@ -1,10 +1,9 @@
 <?php
 
-namespace OmekaCli\Test\Command\Plugin;
+namespace OmekaCli\Test\Command;
 
 use OmekaCli\Context\Context;
 use OmekaCli\Omeka\PluginInstaller;
-use OmekaCli\Test\Command\TestCase;
 
 class PluginEnableCommandTest extends TestCase
 {

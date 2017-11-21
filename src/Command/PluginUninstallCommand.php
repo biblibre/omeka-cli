@@ -1,21 +1,19 @@
 <?php
 
-namespace OmekaCli\Command\Plugin;
+namespace OmekaCli\Command;
 
-use OmekaCli\Command\AbstractCommand;
 use OmekaCli\Omeka\PluginInstaller;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class EnableCommand extends AbstractCommand
+class PluginUninstallCommand extends AbstractCommand
 {
     protected function configure()
     {
-        $this->setName('plugin-enable');
-        $this->setDescription('enable a plugin');
-        $this->setAliases(array('en'));
-        $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to enable');
+        $this->setName('plugin-uninstall');
+        $this->setDescription('uninstall a plugin');
+        $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to uninstall');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -35,14 +33,14 @@ class EnableCommand extends AbstractCommand
         $pluginInstaller->setContext($this->getContext());
 
         try {
-            $pluginInstaller->enable($pluginName);
+            $pluginInstaller->uninstall($pluginName);
         } catch (\Exception $e) {
             $stderr->writeln('Error: ' . $e->getMessage());
 
             return 1;
         }
 
-        $stderr->writeln(sprintf('%s enabled', $pluginName));
+        $stderr->writeln(sprintf('%s uninstalled', $pluginName));
 
         return 0;
     }

@@ -1,8 +1,6 @@
 <?php
 
-namespace OmekaCli\Test\Command\Plugin;
-
-use OmekaCli\Test\Command\TestCase;
+namespace OmekaCli\Test\Command;
 
 class PluginUpdateCommandTest extends TestCase
 {
@@ -13,7 +11,7 @@ class PluginUpdateCommandTest extends TestCase
         parent::setUp();
 
         $zip = new \ZipArchive();
-        $zip->open(__DIR__ . '/../../../../plugins/Dublin-Core-Extended-2.0.zip');
+        $zip->open(__DIR__ . '/../../../plugins/Dublin-Core-Extended-2.0.zip');
         $zip->extractTo(getenv('OMEKA_PATH') . '/plugins');
         $zip->close();
 
