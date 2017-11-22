@@ -23,6 +23,10 @@ class CheckUpdatesCommandTest extends TestCase
     public function tearDown()
     {
         $this->uninstallPlugin('DublinCoreExtended');
+        rrmdir(getenv('OMEKA_PATH') . '/plugins/DublinCoreExtended');
+        $this->flushSandboxes();
+
+        parent::tearDown();
     }
 
     /**

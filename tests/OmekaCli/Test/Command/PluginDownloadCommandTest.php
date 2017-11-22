@@ -15,5 +15,7 @@ class PluginDownloadCommandTest extends TestCase
 
         $this->assertEquals(0, $status);
         $this->assertFileExists($pluginFile);
+
+        rrmdir(getenv('OMEKA_PATH') . "/plugins/$pluginName");
     }
 }

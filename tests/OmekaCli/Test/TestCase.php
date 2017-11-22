@@ -73,10 +73,13 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     {
         $this->getNewSandbox()->execute(function () use ($action, $name) {
             $pluginLoader = \Zend_Registry::get('plugin_loader');
-            (new \Omeka_Plugin_Installer(
-                \Zend_Registry::get('pluginbroker'),
-                $pluginLoader
-            ))->$action($pluginLoader->getPlugin($name));
+            $plugin = $pluginLoader->getPlugin($name);
+            if ($plugin) {
+                (new \Omeka_Plugin_Installer(
+                    \Zend_Registry::get('pluginbroker'),
+                    $pluginLoader
+                ))->$action($plugin);
+            }
         });
     }
 }

@@ -9,6 +9,11 @@ class PluginDisableCommandTest extends TestCase
 {
     protected $commandName = 'plugin-disable';
 
+    public function tearDown()
+    {
+        $this->uninstallPlugin('Foo');
+    }
+
     public function testPluginDisable()
     {
         // Put plugin in activated state first

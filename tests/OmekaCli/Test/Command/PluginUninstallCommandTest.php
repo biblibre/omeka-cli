@@ -2,9 +2,6 @@
 
 namespace OmekaCli\Test\Command;
 
-use OmekaCli\Context\Context;
-use OmekaCli\Omeka\PluginInstaller;
-
 class PluginUninstallCommandTest extends TestCase
 {
     protected $commandName = 'plugin-uninstall';
@@ -13,14 +10,14 @@ class PluginUninstallCommandTest extends TestCase
     {
         parent::setUp();
 
-        $pluginInstaller = new PluginInstaller();
-        $pluginInstaller->setContext(new Context(getenv('OMEKA_PATH')));
-        try {
-            $pluginInstaller->enable('Foo');
-        } catch (\Exception $e) {
-        }
+        $this->installPlugin('Foo');
 
         $this->flushSandboxes();
+    }
+
+    public function tearDown()
+    {
+        $this->uninstallPlugin('Foo');
     }
 
     public function testPluginUninstall()

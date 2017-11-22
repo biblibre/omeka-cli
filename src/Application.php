@@ -3,18 +3,19 @@
 namespace OmekaCli;
 
 use OmekaCli\Command\CheckUpdatesCommand;
-use OmekaCli\Command\InfoCommand;
 use OmekaCli\Command\InstallCommand;
 use OmekaCli\Command\OptionsCommand;
 use OmekaCli\Command\PluginDisableCommand;
 use OmekaCli\Command\PluginDownloadCommand;
 use OmekaCli\Command\PluginEnableCommand;
+use OmekaCli\Command\PluginListCommand;
 use OmekaCli\Command\PluginSearchCommand;
 use OmekaCli\Command\PluginUninstallCommand;
 use OmekaCli\Command\PluginUpdateCommand;
 use OmekaCli\Command\Proxy;
 use OmekaCli\Command\SnapshotCommand;
 use OmekaCli\Command\SnapshotRestoreCommand;
+use OmekaCli\Command\StatusCommand;
 use OmekaCli\Command\UpgradeCommand;
 use OmekaCli\Console\Helper\ContextHelper;
 use OmekaCli\Context\Context;
@@ -56,19 +57,20 @@ class Application extends \Symfony\Component\Console\Application
     protected function getDefaultCommands()
     {
         $commands = array_merge(parent::getDefaultCommands(), array(
-            new InfoCommand(),
-            new InstallCommand(),
             new CheckUpdatesCommand(),
+            new InstallCommand(),
             new OptionsCommand(),
-            new SnapshotCommand(),
-            new SnapshotRestoreCommand(),
-            new UpgradeCommand(),
             new PluginSearchCommand(),
             new PluginDownloadCommand(),
             new PluginEnableCommand(),
+            new PluginListCommand(),
             new PluginDisableCommand(),
             new PluginUninstallCommand(),
             new PluginUpdateCommand(),
+            new SnapshotCommand(),
+            new SnapshotRestoreCommand(),
+            new StatusCommand(),
+            new UpgradeCommand(),
         ));
 
         return $commands;

@@ -13,14 +13,12 @@ class PluginEnableCommandTest extends TestCase
     {
         parent::setUp();
 
-        $pluginInstaller = new PluginInstaller();
-        $pluginInstaller->setContext(new Context(getenv('OMEKA_PATH')));
-        try {
-            $pluginInstaller->uninstall('Foo');
-        } catch (\Exception $e) {
-        }
-
         $this->flushSandboxes();
+    }
+
+    public function tearDown()
+    {
+        $this->uninstallPlugin('Foo');
     }
 
     public function testPluginEnableWhenUninstalled()

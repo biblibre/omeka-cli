@@ -2,9 +2,11 @@
 
 namespace OmekaCli\Omeka;
 
+use Omeka_Plugin_Factory;
 use Omeka_Plugin_Installer;
 use OmekaCli\Context\ContextAwareInterface;
 use OmekaCli\Context\ContextAwareTrait;
+use OmekaCli\Sandbox\OmekaSandbox;
 use Plugin;
 use Zend_Registry;
 
@@ -34,6 +36,27 @@ class PluginInstaller implements ContextAwareInterface
         $sandbox->execute(function () use ($pluginName) {
             $this->uninstallPlugin($pluginName);
         });
+    }
+
+    public function getAll()
+    {
+        $sandbox = $this->getSandbox();
+        $plugins = $sandbox->execute(function () {
+            $plugins = $this->getAllPlugins();
+            $plugins = array_map(function ($plugin) {
+                $p = $plugin->toArray();
+                $iniReader = Zend_Registry::get('plugin_ini_reader');
+                if ($iniReader->hasPluginIniFile($plugin)) {
+                    $p['info'] = parse_ini_file($iniReader->getPluginIniFilePath($plugin));
+                }
+
+                return $p;
+            }, $plugins);
+
+            return $plugins;
+        }, OmekaSandbox::ENV_SHORTLIVED);
+
+        return $plugins;
     }
 
     protected function enablePlugin($pluginName)
@@ -90,6 +113,20 @@ class PluginInstaller implements ContextAwareInterface
         }
 
         $this->getPluginInstaller()->uninstall($plugin);
+    }
+
+    protected function getAllPlugins()
+    {
+        $pluginLoader = $this->getPluginLoader();
+        $installedPlugins = $pluginLoader->getPlugins();
+
+        // Get plugins that are not installed and load them.
+        $factory = new Omeka_Plugin_Factory(PLUGIN_DIR);
+        $uninstalledPlugins = $factory->getNewPlugins($installedPlugins);
+        $pluginLoader->loadPlugins($uninstalledPlugins);
+
+        // Get the combination of installed and not-installed plugins.
+        return $pluginLoader->getPlugins();
     }
 
     protected function getPluginLoader()
