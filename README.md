@@ -16,15 +16,16 @@ commands.
 
     check-updates     check for updates
     help              print help for a specific command
-    info              print informations about current Omeka installation
+    status            print status of current Omeka installation
     install           install Omeka
     list              list available commands
     options           list, get and set Omeka options
-    plugin-enable     enable a plugin (install & activate)
     plugin-disable    disable a plugin
-    plugin-uninstall  uninstall a plugin
     plugin-download   downloads a plugin
+    plugin-enable     enable a plugin (install & activate)
+    plugin-list       list all plugins
     plugin-search     search a plugin
+    plugin-uninstall  uninstall a plugin
     plugin-update     update a plugin
     snapshot          create a snapshot
     snapshot-restore  restore a snapshot

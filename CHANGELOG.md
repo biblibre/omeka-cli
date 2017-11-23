@@ -4,26 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Command 'info' renamed to 'status' and now shows only the number of installed
+  and uninstalled plugins
+
+### Added
+- New command 'plugin-list'
+
 ## [1.0.0-alpha.6] - 2017-11-15
-## Changed
+### Changed
 - Use Symfony's console component
 
 ## [1.0.0-alpha.5] - 2017-11-09
-## Changed
+### Changed
 - Commands plugin-activate and plugin-install are merged into plugin-enable
 - Some commands aliases are modified
 
 ## [1.0.0-alpha.4] - 2017-10-30
-## Added
+### Added
 - New command plugin-search
 
-## Changed
+### Changed
 - Command plugin-download requires an exact name for the plugin
 
-## Removed
+### Removed
 - OmekaCli\Console\Prompt
 
-## Fixed
+### Fixed
 - Phar compiler adds shebang
 - Prevent warnings if command class does not exist
 
@@ -271,6 +279,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 0.1.0 - 2016-12-11
 
+[Unreleased]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.6...HEAD
 [1.0.0-alpha.6]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.5...v1.0.0-alpha.6
 [1.0.0-alpha.5]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.4...v1.0.0-alpha.5
 [1.0.0-alpha.4]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.3...v1.0.0-alpha.4
