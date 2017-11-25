@@ -1,0 +1,22 @@
+<?php
+
+ini_set('user_agent', 'omeka-cli installer');
+$latest_release = json_decode(file_get_contents('https://api.github.com/repos/biblibre/omeka-cli/releases/latest'));
+
+foreach ($latest_release->assets as $asset) {
+    if ($asset->name === 'omeka-cli.phar') {
+        $download_url = $asset->browser_download_url;
+    }
+}
+
+if (!isset($download_url)) {
+    error_log('No valid releases found. Aborting.');
+    exit(1);
+}
+
+if (false === file_put_contents('omeka-cli.phar', fopen($download_url, 'r'))) {
+    error_log('Download of omeka-cli.phar failed');
+    exit(1);
+}
+
+echo "omeka-cli.phar downloaded successfully\n";

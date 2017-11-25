@@ -1,0 +1,34 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+header h1 > * {
+    vertical-align: middle;
+}
+
+header ul {
+    height: unset;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+header li {
+    width: unset;
+    height: unset;
+    float: unset;
+
+    flex-basis: 33%;
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+header ul a {
+    height: unset;
+    padding-top: unset;
+}
