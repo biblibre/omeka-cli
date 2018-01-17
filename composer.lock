@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "af9aa3c332c1441f64b9111135d39f0a",
+    "content-hash": "5d1dc956c992a94c034bded2cc152690",
     "packages": [
         {
             "name": "cache/adapter-common",
@@ -3801,7 +3801,9 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*"
     },
     "platform-dev": [],
     "platform-overrides": {
