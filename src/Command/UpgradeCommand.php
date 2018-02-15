@@ -4,6 +4,7 @@ namespace OmekaCli\Command;
 
 use Omeka_Db_Migration_Manager;
 use OmekaCli\Omeka;
+use OmekaCli\Sandbox\OmekaSandbox;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -136,18 +137,18 @@ class UpgradeCommand extends AbstractCommand
         return $ans === 0;
     }
 
-    protected function upgradeDb($version)
+    protected function upgradeDb()
     {
         $stderr = $this->getStderr();
 
         try {
-            $this->getSandbox()->execute(function () use ($version) {
+            $this->getSandbox()->execute(function () {
                 $migrationMgr = Omeka_Db_Migration_Manager::getDefault();
-                if ($migrationMgr->canUpgrade()) {
+                if ($migrationMgr->dbNeedsUpgrade()) {
                     $migrationMgr->migrate();
-                    set_option(Omeka_Db_Migration_Manager::VERSION_OPTION_NAME, $version);
+                    $migrationMgr->finalizeDbUpgrade();
                 }
-            });
+            }, OmekaSandbox::ENV_SHORTLIVED);
         } catch (\Exception $e) {
             $stderr->writeln(sprintf('Error: Database migration failed: %s', $e->getMessage()));
 
