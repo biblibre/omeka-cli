@@ -133,6 +133,7 @@ class UpgradeCommand extends AbstractCommand
         exec("git -C $baseDir stash save -q 'Stash made by omeka-cli upgrade'");
         exec("git -C $baseDir fetch -q origin");
         exec("git -C $baseDir reset --hard -q v$version", $out, $ans);
+        exec("git -C $baseDir submodule update --init --recursive");
 
         return $ans === 0;
     }
