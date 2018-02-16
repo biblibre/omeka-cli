@@ -4,6 +4,16 @@ php:
   - 5.6
   - 7.0.22
   - 7.1
+  - 7.2
+
+env:
+    - OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.5.1/omeka-2.5.1.zip
+    - OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.6/omeka-2.6.zip
+
+matrix:
+  exclude:
+    - php: 7.2
+      env: OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.5.1/omeka-2.5.1.zip
 
 sudo: false
 
