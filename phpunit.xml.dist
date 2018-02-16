@@ -13,6 +13,6 @@
         <env name="OMEKA_DB_USER" value="omeka"/>
         <env name="OMEKA_DB_PASS" value=""/>
         <env name="OMEKA_DB_NAME" value="omeka_cli_test"/>
-        <env name="OMEKA_ZIP_PATH" value="https://github.com/omeka/Omeka/releases/download/v2.5.1/omeka-2.5.1.zip"/>
+        <env name="OMEKA_ZIP_PATH" value="https://github.com/omeka/Omeka/releases/download/v2.6/omeka-2.6.zip"/>
     </php>
 </phpunit>
