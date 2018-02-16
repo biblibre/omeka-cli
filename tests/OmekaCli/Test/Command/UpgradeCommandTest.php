@@ -25,6 +25,10 @@ class UpgradeCommandTest extends TestCase
      */
     public function testUpgrade()
     {
+        if (version_compare(PHP_VERSION, '7.2') >= 0) {
+            $this->markTestSkipped('Only latest version of Omeka is compatible with PHP 7.2');
+        }
+
         $tempdir = rtrim(`mktemp -d --tmpdir omeka-upgrade-test.XXXXXX`);
         $input = array(
             'omeka-path' => $tempdir,
