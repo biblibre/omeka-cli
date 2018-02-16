@@ -6,6 +6,8 @@ This tool allows to interact with Omeka by using a command line interface.
 It also provides everything needed for Omeka plugins to create custom
 commands.
 
+[![Build status][Build status]][Travis]
+
 ## Usage
 
     omeka-cli [-h | --help]
@@ -155,3 +157,5 @@ GPL 3.0+
 [Omeka]: https://omeka.org/
 [Releases]: https://github.com/biblibre/omeka-cli/releases
 [Foo]: https://github.com/biblibre/omeka-plugin-Foo
+[Build status]: https://travis-ci.org/biblibre/omeka-cli.svg?branch=master
+[Travis]: https://travis-ci.org/biblibre/omeka-cli "biblibre/omeka-cli - Travis CI"
