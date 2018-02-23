@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2018-02-23
+### Fixed
+- Update git submodules when upgrading Omeka
+- Fix command upgrade when there is no database migrations
+- Make tests pass with Omeka 2.6 and PHP 7.2
+
+### Changed
+- Updated composer dependencies
+
 ## [1.0.0-beta.1] - 2017-11-27
 ### Changed
 - Command 'info' renamed to 'status' and now shows only the number of installed
@@ -279,6 +288,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## 0.1.0 - 2016-12-11
 
+[1.0.0]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-beta.1...v1.0.0
 [1.0.0-beta.1]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.6...v1.0.0-beta.1
 [1.0.0-alpha.6]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.5...v1.0.0-alpha.6
 [1.0.0-alpha.5]: https://github.com/biblibre/omeka-cli/compare/v1.0.0-alpha.4...v1.0.0-alpha.5

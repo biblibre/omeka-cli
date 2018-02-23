@@ -46,7 +46,7 @@ commands.
 
 ```sh
 # For the latest released version
-composer global require biblibre/omeka-cli:@beta   # No stable releases yet!
+composer global require biblibre/omeka-cli
 
 # For the latest dev version
 composer global require biblibre/omeka-cli:@dev
