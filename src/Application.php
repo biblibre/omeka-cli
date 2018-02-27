@@ -17,6 +17,7 @@ use OmekaCli\Command\SnapshotCommand;
 use OmekaCli\Command\SnapshotRestoreCommand;
 use OmekaCli\Command\StatusCommand;
 use OmekaCli\Command\UpgradeCommand;
+use OmekaCli\Command\UserCreateCommand;
 use OmekaCli\Console\Helper\ContextHelper;
 use OmekaCli\Context\Context;
 use OmekaCli\Sandbox\OmekaSandbox;
@@ -71,6 +72,7 @@ class Application extends \Symfony\Component\Console\Application
             new SnapshotRestoreCommand(),
             new StatusCommand(),
             new UpgradeCommand(),
+            new UserCreateCommand(),
         ));
 
         return $commands;
