@@ -9,6 +9,7 @@ php:
 env:
     - OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.5.1/omeka-2.5.1.zip
     - OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.6/omeka-2.6.zip
+    - OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.6.1/omeka-2.6.1.zip
 
 matrix:
   exclude:
