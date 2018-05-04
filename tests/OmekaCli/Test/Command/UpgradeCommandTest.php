@@ -25,9 +25,13 @@ class UpgradeCommandTest extends TestCase
      */
     public function testUpgrade()
     {
+        $current_version = '2.5.1';
+
         if (version_compare(PHP_VERSION, '7.2') >= 0) {
-            $this->markTestSkipped('Only latest version of Omeka is compatible with PHP 7.2');
+            $current_version = '2.6';
         }
+
+        $branch = "v$current_version";
 
         $tempdir = rtrim(`mktemp -d --tmpdir omeka-upgrade-test.XXXXXX`);
         $input = array(
@@ -38,7 +42,7 @@ class UpgradeCommandTest extends TestCase
             '--db-name' => getenv('OMEKA_DB_NAME'),
             '--db-prefix' => 'upgradetest_',
             '--omeka-site-title' => 'UpgradeCommand test',
-            '--branch' => 'v2.5.1',
+            '--branch' => $branch,
         );
         $installCommand = $this->getCommand('install');
         $installCommandTester = new CommandTester($installCommand);
@@ -49,7 +53,7 @@ class UpgradeCommandTest extends TestCase
         $version = $sandbox->execute(function () {
             return get_option('omeka_version');
         }, OmekaSandbox::ENV_SHORTLIVED);
-        $this->assertEquals('2.5.1', $version);
+        $this->assertEquals($current_version, $version);
 
         $command = $this->getCommand('upgrade');
         $command->getHelper('context')->setContext(new Context($tempdir));
@@ -63,7 +67,9 @@ class UpgradeCommandTest extends TestCase
         $version = $sandbox->execute(function () {
             return get_option('omeka_version');
         }, OmekaSandbox::ENV_SHORTLIVED);
-        $this->assertEquals('2.6', $version);
+
+        $latest_version = rtrim(file_get_contents('http://api.omeka.org/latest-version'));
+        $this->assertEquals($latest_version, $version);
 
         unset($sandbox);
         rrmdir($tempdir);
