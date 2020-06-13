@@ -73,12 +73,12 @@ class SnapshotRestoreCommand extends AbstractCommand
         $dbIniFile = "$target/db.ini";
         $db = parse_ini_file($dbIniFile, true);
 
-        $confMap = array(
+        $confMap = [
             'db-host' => 'host',
             'db-user' => 'username',
             'db-pass' => 'password',
             'db-name' => 'dbname',
-        );
+        ];
 
         $dbHasChanged = false;
         foreach ($confMap as $optionKey => $dbIniKey) {

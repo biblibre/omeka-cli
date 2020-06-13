@@ -14,7 +14,7 @@ class SnapshotRestoreCommandTest extends TestCase
     {
         $snapshotCommand = $this->getCommand('snapshot');
         $snapshotCommandTester = new CommandTester($snapshotCommand);
-        $snapshotCommandTester->execute(array());
+        $snapshotCommandTester->execute([]);
         $output = $snapshotCommandTester->getDisplay();
         preg_match('/Snapshot created at (.*)/', $output, $matches);
         $snapshot = $matches[1];
@@ -27,7 +27,7 @@ class SnapshotRestoreCommandTest extends TestCase
         });
 
         $tempdir = rtrim(`mktemp -d --tmpdir omeka-snapshot-test.XXXXXX`);
-        $this->commandTester->execute(array('snapshot' => $snapshot, 'target' => $tempdir));
+        $this->commandTester->execute(['snapshot' => $snapshot, 'target' => $tempdir]);
 
         $omeka = new Omeka();
         $omeka->setContext(new Context($tempdir));

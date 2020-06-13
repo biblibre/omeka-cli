@@ -41,7 +41,7 @@ class Application extends \Symfony\Component\Console\Application
     {
         $input->setStream(STDIN);
 
-        if ($omekaPath = $input->getParameterOption(array('--omeka-path', '-C'))) {
+        if ($omekaPath = $input->getParameterOption(['--omeka-path', '-C'])) {
             if (!$this->isOmekaDir($omekaPath)) {
                 throw new \Exception("$omekaPath is not an Omeka directory");
             }
@@ -57,7 +57,7 @@ class Application extends \Symfony\Component\Console\Application
 
     protected function getDefaultCommands()
     {
-        $commands = array_merge(parent::getDefaultCommands(), array(
+        $commands = array_merge(parent::getDefaultCommands(), [
             new CheckUpdatesCommand(),
             new InstallCommand(),
             new OptionsCommand(),
@@ -73,7 +73,7 @@ class Application extends \Symfony\Component\Console\Application
             new StatusCommand(),
             new UpgradeCommand(),
             new UserCreateCommand(),
-        ));
+        ]);
 
         return $commands;
     }
@@ -127,7 +127,7 @@ class Application extends \Symfony\Component\Console\Application
         $eventId = self::EVENT_ID;
         $eventName = self::COMMANDS_EVENT_NAME;
         $commands = $sandbox->execute(function () use ($eventId, $eventName) {
-            $items = array();
+            $items = [];
 
             if (class_exists('Zend_EventManager_StaticEventManager')) {
                 $events = \Zend_EventManager_StaticEventManager::getInstance();

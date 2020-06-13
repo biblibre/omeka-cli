@@ -14,7 +14,7 @@ class PluginUpdateCommand extends AbstractCommand
     {
         $this->setName('plugin-update');
         $this->setDescription('update plugins');
-        $this->setAliases(array('up'));
+        $this->setAliases(['up']);
         $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to update');
     }
 

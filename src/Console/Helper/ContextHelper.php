@@ -2,7 +2,6 @@
 
 namespace OmekaCli\Console\Helper;
 
-use OmekaCli\Context\Context;
 use OmekaCli\Context\ContextAwareInterface;
 use OmekaCli\Context\ContextAwareTrait;
 use Symfony\Component\Console\Helper\Helper;

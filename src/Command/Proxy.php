@@ -12,7 +12,7 @@ class Proxy extends AbstractCommand
 {
     use ContextAwareTrait;
 
-    protected static $commands = array();
+    protected static $commands = [];
 
     protected $class;
 
@@ -38,19 +38,19 @@ class Proxy extends AbstractCommand
     public function setApplication(\Symfony\Component\Console\Application $application = null)
     {
         parent::setApplication($application);
-        $this->call(__FUNCTION__, array($application));
+        $this->call(__FUNCTION__, [$application]);
     }
 
     public function setHelperSet(\Symfony\Component\Console\Helper\HelperSet $helperSet)
     {
         parent::setHelperSet($helperSet);
-        $this->call(__FUNCTION__, array($helperSet));
+        $this->call(__FUNCTION__, [$helperSet]);
     }
 
     public function setDefinition($definition)
     {
         parent::setDefinition($definition);
-        $this->call(__FUNCTION__, array($definition));
+        $this->call(__FUNCTION__, [$definition]);
     }
 
     public function isEnabled()
@@ -75,12 +75,12 @@ class Proxy extends AbstractCommand
     public function mergeApplicationDefinition($mergeArgs = true)
     {
         parent::mergeApplicationDefinition($mergeArgs);
-        $this->call(__FUNCTION__, array($mergeArgs));
+        $this->call(__FUNCTION__, [$mergeArgs]);
     }
 
     public function getSynopsis($short = false)
     {
-        return $this->call(__FUNCTION__, array($short));
+        return $this->call(__FUNCTION__, [$short]);
     }
 
     protected function getCommand()
@@ -95,12 +95,12 @@ class Proxy extends AbstractCommand
         return self::$commands[$this->class];
     }
 
-    protected function call($name, $args = array())
+    protected function call($name, $args = [])
     {
         $c = function () use ($name, $args) {
             $command = $this->getCommand();
 
-            $callback = array($command, $name);
+            $callback = [$command, $name];
             if (!is_callable($callback)) {
                 throw new \Exception(sprintf('Method %s does not exist', $this->class . '::' . $name));
             }

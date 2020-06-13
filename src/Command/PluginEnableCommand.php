@@ -13,7 +13,7 @@ class PluginEnableCommand extends AbstractCommand
     {
         $this->setName('plugin-enable');
         $this->setDescription('enable a plugin');
-        $this->setAliases(array('en'));
+        $this->setAliases(['en']);
         $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to enable');
     }
 

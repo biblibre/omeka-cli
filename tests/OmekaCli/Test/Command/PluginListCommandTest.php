@@ -8,7 +8,7 @@ class PluginListCommandTest extends TestCase
 
     public function testPluginListCommand()
     {
-        $this->commandTester->execute(array());
+        $this->commandTester->execute([]);
         $output = $this->commandTester->getDisplay();
 
         $this->assertRegExp('/Coins\s+\|\s+\d+(\.\d+)*\s+\|\s+uninstalled/', $output);

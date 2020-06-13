@@ -14,7 +14,7 @@ class CheckUpdatesCommand extends AbstractCommand
     {
         $this->setName('check-updates');
         $this->setDescription('tell if omeka-cli, Omeka and its plugins are up-to-date');
-        $this->setAliases(array('chkup'));
+        $this->setAliases(['chkup']);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -54,7 +54,7 @@ class CheckUpdatesCommand extends AbstractCommand
                 return array_map(function ($plugin) {
                     return array_merge(
                         $plugin->toArray(),
-                        array('ini_version' => $plugin->getIniVersion())
+                        ['ini_version' => $plugin->getIniVersion()]
                     );
                 }, $pluginLoader->getPlugins());
             });

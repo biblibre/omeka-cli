@@ -13,7 +13,7 @@ class PluginDisableCommand extends AbstractCommand
     {
         $this->setName('plugin-disable');
         $this->setDescription('disable a plugin');
-        $this->setAliases(array('dis'));
+        $this->setAliases(['dis']);
         $this->addArgument('name', InputArgument::REQUIRED, 'the name of plugin to disable');
     }
 

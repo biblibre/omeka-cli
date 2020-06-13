@@ -9,7 +9,7 @@ class PluginSearchCommandTest extends TestCase
     public function testPluginSearch()
     {
         $query = 'zotero';
-        $status = $this->commandTester->execute(array('--exclude-github' => true, 'query' => $query));
+        $status = $this->commandTester->execute(['--exclude-github' => true, 'query' => $query]);
 
         $this->assertEquals(0, $status);
         $this->assertRegExp('/ZoteroImport/', $this->commandTester->getDisplay());

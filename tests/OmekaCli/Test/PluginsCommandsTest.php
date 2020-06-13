@@ -30,10 +30,10 @@ class PluginsCommandsTest extends TestCase
 
     public function testPluginsCommandsAreListed()
     {
-        $input = array(
+        $input = [
             '--omeka-path' => getenv('OMEKA_PATH'),
             'command' => 'list',
-        );
+        ];
         $this->applicationTester->run($input);
 
         $this->assertStringContainsString('foo:bar', $this->applicationTester->getDisplay());
@@ -41,10 +41,10 @@ class PluginsCommandsTest extends TestCase
 
     public function testPluginsCommandsCanBeExecuted()
     {
-        $input = array(
+        $input = [
             '--omeka-path' => getenv('OMEKA_PATH'),
             'command' => 'foo:bar',
-        );
+        ];
         $this->applicationTester->run($input);
 
         $this->assertStringContainsString('Hello, omeka-cli!', $this->applicationTester->getDisplay());

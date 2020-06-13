@@ -15,7 +15,7 @@ class StatusCommandTest extends TestCase
 
     public function testIsOutputFormatOk()
     {
-        $this->commandTester->execute(array());
+        $this->commandTester->execute([]);
 
         $output = $this->commandTester->getDisplay();
         $this->assertRegExp('|Omeka base directory:\s+' . preg_quote(getenv('OMEKA_PATH')) . '|', $output);

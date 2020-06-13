@@ -2,7 +2,6 @@
 
 namespace OmekaCli\Test\Command;
 
-use OmekaCli\Command\UpgradeCommand;
 use OmekaCli\Context\Context;
 use OmekaCli\Sandbox\OmekaSandbox;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -13,7 +12,7 @@ class UpgradeCommandTest extends TestCase
 
     public function testUpgradeNeedsGitRepo()
     {
-        $status = $this->commandTester->execute(array());
+        $status = $this->commandTester->execute([]);
 
         $this->assertEquals(1, $status);
         $output = $this->commandTester->getDisplay();
@@ -34,7 +33,7 @@ class UpgradeCommandTest extends TestCase
         $branch = "v$current_version";
 
         $tempdir = rtrim(`mktemp -d --tmpdir omeka-upgrade-test.XXXXXX`);
-        $input = array(
+        $input = [
             'omeka-path' => $tempdir,
             '--db-host' => getenv('OMEKA_DB_HOST'),
             '--db-user' => getenv('OMEKA_DB_USER'),
@@ -43,7 +42,7 @@ class UpgradeCommandTest extends TestCase
             '--db-prefix' => 'upgradetest_',
             '--omeka-site-title' => 'UpgradeCommand test',
             '--branch' => $branch,
-        );
+        ];
         $installCommand = $this->getCommand('install');
         $installCommandTester = new CommandTester($installCommand);
         $installCommandTester->execute($input);
@@ -58,7 +57,7 @@ class UpgradeCommandTest extends TestCase
         $command = $this->getCommand('upgrade');
         $command->getHelper('context')->setContext(new Context($tempdir));
         $commandTester = new CommandTester($command);
-        $status = $commandTester->execute(array());
+        $status = $commandTester->execute([]);
 
         $this->assertEquals(0, $status);
 

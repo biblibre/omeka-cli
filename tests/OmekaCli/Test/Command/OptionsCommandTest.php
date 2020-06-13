@@ -8,14 +8,14 @@ class OptionsCommandTest extends TestCase
 
     public function testShowAllOptionsWhenRunWithoutArgument()
     {
-        $this->commandTester->execute(array());
+        $this->commandTester->execute([]);
 
         $this->assertRegExp('/\A(.+=.*\n)*\Z/', $this->commandTester->getDisplay());
     }
 
     public function testCanRetrieveExistingTableEntries()
     {
-        $this->commandTester->execute(array('name' => 'omeka_version'));
+        $this->commandTester->execute(['name' => 'omeka_version']);
 
         $output = $this->commandTester->getDisplay();
         $this->assertRegexp('/\A[0-9a-zA-Z]+([\.-][0-9a-zA-Z]+)*\n\z/', $output);
@@ -23,7 +23,7 @@ class OptionsCommandTest extends TestCase
 
     public function testShowErrorOnNonExistingTableEntries()
     {
-        $retCode = $this->commandTester->execute(array('name' => 'NonExistingOption'));
+        $retCode = $this->commandTester->execute(['name' => 'NonExistingOption']);
 
         $this->assertEquals(1, $retCode);
         $this->assertRegExp('/\AError: Option not found\Z/', $this->commandTester->getDisplay());
@@ -31,7 +31,7 @@ class OptionsCommandTest extends TestCase
 
     public function testCanEditExistingTableEntries()
     {
-        $this->commandTester->execute(array('name' => 'site_title', 'value' => 'yee'));
+        $this->commandTester->execute(['name' => 'site_title', 'value' => 'yee']);
 
         $sandbox = $this->getSandbox();
         $siteTitle = $sandbox->execute(function () {

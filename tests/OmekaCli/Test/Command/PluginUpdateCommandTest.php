@@ -36,7 +36,7 @@ class PluginUpdateCommandTest extends TestCase
         });
         $this->assertNull($dce_refines);
 
-        $status = $this->commandTester->execute(array('name' => 'DublinCoreExtended'));
+        $status = $this->commandTester->execute(['name' => 'DublinCoreExtended']);
 
         $this->assertEquals(0, $status);
 

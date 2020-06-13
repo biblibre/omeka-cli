@@ -63,7 +63,7 @@ class OptionsCommand extends AbstractCommand
         $isOption = $sandbox->execute(function () use ($optionName) {
             $db = get_db();
             $optionsTable = $db->getTable('Option');
-            $options = $optionsTable->findBy(array('name' => $optionName));
+            $options = $optionsTable->findBy(['name' => $optionName]);
 
             return !empty($options);
         });
@@ -77,7 +77,7 @@ class OptionsCommand extends AbstractCommand
         $options = $sandbox->execute(function () {
             $db = get_db();
             $optionsTable = $db->getTable('Option');
-            $options = array();
+            $options = [];
             foreach ($optionsTable->findAll() as $option) {
                 $options[$option->name] = $option->value;
             }

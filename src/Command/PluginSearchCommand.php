@@ -15,7 +15,7 @@ class PluginSearchCommand extends AbstractCommand
     {
         $this->setName('plugin-search');
         $this->setDescription('search plugins');
-        $this->setAliases(array('search'));
+        $this->setAliases(['search']);
         $this->addArgument('query', InputArgument::REQUIRED);
         $this->addOption('exclude-github', 'G', InputOption::VALUE_NONE, 'do not search plugins on Github');
     }
@@ -24,7 +24,7 @@ class PluginSearchCommand extends AbstractCommand
     {
         $stderr = $this->getStderr();
 
-        $repositories = array();
+        $repositories = [];
         $repositories[] = new OmekaDotOrgRepository();
         if (!isset($options['exclude-github']) || !$options['exclude-github']) {
             $repositories[] = new GithubRepository();
@@ -32,14 +32,14 @@ class PluginSearchCommand extends AbstractCommand
 
         $query = $input->getArgument('query');
 
-        $plugins = array();
+        $plugins = [];
         foreach ($repositories as $repository) {
             $pluginsInfo = $repository->search($query);
             foreach ($pluginsInfo as $pluginInfo) {
-                $plugins[] = array(
+                $plugins[] = [
                     'info' => $pluginInfo,
                     'repository' => $repository,
-                );
+                ];
             }
         }
 

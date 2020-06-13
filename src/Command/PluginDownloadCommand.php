@@ -15,7 +15,7 @@ class PluginDownloadCommand extends AbstractCommand
     {
         $this->setName('plugin-download');
         $this->setDescription('download a plugin');
-        $this->setAliases(array('dl'));
+        $this->setAliases(['dl']);
         $this->addArgument('plugin-id', InputArgument::REQUIRED, 'the identifier of the plugin, as returned by plugin-search');
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'force download, even if Omeka minimum version requirement is not met');
     }
@@ -24,10 +24,10 @@ class PluginDownloadCommand extends AbstractCommand
     {
         $stderr = $this->getStderr();
 
-        $repositories = array(
+        $repositories = [
             new OmekaDotOrgRepository(),
             new GithubRepository(),
-        );
+        ];
 
         foreach ($repositories as $repository) {
             $repository->setOutput($stderr);
@@ -39,10 +39,10 @@ class PluginDownloadCommand extends AbstractCommand
         foreach ($repositories as $repository) {
             $pluginInfo = $repository->find($id);
             if ($pluginInfo) {
-                $plugin = array(
+                $plugin = [
                     'info' => $pluginInfo,
                     'repository' => $repository,
-                );
+                ];
 
                 break;
             }
@@ -78,7 +78,7 @@ class PluginDownloadCommand extends AbstractCommand
             $tempdir = $repository->download($id);
 
             foreach (scandir($tempdir) as $file) {
-                $matches = array();
+                $matches = [];
                 if (preg_match('/(.*)Plugin.php$/', $file, $matches)) {
                     $pluginName = $matches[1];
                     break;

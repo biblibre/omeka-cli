@@ -21,7 +21,7 @@ class OmekaSandbox implements ContextAwareInterface
     const ENV_LONGLIVED = 1;
     const ENV_SHORTLIVED = 2;
 
-    protected $fd = array();
+    protected $fd = [];
     protected $workerPid;
 
     /**
@@ -181,7 +181,7 @@ class OmekaSandbox implements ContextAwareInterface
 
     protected function createSocketPair()
     {
-        $fd = array();
+        $fd = [];
         if (false === socket_create_pair(AF_UNIX, SOCK_STREAM, 0, $fd)) {
             throw new \Exception('Failed to create sockets pair');
         }
@@ -252,14 +252,14 @@ class OmekaSandbox implements ContextAwareInterface
             if (class_exists('Omeka_Application')) {
                 $application = new \Omeka_Application(APPLICATION_ENV);
                 $bootstrap = $application->getBootstrap();
-                $bootstrap->setOptions(array(
-                    'resources' => array(
-                        'theme' => array(
+                $bootstrap->setOptions([
+                    'resources' => [
+                        'theme' => [
                             'basePath' => THEME_DIR,
                             'webBasePath' => WEB_THEME,
-                        ),
-                    ),
-                ));
+                        ],
+                    ],
+                ]);
 
                 if (APPLICATION_ENV === 'testing') {
                     \Zend_Controller_Front::getInstance()->getRouter()->addDefaultRoutes();
@@ -271,10 +271,10 @@ class OmekaSandbox implements ContextAwareInterface
                     $bootstrap->bootstrap('Options');
 
                     $db = $bootstrap->getResource('Db');
-                    $superUsers = $db->getTable('User')->findBy(array(
+                    $superUsers = $db->getTable('User')->findBy([
                         'role' => 'super',
                         'active' => '1',
-                    ));
+                    ]);
                     if (!empty($superUsers)) {
                         $bootstrap->getContainer()->currentuser = $superUsers[0];
                     }

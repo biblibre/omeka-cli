@@ -27,12 +27,12 @@ class GithubRepository extends AbstractRepository
         if ($repository) {
             $ini = $this->getPluginIni($repository);
             if (isset($ini)) {
-                return array(
+                return [
                     'id' => $id,
                     'displayName' => $ini['name'],
                     'version' => $ini['version'],
                     'omekaMinimumVersion' => $ini['omeka_minimum_version'],
-                );
+                ];
             }
         }
     }
@@ -57,17 +57,17 @@ class GithubRepository extends AbstractRepository
             return true;
         });
 
-        $plugins = array();
+        $plugins = [];
         foreach ($repositories as $repository) {
             $id = $repository['full_name'];
             $ini = $this->getPluginIni($repository);
             if (isset($ini)) {
-                $plugins[$id] = array(
+                $plugins[$id] = [
                     'id' => $id,
                     'displayName' => $ini['name'],
                     'version' => $ini['version'],
                     'omekaMinimumVersion' => $ini['omeka_minimum_version'],
-                );
+                ];
             }
         }
 

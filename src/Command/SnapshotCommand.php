@@ -10,7 +10,7 @@ class SnapshotCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName('snapshot');
-        $this->setAliases(array('snap'));
+        $this->setAliases(['snap']);
         $this->setDescription('create a snapshot of the current Omeka installation');
     }
 

@@ -34,7 +34,7 @@ class CheckUpdatesCommandTest extends TestCase
      */
     public function testIsOutputFormatOk()
     {
-        $status = $this->commandTester->execute(array());
+        $status = $this->commandTester->execute([]);
 
         $this->assertEquals(0, $status);
         $this->assertRegExp('/DublinCoreExtended \(2\.0 -> 2\.2\)/', $this->commandTester->getDisplay());

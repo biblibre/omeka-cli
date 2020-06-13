@@ -32,7 +32,7 @@ class OmekaSandboxTest extends TestCase
         $return = $this->sandbox->execute(function () use ($a, $b) {
             define('SANDBOX_TEST', true);
 
-            return array('foo' => $b . $a . 'r');
+            return ['foo' => $b . $a . 'r'];
         });
 
         $this->assertEquals($return['foo'], 'bar');
@@ -47,7 +47,7 @@ class OmekaSandboxTest extends TestCase
         $return = $this->sandbox->execute(function () use ($a, $b) {
             define('SANDBOX_TEST', true);
 
-            return array('foo' => $b . $a . 'r');
+            return ['foo' => $b . $a . 'r'];
         }, OmekaSandbox::ENV_SHORTLIVED);
 
         $this->assertEquals($return['foo'], 'bar');

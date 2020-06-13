@@ -15,7 +15,7 @@ class InstallCommandTest extends TestCase
     public function testBasicInstall()
     {
         $tempdir = rtrim(`mktemp -d --tmpdir omeka-install-test.XXXXXX`);
-        $input = array(
+        $input = [
             'omeka-path' => $tempdir,
             '--db-host' => getenv('OMEKA_DB_HOST'),
             '--db-user' => getenv('OMEKA_DB_USER'),
@@ -23,7 +23,7 @@ class InstallCommandTest extends TestCase
             '--db-name' => getenv('OMEKA_DB_NAME'),
             '--db-prefix' => 'installtest_',
             '--omeka-site-title' => 'InstallCommand test',
-        );
+        ];
         $this->commandTester->execute($input);
 
         $sandbox = new OmekaSandbox();

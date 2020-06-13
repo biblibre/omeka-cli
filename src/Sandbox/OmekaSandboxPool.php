@@ -6,7 +6,7 @@ use OmekaCli\Context\Context;
 
 class OmekaSandboxPool
 {
-    protected static $sandboxes = array();
+    protected static $sandboxes = [];
 
     public static function getSandbox(Context $context)
     {
@@ -25,6 +25,6 @@ class OmekaSandboxPool
 
     public static function flush()
     {
-        self::$sandboxes = array();
+        self::$sandboxes = [];
     }
 }

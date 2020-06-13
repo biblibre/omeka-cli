@@ -1,6 +1,5 @@
 <?php
 
-
 require_once __DIR__ . '/../bootstrap.php';
 
 $omeka_db_host = getenv('OMEKA_DB_HOST');
@@ -64,14 +63,14 @@ if ($pid) {
 
     $application = new Omeka_Application(APPLICATION_ENV);
     $bootstrap = $application->getBootstrap();
-    $bootstrap->setOptions(array(
-        'resources' => array(
-            'theme' => array(
+    $bootstrap->setOptions([
+        'resources' => [
+            'theme' => [
                 'basePath' => THEME_DIR,
                 'webBasePath' => WEB_THEME,
-            ),
-        ),
-    ));
+            ],
+        ],
+    ]);
     $bootstrap->bootstrap('Db');
     $db = $bootstrap->getResource('Db');
 
@@ -80,7 +79,7 @@ if ($pid) {
     require_once FORM_DIR . '/Install.php';
     $form = new Omeka_Form_Install();
     $form->init();
-    $form->isValid(array(
+    $form->isValid([
         'username' => 'admin',
         'password' => 'admin',
         'password_confirm' => 'admin',
@@ -93,7 +92,7 @@ if ($pid) {
         'square_thumbnail_constraint' => '200',
         'per_page_admin' => '10',
         'per_page_public' => '10',
-    ));
+    ]);
     $installer = new Installer_Default($db);
     $installer->setForm($form);
     $installer->install();

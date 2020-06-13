@@ -2,7 +2,6 @@
 
 namespace OmekaCli\Command;
 
-use OmekaCli\Application;
 use OmekaCli\Context\Context;
 use OmekaCli\IniWriter;
 use PDO;
@@ -117,18 +116,18 @@ class InstallCommand extends AbstractCommand
         }
 
         $cmd = 'git clone --recursive --branch ' . escapeshellarg($branch) . " $repository " . escapeshellarg($omekaPath);
-        $descriptorspec = array(
-            array('pipe', 'r'),
-            array('pipe', 'w'),
-            array('pipe', 'w'),
-        );
+        $descriptorspec = [
+            ['pipe', 'r'],
+            ['pipe', 'w'],
+            ['pipe', 'w'],
+        ];
         $proc = proc_open($cmd, $descriptorspec, $pipes);
 
         stream_set_blocking($pipes[1], false);
         stream_set_blocking($pipes[2], false);
 
         do {
-            $read = array($pipes[1], $pipes[2]);
+            $read = [$pipes[1], $pipes[2]];
             $write = null;
             $except = null;
 
@@ -160,11 +159,11 @@ class InstallCommand extends AbstractCommand
     {
         $stderr = $this->getStderr();
 
-        $files = array(
+        $files = [
             'db.ini',
             '.htaccess',
             'application/config/config.ini',
-        );
+        ];
 
         if ($stderr->isVerbose()) {
             $stderr->writeln('Copying .changeme files');
@@ -263,7 +262,7 @@ class InstallCommand extends AbstractCommand
             $stderr->writeln('Installing Omeka');
         }
 
-        $data = array(
+        $data = [
             'username' => $config['omeka-user-name'],
             'password' => $config['omeka-user-password'],
             'password_confirm' => $config['omeka-user-password'],
@@ -276,7 +275,7 @@ class InstallCommand extends AbstractCommand
             'square_thumbnail_constraint' => '200',
             'per_page_admin' => '10',
             'per_page_public' => '10',
-        );
+        ];
 
         $sandbox = $this->getSandbox(new Context($omekaPath));
         try {

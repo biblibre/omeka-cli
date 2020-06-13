@@ -23,12 +23,12 @@ class OmekaDotOrgRepository extends AbstractRepository
             return null;
         }
 
-        $plugin = array(
+        $plugin = [
             'id' => $id,
             'displayName' => $plugins[$id]['versions'][0]['info']['name'],
             'version' => $plugins[$id]['versions'][0]['info']['version'],
             'omekaMinimumVersion' => $plugins[$id]['versions'][0]['info']['omeka_minimum_version'],
-        );
+        ];
 
         return $plugin;
     }
@@ -37,7 +37,7 @@ class OmekaDotOrgRepository extends AbstractRepository
     {
         $plugins = $this->getPlugins();
 
-        $ids = array();
+        $ids = [];
         foreach ($plugins as $id => $plugin) {
             $info = $plugin['versions'][0]['info'];
             if (
@@ -49,15 +49,15 @@ class OmekaDotOrgRepository extends AbstractRepository
             }
         }
 
-        $results = array();
+        $results = [];
         foreach ($ids as $id) {
             $plugin = $plugins[$id]['versions'][0];
-            $results[$id] = array(
+            $results[$id] = [
                 'id' => $id,
                 'displayName' => $plugin['info']['name'],
                 'version' => $plugin['info']['version'],
                 'omekaMinimumVersion' => $plugin['info']['omeka_minimum_version'],
-            );
+            ];
         }
 
         return $results;

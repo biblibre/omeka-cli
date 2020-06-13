@@ -11,7 +11,7 @@ class PluginDownloadCommandTest extends TestCase
         $pluginName = 'CollectionTree';
         $pluginFile = getenv('OMEKA_PATH') . "/plugins/$pluginName/{$pluginName}Plugin.php";
         $this->assertFileNotExists($pluginFile);
-        $status = $this->commandTester->execute(array('plugin-id' => $pluginName));
+        $status = $this->commandTester->execute(['plugin-id' => $pluginName]);
 
         $this->assertEquals(0, $status);
         $this->assertFileExists($pluginFile);

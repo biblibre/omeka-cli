@@ -23,7 +23,7 @@ class PluginEnableCommandTest extends TestCase
 
     public function testPluginEnableWhenUninstalled()
     {
-        $status = $this->commandTester->execute(array('name' => 'Foo'));
+        $status = $this->commandTester->execute(['name' => 'Foo']);
 
         $this->assertEquals(0, $status);
 
@@ -45,7 +45,7 @@ class PluginEnableCommandTest extends TestCase
 
         $this->flushSandboxes();
 
-        $status = $this->commandTester->execute(array('name' => 'Foo'));
+        $status = $this->commandTester->execute(['name' => 'Foo']);
 
         $this->assertEquals(0, $status);
 

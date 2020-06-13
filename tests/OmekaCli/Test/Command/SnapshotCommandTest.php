@@ -8,7 +8,7 @@ class SnapshotCommandTest extends TestCase
 
     public function testSnapshot()
     {
-        $status = $this->commandTester->execute(array());
+        $status = $this->commandTester->execute([]);
 
         $this->assertEquals(0, $status);
 

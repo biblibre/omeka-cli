@@ -3,7 +3,6 @@
 namespace OmekaCli\Command;
 
 use Omeka_Db_Migration_Manager;
-use OmekaCli\Omeka;
 use OmekaCli\Sandbox\OmekaSandbox;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

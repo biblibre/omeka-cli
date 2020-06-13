@@ -29,7 +29,7 @@ class PluginUninstallCommandTest extends TestCase
 
         $this->flushSandboxes();
 
-        $status = $this->commandTester->execute(array('name' => 'Foo'));
+        $status = $this->commandTester->execute(['name' => 'Foo']);
 
         $this->assertEquals(0, $status);
         $foo_bar = $this->getSandbox()->execute(function () {

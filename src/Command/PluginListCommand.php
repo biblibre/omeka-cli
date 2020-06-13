@@ -47,7 +47,7 @@ class PluginListCommand extends AbstractCommand
         });
 
         $table = new Table($output);
-        $table->setHeaders(array('Name', 'Version', 'State'));
+        $table->setHeaders(['Name', 'Version', 'State']);
         foreach ($plugins as $plugin) {
             $name = $plugin['name'];
             $iniVersion = $plugin['info']['version'];
@@ -55,7 +55,7 @@ class PluginListCommand extends AbstractCommand
             if ($state === 'version-mismatch') {
                 $state .= sprintf(' (db version: %s)', $plugin['version']);
             }
-            $table->addRow(array($name, $iniVersion, $state));
+            $table->addRow([$name, $iniVersion, $state]);
         }
         $table->render();
     }
