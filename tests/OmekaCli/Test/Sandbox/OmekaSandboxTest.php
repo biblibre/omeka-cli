@@ -11,7 +11,7 @@ class OmekaSandboxTest extends TestCase
 {
     protected $sandbox;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -19,7 +19,7 @@ class OmekaSandboxTest extends TestCase
         $this->sandbox->setContext(new Context(getenv('OMEKA_PATH')));
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         unset($this->sandbox);
     }
@@ -74,23 +74,19 @@ class OmekaSandboxTest extends TestCase
         $this->assertFalse(call_user_func($omekaVersionDefined));
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Call to undefined function undefined_function()
-     */
     public function testFatalError()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Call to undefined function undefined_function()');
         $this->sandbox->execute(function () {
             \undefined_function();
         });
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Call to undefined function undefined_function()
-     */
     public function testFatalErrorInShortLivedEnv()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Call to undefined function undefined_function()');
         $this->sandbox->execute(function () {
             \undefined_function();
         }, OmekaSandbox::ENV_SHORTLIVED);

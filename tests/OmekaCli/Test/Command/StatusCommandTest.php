@@ -6,7 +6,7 @@ class StatusCommandTest extends TestCase
 {
     protected $commandName = 'status';
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

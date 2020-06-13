@@ -25,10 +25,10 @@ class UpgradeCommandTest extends TestCase
      */
     public function testUpgrade()
     {
-        $current_version = '2.5.1';
+        $current_version = '2.6';
 
-        if (version_compare(PHP_VERSION, '7.2') >= 0) {
-            $current_version = '2.6';
+        if (version_compare(PHP_VERSION, '7.3') >= 0) {
+            $current_version = '2.7';
         }
 
         $branch = "v$current_version";

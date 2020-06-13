@@ -4,7 +4,7 @@ namespace OmekaCli\Sandbox;
 
 use OmekaCli\Context\ContextAwareInterface;
 use OmekaCli\Context\ContextAwareTrait;
-use SuperClosure\SerializableClosure;
+use Opis\Closure\SerializableClosure;
 
 /**
  * Executes code in an Omeka environment without polluting the main process.
@@ -32,9 +32,10 @@ class OmekaSandbox implements ContextAwareInterface
         if ($this->workerPid && getmypid() !== $this->workerPid) {
             if (0 === pcntl_waitpid($this->workerPid, $status, WNOHANG)) {
                 // Tell the child to exit
-                $this->write($this->fd[1], new SerializableClosure(function () {
+                $closure = new SerializableClosure(function () {
                     exit(0);
-                }));
+                });
+                $this->write($this->fd[1], $closure);
                 pcntl_waitpid($this->workerPid, $status);
             }
         }

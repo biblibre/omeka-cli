@@ -9,14 +9,14 @@ class PluginEnableCommandTest extends TestCase
 {
     protected $commandName = 'plugin-enable';
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->flushSandboxes();
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->uninstallPlugin('Foo');
     }

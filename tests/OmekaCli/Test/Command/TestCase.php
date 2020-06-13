@@ -9,7 +9,7 @@ abstract class TestCase extends \OmekaCli\Test\TestCase
     protected $commandName;
     protected $commandTester;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

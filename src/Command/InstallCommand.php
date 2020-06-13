@@ -281,7 +281,7 @@ class InstallCommand extends AbstractCommand
         $sandbox = $this->getSandbox(new Context($omekaPath));
         try {
             $sandbox->execute(function () use ($data) {
-                require_once FORM_DIR . '/Install.php';
+                require_once constant('FORM_DIR') . '/Install.php';
 
                 $form = new \Omeka_Form_Install();
                 $form->init();

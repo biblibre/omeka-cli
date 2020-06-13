@@ -6,7 +6,7 @@ class PluginUninstallCommandTest extends TestCase
 {
     protected $commandName = 'plugin-uninstall';
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -15,7 +15,7 @@ class PluginUninstallCommandTest extends TestCase
         $this->flushSandboxes();
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->uninstallPlugin('Foo');
     }

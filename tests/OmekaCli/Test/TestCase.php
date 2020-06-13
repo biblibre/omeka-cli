@@ -11,7 +11,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected $application;
 
-    public function setUp()
+    protected function setUp(): void
     {
         $this->application = new Application();
 

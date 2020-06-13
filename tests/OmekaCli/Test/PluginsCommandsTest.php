@@ -9,7 +9,7 @@ class PluginsCommandsTest extends TestCase
 {
     protected $applicationTester;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -21,7 +21,7 @@ class PluginsCommandsTest extends TestCase
         $this->applicationTester = new ApplicationTester($app);
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->uninstallPlugin('Foo');
 
@@ -36,7 +36,7 @@ class PluginsCommandsTest extends TestCase
         );
         $this->applicationTester->run($input);
 
-        $this->assertContains('foo:bar', $this->applicationTester->getDisplay());
+        $this->assertStringContainsString('foo:bar', $this->applicationTester->getDisplay());
     }
 
     public function testPluginsCommandsCanBeExecuted()
@@ -47,6 +47,6 @@ class PluginsCommandsTest extends TestCase
         );
         $this->applicationTester->run($input);
 
-        $this->assertContains('Hello, omeka-cli!', $this->applicationTester->getDisplay());
+        $this->assertStringContainsString('Hello, omeka-cli!', $this->applicationTester->getDisplay());
     }
 }

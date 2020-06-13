@@ -6,7 +6,7 @@ class PluginUpdateCommandTest extends TestCase
 {
     protected $commandName = 'plugin-update';
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -20,7 +20,7 @@ class PluginUpdateCommandTest extends TestCase
         $this->flushSandboxes();
     }
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->uninstallPlugin('DublinCoreExtended');
         rrmdir(getenv('OMEKA_PATH') . '/plugins/DublinCoreExtended');

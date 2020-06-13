@@ -9,7 +9,7 @@ class PluginDisableCommandTest extends TestCase
 {
     protected $commandName = 'plugin-disable';
 
-    public function tearDown()
+    protected function tearDown(): void
     {
         $this->uninstallPlugin('Foo');
     }
