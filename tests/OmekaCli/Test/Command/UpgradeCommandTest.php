@@ -29,6 +29,9 @@ class UpgradeCommandTest extends TestCase
         if (version_compare(PHP_VERSION, '7.3') >= 0) {
             $current_version = '2.7';
         }
+        if (version_compare(PHP_VERSION, '7.4') >= 0) {
+            $this->markTestSkipped('Only latest version of Omeka is compatible with PHP 7.4');
+        }
 
         $branch = "v$current_version";
 
