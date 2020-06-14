@@ -1,4 +1,6 @@
 language: php
+os: linux
+dist: bionic
 services:
   - mysql
 
@@ -11,14 +13,12 @@ env:
     - OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.6.1/omeka-2.6.1.zip
     - OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.7.1/omeka-2.7.1.zip
 
-matrix:
+jobs:
   exclude:
     - php: 7.3
       env: OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.6.1/omeka-2.6.1.zip
     - php: 7.4
       env: OMEKA_ZIP_PATH=https://github.com/omeka/Omeka/releases/download/v2.6.1/omeka-2.6.1.zip
-
-sudo: false
 
 cache:
   directories:
