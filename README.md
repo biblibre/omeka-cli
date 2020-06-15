@@ -35,7 +35,7 @@ commands.
 
 ## Requirements
 
-- PHP (>= 5.6) with the following extensions:
+- PHP (>= 7.2) with the following extensions:
   - Zip
   - PDO and the PDO_MYSQL driver
 - git
